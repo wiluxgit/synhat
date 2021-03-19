@@ -1,13 +1,13 @@
 # Synhat Infinity
 this is the master repository for all Synhat things
 
-## Download Auto-Synhat
+### Download Auto-Synhat
 When i'm done
 
-## Download the latest version manually
+### Download the latest version manually
 can't be done during alpha/beta testing, i need to make sure auto-synhat works
 
-## Add Hats
+### Add Hats
 Join https://discord.gg/up9Crfr and I will do everything for you
 OR
 1. Clone this repository `git clone https://github.com/OscarDahlqvist/synhat.git`
@@ -19,7 +19,19 @@ OR
 
 * Install python and run `/dev_scripts/make_local_pack.py` to test your pack locally
 
-## Fix the shitty code
+### Fix the shitty code
 Make a pull request
+
+### Progress
+- [X] Python script to generate, merge and update packs build file
+- [X] Python script to make build file to a resourcepack
+- [X] Java Launcher Hook Executable (Auto-Synhat)
+- [ ] Add in all old hats to the new system
+- [ ] Generate Players
+- [ ] Auto-Synhat Downloading stuff
+- [ ] Custom Player models 👀
+
+maybe
+- [ ] Auto-Synhat Directly Building the rp?
 
 
