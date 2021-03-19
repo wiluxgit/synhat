@@ -1,4 +1,2 @@
-pack_output\*
-pack_output\.
-pack_output\
-assets\%WIP\*
+pack_output/*
+assets/%WIP/*
