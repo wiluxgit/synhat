@@ -28,7 +28,7 @@ Make a pull request
 - [X] Java Launcher Hook Executable (Auto-Synhat)
 - [ ] Allow parent models
 - [ ] Add in all old hats to the new system
-- [ ] Generate Players
+- [ ] Generate Player Plushies
 - [ ] Auto-Synhat Downloading stuff
 - [ ] Custom Player models 👀
 
