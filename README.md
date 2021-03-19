@@ -1,14 +1,14 @@
-### Synhat Infinity
+# Synhat Infinity
 this is the master repository for all Synhat things
 
 I want to:
-# Download Auto-Synhat
+## Download Auto-Synhat
 When i'm done
 
-# Download the latest version manually
+## Download the latest version manually
 can't be done during alpha/beta testing, i need to make sure auto-synhat works
 
-# Add Hats
+## Add Hats
 Join `https://discord.gg/up9Crfr` and I will do everything for you
 OR
 0. All folders/files must be lower case alphanumeric with no spaces
