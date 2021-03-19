@@ -26,6 +26,7 @@ Make a pull request
 - [X] Python script to generate, merge and update packs build file
 - [X] Python script to make build file to a resourcepack
 - [X] Java Launcher Hook Executable (Auto-Synhat)
+- [ ] Allow parent models
 - [ ] Add in all old hats to the new system
 - [ ] Generate Players
 - [ ] Auto-Synhat Downloading stuff
