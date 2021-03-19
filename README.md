@@ -1,7 +1,6 @@
 # Synhat Infinity
 this is the master repository for all Synhat things
 
-I want to:
 ## Download Auto-Synhat
 When i'm done
 
@@ -18,5 +17,8 @@ OR
 5. Read `/assets/example/pack.info.json` to register models
 6. Run `/dev_scripts/make_local_pack.py` to test your pack locally
 7. Make a pull request (https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request)
+
+## Fix the shitty code
+Make a pull request
 
 
