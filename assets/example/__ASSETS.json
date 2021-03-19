@@ -1,0 +1,6 @@
+{
+	"models":[
+		{"path":"fortress_warrior", "author":"Wilux"},
+		{"path":"baugette_blade", "author":"Wilux", "type":"sword"}
+	]
+}

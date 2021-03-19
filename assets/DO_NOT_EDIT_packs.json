@@ -1,0 +1,6 @@
+{
+	"packs":[
+		{"path":"old", "author":"multiple"},
+		{"path":"example", "author":"Wilux"}
+	]
+}
