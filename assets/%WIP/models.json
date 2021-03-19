@@ -2,19 +2,26 @@
     "models": [
         {
             "author": "Wilux",
-            "compileTime": "2021-03-19 13:35:54.206792",
+            "compileTime": "2021-03-19 13:52:03.988222",
             "pack": "example",
-            "packhash": "9081f6d996768df30158170e3845fe98",
+            "packHash": "b619c2c3983222ac2b8dee761dbc845b",
             "path": "example/fortress_warrior",
             "type": "clock"
         },
         {
             "author": "Wilux",
-            "compileTime": "2021-03-19 13:35:54.206792",
+            "compileTime": "2021-03-19 13:52:03.988222",
             "pack": "example",
-            "packhash": "9081f6d996768df30158170e3845fe98",
+            "packHash": "b619c2c3983222ac2b8dee761dbc845b",
             "path": "example/baugette_blade",
             "type": "netherite_sword"
+        },
+        {
+            "compileTime": "2021-03-19 13:52:03.988222",
+            "pack": "old",
+            "packHash": "ca93c4c1c4febaa955b63d721b66b336",
+            "path": "old/ember_goggles",
+            "type": "clock"
         }
     ]
 }

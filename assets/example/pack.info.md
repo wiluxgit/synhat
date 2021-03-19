@@ -10,14 +10,18 @@ example of assets file:
 ```
 required tags:
  `path` the relative path to the model.json (relative from `./models`)
+ 
 optional tags:
- `author` the author name/username
+ `displayName` the name used in game
+	if none exists the name will be auto generated
+	you must escape `\` with `\\` and `"` with `\"`
+ `author` the author's name/username
  `type` which base item the custom model should be applied to:
 	suports aliases: `sword` `axe` `pickaxe` `shovel` `hoe` 
 	if none is supplied defaults to `clock` (`minecraft:clock`)
-	NOTE: ONLY supports alias or nothing atm.
  `in_hand_path` tridents (and soon spyglasses) have two models, one 
 	in the inventory (this is the `path` tag) and another used in steve's hand.
 	`in_hand_path` is the path to the model which should be used in this case.
 	if not supplied to model that requires it there will likely be glitches.
 	NOTE: unimplemented
+

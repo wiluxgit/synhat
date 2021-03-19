@@ -17,7 +17,7 @@ cmpTime = str(datetime.datetime.now())
 
 permModelPaths = []
 for x in permModels:
-    permModelPath.append(x["path"])
+    permModelPaths.append(x["path"])
 
 def packdiff():
     packs = getPackDeclrs()
@@ -83,7 +83,7 @@ def toSafePackDeclr(packName,packDeclr):
         modelDeclr["type"] = mcItem
         modelDeclr["path"] = nameSpacedPath
         modelDeclr["pack"] = packName
-        modelDeclr["packhash"] = packHash
+        modelDeclr["packHash"] = packHash
         modelDeclr["compileTime"] = cmpTime
 
     return(packDeclr)
@@ -93,10 +93,11 @@ def mergeWithPermModels(packDeclr):
 
     for modelDeclr in packDeclr["models"]:
         path = modelDeclr["path"]
-        if path in permModelPath:
-            for y in permModels:
-                if y["path"] == path:
-                    y = modelDeclr
+        if path in permModelPaths:
+            for i,model in enumerate(permModels):
+                if model["path"] == path:
+                    permModels[i] = modelDeclr
+                    print("hello")
         else:
             permModels.append(modelDeclr)
 
