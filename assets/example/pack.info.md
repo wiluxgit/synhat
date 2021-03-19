@@ -1,4 +1,4 @@
-all models in the pack must be declared in "__ASSETS.json"
+all models in the pack must be declared in "pack.json"
 example of assets file:
 ```
 {
@@ -13,9 +13,9 @@ required tags:
 optional tags:
  `author` the author name/username
  `type` which base item the custom model should be applied to:
-	suports aliases: `sword` `axe` `pickaxe ``pick` `shovel` `hoe` 
+	suports aliases: `sword` `axe` `pickaxe` `shovel` `hoe` 
 	if none is supplied defaults to `clock` (`minecraft:clock`)
-	NOTE: only supports clocks ATM
+	NOTE: ONLY supports alias or nothing atm.
  `in_hand_path` tridents (and soon spyglasses) have two models, one 
 	in the inventory (this is the `path` tag) and another used in steve's hand.
 	`in_hand_path` is the path to the model which should be used in this case.

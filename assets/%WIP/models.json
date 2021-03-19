@@ -1,0 +1,20 @@
+{
+    "models": [
+        {
+            "author": "Wilux",
+            "compileTime": "2021-03-19 13:35:54.206792",
+            "pack": "example",
+            "packhash": "9081f6d996768df30158170e3845fe98",
+            "path": "example/fortress_warrior",
+            "type": "clock"
+        },
+        {
+            "author": "Wilux",
+            "compileTime": "2021-03-19 13:35:54.206792",
+            "pack": "example",
+            "packhash": "9081f6d996768df30158170e3845fe98",
+            "path": "example/baugette_blade",
+            "type": "netherite_sword"
+        }
+    ]
+}
