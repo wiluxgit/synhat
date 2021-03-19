@@ -24,4 +24,6 @@ optional tags:
 	`in_hand_path` is the path to the model which should be used in this case.
 	if not supplied to model that requires it there will likely be glitches.
 	NOTE: unimplemented
+ `is_player`
+	only Wilux may use this tag, it does secret stuff
 
