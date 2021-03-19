@@ -11,7 +11,7 @@ can't be done during alpha/beta testing, i need to make sure auto-synhat works
 Join https://discord.gg/up9Crfr and I will do everything for you
 OR
 1. Clone this repository `git clone https://github.com/OscarDahlqvist/synhat.git`
-2. Create a new folder in `assets`, *preferably your username when making your first pack*
+2. Create a new folder in `/assets`, *preferably your username when making your first pack*
 3. Copy `/assets/example/pack.json` into `assets/<yourpackname>/`
 4. Follow the same file structure as a resourcepack `assets/minecraft` folder.
 5. Read `/assets/example/pack.info.json` to register models
