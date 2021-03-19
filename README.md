@@ -23,16 +23,16 @@ OR
 Make a pull request
 
 ### Progress
-- [X] Python script to generate, merge and update packs build file
-- [X] Python script to make build file to a resourcepack
-- [X] Java Launcher Hook Executable (Auto-Synhat)
-- [ ] Allow parent models
-- [ ] Add in all old hats to the new system
-- [ ] Generate Player Plushies
-- [ ] Auto-Synhat Downloading stuff
-- [ ] Custom Player models 👀
-
-maybe
-- [ ] Auto-Synhat Directly Building the rp?
+Status | Task
+------------ | -------------
+Done  | Python script to generate, merge and update packs build file
+Done  | Python script to make build file to a resourcepack
+Done  | Mc Launcher Hook (Auto-Synhat)
+X     | Allow parent models
+X     | Add in all old hats to the new system
+X     | Code to Generate Player Plushies
+X     | Auto-Synhat Downloading stuff
+X     | Custom Player models 👀
+Maybe Later | Auto-Synhat Directly Building the rp?
 
 
