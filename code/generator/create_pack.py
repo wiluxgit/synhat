@@ -89,6 +89,7 @@ def copyTextureAssets(packList):
         srcPath = f"{packInDir}/{packName}/textures"
         
         Path(f"{destPath}").mkdir(parents=True, exist_ok=True)
+        Path(f"{srcPath}").mkdir(parents=True, exist_ok=True)
 
         copy_tree(srcPath, destPath)
     return -1
