@@ -37,10 +37,9 @@ jobs:
           tag_name: tag-${{ github.run_number }}
           release_name: release-${{ github.run_number }}
           body: |
-            Download: ${{ steps.create_release.outputs.upload_url }}
-            *this file was automatically generated*
+            this file was automatically generated and is not meant for human eyes, so please look away.
           draft: false
-          prerelease: true
+          prerelease: false
           
       - name: Upload Release Asset
         id: upload-release-asset 
