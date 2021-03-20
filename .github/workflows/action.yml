@@ -10,11 +10,11 @@ on:
     inputs:
       name:
         # Friendly description to be shown in the UI instead of 'name'
-        description: 'Person to greet'
+        description: 'Build type (Unimplemented)'
         # Default value if no value is explicitly provided
-        default: 'World'
+        default: 'default'
         # Input has to be provided for the workflow to run
-        required: true
+        required: false
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel         
 jobs:
@@ -37,9 +37,9 @@ jobs:
           tag_name: tag-${{ github.run_number }}
           release_name: release-${{ github.run_number }}
           body: |
-            Automatically Generated Release
+            This file was automatically generated.
           draft: false
-          prerelease: true
+          prerelease: false
           
       - name: Upload Release Asset
         id: upload-release-asset 
