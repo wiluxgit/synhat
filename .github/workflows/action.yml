@@ -22,10 +22,6 @@ jobs:
     name: Upload Release Asset
     runs-on: ubuntu-latest
     steps:    
-      - name: Get time
-        id: get_time
-        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
-
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Build project # This would actually build your project, using zip for an example artifact
