@@ -37,7 +37,7 @@ jobs:
           tag_name: tag-${{ github.run_number }}
           release_name: release-${{ github.run_number }}
           body: |
-            this file was automatically generated and is not meant for human eyes, so please look away.
+            This file was automatically generated.
           draft: false
           prerelease: false
           
