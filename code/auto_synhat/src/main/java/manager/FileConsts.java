@@ -1,3 +1,5 @@
+package manager;
+
 import java.io.File;
 
 public final class FileConsts {

@@ -13,6 +13,8 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile 'net.lingala.zip4j:zip4j:2.7.0'
+    compile 'com.google.code.gson:gson:2.8.2'
 }
 
 jar {

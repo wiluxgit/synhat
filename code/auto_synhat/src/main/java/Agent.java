@@ -1,3 +1,4 @@
+import manager.Generator;
 import manager.GithubDownloader;
 
 import java.io.File;
@@ -14,6 +15,8 @@ public class Agent {
         if(Window.yesNoQuery("A new update of the auto-synhat core is available, download?", "update available")){
             GithubDownloader.download();
             Window.msgBox("download complete");
+            Generator generator = new Generator();
+            generator.write(Generator.GeneratorSource.PERM);
         }
         //throw new Exception("sucks to suck");
 
