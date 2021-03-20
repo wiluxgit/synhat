@@ -24,7 +24,7 @@ jobs:
     steps:    
       - name: Get time
         id: get_time
-        run: echo "::set-output name=date::$(date +'%s')"
+        run: echo "::set-output name=date::$$(date +'%Y-%m-%d-%s')"
 
       - name: Checkout code
         uses: actions/checkout@v2
@@ -38,8 +38,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: r${{steps.date.outputs.date}}
-          release_name: Release ${{steps.date.outputs.date}}
+          tag_name: tag-${{steps.date.outputs.date}}
+          release_name: release-${{steps.date.outputs.date}}
           draft: false
           prerelease: false
           
