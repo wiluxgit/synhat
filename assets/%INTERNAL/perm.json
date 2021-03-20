@@ -2,7 +2,7 @@
     "models": [
         {
             "author": "Wilux",
-            "compileTime": "2021-03-20 11:58:21.508476",
+            "compileTime": "2021-03-20 20:39:24.161633",
             "pack": "example",
             "packHash": "28ced10433a997635314eb260190122e",
             "path": "fortress_warrior",
@@ -10,14 +10,14 @@
         },
         {
             "author": "Wilux",
-            "compileTime": "2021-03-20 11:58:21.508476",
+            "compileTime": "2021-03-20 20:39:24.161633",
             "pack": "example",
             "packHash": "28ced10433a997635314eb260190122e",
             "path": "tool/baugette_blade",
             "type": "netherite_sword"
         },
         {
-            "compileTime": "2021-03-20 11:58:21.508476",
+            "compileTime": "2021-03-20 20:39:24.161633",
             "pack": "old",
             "packHash": "32acd4f7da357486f923d521f7048cd0",
             "path": "ember_goggles",

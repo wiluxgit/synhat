@@ -5,46 +5,29 @@ from checksumdir import dirhash
 import datetime
 import simplejson
 
+permFilePath = "../../assets/%INTERNAL/perm.json"
+permModelJson = json.load(open(permFilePath))
+permModels = permModelJson["models"]
+cmpTime = str(datetime.datetime.now())
+permModelPaths = []
+for x in permModels:
+    permModelPaths.append(x["path"])
+
 def __init__(args=""):
-    permFilePath = "../../assets/%INTERNAL/perm.json"
-    wipFilePath = "../../assets/%INTERNAL/wip.json"
+    packdiff()
+    print(permModelJson)    
+    writePermModel()
 
-    permModelJson = json.load(open(permFilePath))
-    permModels = permModelJson["models"]
-    cmpTime = str(datetime.datetime.now())
-
-    permModelPaths = []
-    for x in permModels:
-        permModelPaths.append(x["path"])
-
-    packdiff(
-        cmpTime = cmpTime,
-        permModelPaths = permModelPaths,
-        permModels = permModels
-    )
-
-    print(permModelJson)
-    
-    writePermModel(
-        overwrite=True,
-        permFilePath=permFilePath,
-        wipFilePath=wipFilePath,
-        permModelJson=permModelJson
-    )
-
-def packdiff(cmpTime="",permModelPaths="",permModels=""):
+def packdiff():
     packs = getPackDeclrs()
 
     for (packName,packDeclr) in packs.items():
-        safePackDeclr = toSafePackDeclr(packName,packDeclr, cmpTime=cmpTime)
+        safePackDeclr = toSafePackDeclr(packName,packDeclr)
         #TODO not merge if same hash
-        mergeWithPermModels(safePackDeclr, permModelPaths=permModelPaths, permModels=permModels)
+        mergeWithPermModels(safePackDeclr)
 
-def writePermModel(overwrite=False, permFilePath="", wipFilePath="", permModelJson=""):
-    if overwrite:
-        f = open(permFilePath,"w+")
-    else:
-        f = open(wipFilePath,"w+")
+def writePermModel():
+    f = open(permFilePath,"w+")
     f.write(simplejson.dumps(
         permModelJson, indent=4, sort_keys=True
     ))
@@ -69,7 +52,7 @@ def md5hashFolder(path):
         raise Exception(f"{path} does not exist")
     return(dirhash(path, "md5"))
 
-def toSafePackDeclr(packName,packDeclr,cmpTime=""):
+def toSafePackDeclr(packName,packDeclr):
     packDeclr = copy.deepcopy(packDeclr)
 
     packHash = md5fromPackName(packName)
@@ -92,7 +75,7 @@ def toSafePackDeclr(packName,packDeclr,cmpTime=""):
 
     return(packDeclr)
 
-def mergeWithPermModels(packDeclr,permModelPaths="",permModels=""):
+def mergeWithPermModels(packDeclr):
     #TODO? only update permodel if model/texture changed
 
     for modelDeclr in packDeclr["models"]:
@@ -101,7 +84,6 @@ def mergeWithPermModels(packDeclr,permModelPaths="",permModels=""):
             for i,model in enumerate(permModels):
                 if model["path"] == path:
                     permModels[i] = modelDeclr
-                    print("hello")
         else:
             permModels.append(modelDeclr)
 

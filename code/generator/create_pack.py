@@ -6,17 +6,15 @@ import simplejson
 from distutils.dir_util import copy_tree
 from pathlib import Path
 
-#TODO better find directory
-def __init__(doFinal=False, defaultItemModelDir=R"C:\Users\Ananas\AppData\Roaming\.minecraft\resourcepacks\_1.16\models\item"):
-    packOutDir = "../../pack_output"
-    packInDir = "../../assets"
-    declrPath = ""
-    if doFinal:
-        declrPath = "../../assets/%INTERNAL/perm.json"
-    else:
-        declrPath = "../../assets/%INTERNAL/wip.json"
+packOutDir = "../../pack_output"
+packInDir = "../../assets"
+declrPath = "../../assets/%INTERNAL/perm.json"
 
-    setUpBaseRP(packOutDir,"assets",6)
+#TODO better find directory
+def __init__():
+    defaultItemModelDir="assets/mc"
+
+    setUpBaseRP("assets",6)
 
     cmNext = {}
     itemModelJson = {}
@@ -52,12 +50,12 @@ def __init__(doFinal=False, defaultItemModelDir=R"C:\Users\Ananas\AppData\Roamin
         }
         js["overrides"].append(override)
 
-        cloneAssetToOut(packOutDir, packInDir, path, pack)
+        cloneAssetToOut(path, pack)
 
     print(packNames)
 
     #get pack pngs to the output
-    copyTextureAssets(packOutDir, packInDir, list(packNames))
+    copyTextureAssets(list(packNames))
 
     #make mcitem jsons
     for (k,v) in itemModelJson.items():
@@ -65,7 +63,7 @@ def __init__(doFinal=False, defaultItemModelDir=R"C:\Users\Ananas\AppData\Roamin
         print(f"generated {k}.json")
 
 #TODO make parent models work
-def cloneAssetToOut(packOutDir, packInDir, path, pack):
+def cloneAssetToOut(path, pack):
     destFile = Path(f"{packOutDir}/assets/models/synhat/{pack}/{path}.json")
     destDir = destFile.parent
     Path(destDir).mkdir(parents=True, exist_ok=True)
@@ -85,7 +83,7 @@ def cloneAssetToOut(packOutDir, packInDir, path, pack):
         js, indent=4, sort_keys=False
     ))
 
-def copyTextureAssets(packOutDir, packInDir, packList):
+def copyTextureAssets(packList):
     for packName in packList:
         destPath = f"{packOutDir}/assets/textures/synhat/{packName}"
         srcPath = f"{packInDir}/{packName}/textures"
@@ -95,7 +93,7 @@ def copyTextureAssets(packOutDir, packInDir, packList):
         copy_tree(srcPath, destPath)
     return -1
 
-def setUpBaseRP(packOutDir, baseAssetsDir, packFormat):
+def setUpBaseRP(baseAssetsDir, packFormat):
     #shutil.rmt ree(packOutDir)
     Path(f"{packOutDir}").mkdir(parents=True, exist_ok=True)
     Path(f"{packOutDir}/assets/models/item").mkdir(parents=True, exist_ok=True)
