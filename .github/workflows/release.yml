@@ -40,7 +40,8 @@ jobs:
         
       - name: Build project # This would actually build your project, using zip for an example artifact
         run: |
-           zip -r release pack_output
+          cd pack_output
+          zip -r ../release ./*
            
       - name: Create Release
         id: create_release
@@ -48,8 +49,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v0.${{ github.run_number }}
-          release_name: Release 0.-${{ github.run_number }}
+          tag_name: v0.0.${{ github.run_number }}
+          release_name: Release 0.0.${{ github.run_number }}
           body: |
             This file was automatically generated.
           draft: false
