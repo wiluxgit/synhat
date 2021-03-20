@@ -24,7 +24,7 @@ jobs:
     steps:    
       - name: Get time
         id: get_time
-        run: echo "::set-output name=date::$$(date +'%Y-%m-%d-%s')"
+        run: echo "::set-output name=date::$$(date +'%Y-%m-%d')"
 
       - name: Checkout code
         uses: actions/checkout@v2
