@@ -38,8 +38,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: nightly-tag-${{ steps.date.outputs.date }}
-          release_name: nightly-release-${{ steps.date.outputs.date }}
+          tag_name: tag-${{ github.run_number }}
+          release_name: release-${{ github.run_number }}
+          body: |
+            Automatically Generated Release
           draft: false
           prerelease: true
           
