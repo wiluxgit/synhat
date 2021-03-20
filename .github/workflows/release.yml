@@ -33,6 +33,9 @@ jobs:
       - name: execute py script # run the run.py to get the latest data
         run: |
           cd code/generator
+          pip install checksumdir
+          pip install simplejson
+          pip install shutil
           python perm_creator.py
           python create_pack.py
         
