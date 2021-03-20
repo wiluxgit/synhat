@@ -18,12 +18,11 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  build:
+  zip-files:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - name: Archive Release
-      uses: OscarDahlqvist/synhat@master
-      with:
-        filename: 'release.zip'
-        exclusions: '*.git* *.github*'
+      - uses: actions/checkout@v2
+      - uses: papeloto/action-zip@v1
+        with:
+          files: assets/ 
+          dest: result.zip
