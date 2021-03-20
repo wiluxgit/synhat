@@ -40,8 +40,8 @@ jobs:
         
       - name: Build project # This would actually build your project, using zip for an example artifact
         run: |
-          mv pack_output minecraft
-          zip -r release minecraft
+          cd pack_output
+          zip -r ../release ./*
            
       - name: Create Release
         id: create_release
