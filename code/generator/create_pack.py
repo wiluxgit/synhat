@@ -59,12 +59,12 @@ def __init__():
 
     #make mcitem jsons
     for (k,v) in itemModelJson.items():
-        f = json.dump(v, open(f"{packOutDir}/assets/models/item/{k}.json","w+"))
+        f = json.dump(v, open(f"{packOutDir}/assets/minecraft/models/item/{k}.json","w+"))
         print(f"generated {k}.json")
 
 #TODO make parent models work
 def cloneAssetToOut(path, pack):
-    destFile = Path(f"{packOutDir}/assets/models/synhat/{pack}/{path}.json")
+    destFile = Path(f"{packOutDir}/assets/minecraft/models/synhat/{pack}/{path}.json")
     destDir = destFile.parent
     Path(destDir).mkdir(parents=True, exist_ok=True)
 
@@ -85,8 +85,8 @@ def cloneAssetToOut(path, pack):
 
 def copyTextureAssets(packList):
     for packName in packList:
-        destPath = f"{packOutDir}/assets/textures/synhat/{packName}"
-        srcPath = f"{packInDir}/{packName}/textures"
+        destPath = f"{packOutDir}/assets/minecraft/textures/synhat/{packName}"
+        srcPath = f"{packInDir}/{packName}/minecraft/textures"
         
         Path(f"{destPath}").mkdir(parents=True, exist_ok=True)
         Path(f"{srcPath}").mkdir(parents=True, exist_ok=True)
@@ -97,9 +97,9 @@ def copyTextureAssets(packList):
 def setUpBaseRP(baseAssetsDir, packFormat):
     #shutil.rmt ree(packOutDir)
     Path(f"{packOutDir}").mkdir(parents=True, exist_ok=True)
-    Path(f"{packOutDir}/assets/models/item").mkdir(parents=True, exist_ok=True)
-    Path(f"{packOutDir}/assets/models/synhat").mkdir(parents=True, exist_ok=True)
-    Path(f"{packOutDir}/assets/textures").mkdir(parents=True, exist_ok=True)
+    Path(f"{packOutDir}/assets/minecraft/models/item").mkdir(parents=True, exist_ok=True)
+    Path(f"{packOutDir}/assets/minecraft/models/synhat").mkdir(parents=True, exist_ok=True)
+    Path(f"{packOutDir}/assets/minecraft/textures").mkdir(parents=True, exist_ok=True)
 
     shutil.copy(f"{baseAssetsDir}/pack.png", packOutDir)
     shutil.copy(f"{baseAssetsDir}/pack.mcmeta", packOutDir)
