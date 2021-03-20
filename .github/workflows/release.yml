@@ -24,9 +24,23 @@ jobs:
     steps:    
       - name: Checkout code
         uses: actions/checkout@v2
+        
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8 #install the python needed
+          
+      - name: execute py script # run the run.py to get the latest data
+        run: |
+          cd code/generator
+          pip install checksumdir
+          pip install simplejson
+          python perm_creator.py
+          python create_pack.py
+        
       - name: Build project # This would actually build your project, using zip for an example artifact
         run: |
-           zip -r release assets
+           zip -r release pack_output
            
       - name: Create Release
         id: create_release
