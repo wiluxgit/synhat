@@ -21,25 +21,18 @@ public class PermaFile {
         fileLocation = location;
 
         if(!fileLocation.exists()){
-            System.out.println("create file");
-
             fileLocation.getParentFile().mkdirs();
             fileLocation.createNewFile();
 
             JsonObject defaultJson = new JsonObject();
-            defaultJson.add(installedPackName, new JsonPrimitive("release-0"));
+            defaultJson.add(installedPackName, new JsonPrimitive("nothing"));
             defaultJson.add(installedPackTime,
                     new JsonPrimitive(installTimeDateFormat.format(System.currentTimeMillis()))
             );
 
             content = defaultJson.getAsJsonObject();
 
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            try (FileWriter writer = new FileWriter(location)) {
-                gson.toJson(defaultJson, writer);
-            } catch (IOException e) {
-                throw new IOException(e);
-            }
+            save();
         } else {
             JsonParser jsonParser = new JsonParser();
             try (FileReader reader = new FileReader(fileLocation)) {
@@ -50,7 +43,7 @@ public class PermaFile {
         }
     }
 
-    public void Save(){
+    public void save(){
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         try (FileWriter writer = new FileWriter(fileLocation)) {
             gson.toJson(content, writer);

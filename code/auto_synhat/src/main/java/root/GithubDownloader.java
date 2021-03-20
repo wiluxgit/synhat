@@ -12,8 +12,24 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class GithubDownloader {
+    public static boolean isOutdated() {
+        try {
+            GitHub github = GitHub.connect();
+            github.checkApiUrlValidity();
+            GHRepository repo = github.getRepository("OscarDahlqvist/synhat");
+            GHRelease latestRelease = repo.getLatestRelease();
+            String latestReleaseName = latestRelease.getName();
 
-    public static ReleaseDownloadStatus downloadLatestZipIfOutdated() throws Exception {
+            String installedReleaseName = Main.propertyFile.content.get(PermaFile.installedPackName).getAsString();
+
+            //Window.msgBox(installedReleaseName + ":" + latestReleaseName);
+
+            return !installedReleaseName.equals(latestReleaseName);
+        } catch (IOException e){
+            return false;
+        }
+    }
+    public static String downloadLatestZip() throws Exception {
         FileConsts.outputDir.mkdirs();
 
         try {
@@ -22,39 +38,35 @@ public class GithubDownloader {
             GHRelease latestRelease = repo.getLatestRelease();
             String latestReleaseName = latestRelease.getName();
 
-            String installedReleaseName = Main.propertyFile.content.get(PermaFile.installedPackName).toString();
+            String latestReleaseUrl = latestRelease.getAssetsUrl();
 
-            if(!installedReleaseName.equals(latestReleaseName)){
-                Window.basicMsgBox("RELEASE OUTDATED");
-                String latestReleaseUrl = latestRelease.getAssetsUrl();
+            JsonParser jsonParser = new JsonParser();
+            String releaseApiString = downloadStringFromURL(latestReleaseUrl);
+            JsonArray releaseApiJson = jsonParser.parse(releaseApiString).getAsJsonArray();
 
-                JsonParser jsonParser = new JsonParser();
-                String releaseApiString = downloadStringFromURL(latestReleaseUrl);
-                JsonArray releaseApiJson = jsonParser.parse(releaseApiString).getAsJsonArray();
+            JsonObject releaseReleaseZipJson = releaseApiJson.get(0).getAsJsonObject();
+            String releaseFileName = releaseReleaseZipJson.getAsJsonObject().get("name").getAsString();
 
-                JsonObject releaseReleaseZipJson = releaseApiJson.get(0).getAsJsonObject();
-                String releaseFileName = releaseReleaseZipJson.getAsJsonObject().get("name").getAsString();
+            if(!releaseFileName.equals("release.zip")) throw new Exception("Invalid File Json");
 
-                if(!releaseFileName.equals("release.zip")) throw new Exception("Invalid File Json");
+            String latestReleaseDownloadUrl = releaseReleaseZipJson.get("browser_download_url").getAsString();
 
-                String latestReleaseDownloadUrl = releaseReleaseZipJson.get("browser_download_url").getAsString();
+            copyURLToFile(new URL(latestReleaseDownloadUrl), FileConsts.downloadZipFile);
 
-                copyURLToFile(new URL(latestReleaseDownloadUrl), FileConsts.downloadZipFile);
+            Main.propertyFile.content.add(PermaFile.installedPackName, new JsonPrimitive(latestReleaseName));
+            //TODO: save creation date
+            Main.propertyFile.save();
 
-                Main.propertyFile.content.add(PermaFile.installedPackName, new JsonPrimitive(latestReleaseName));
-                //TODO: save creation date
-                Main.propertyFile.Save();
-
-                return ReleaseDownloadStatus.NewReleaseDownloaded;
-            }
+            return latestReleaseName;
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return ReleaseDownloadStatus.NewReleaseDownloaded;
+        return null;
     }
 
     public static void unzip() throws IOException {
+
         ZipFile zipFile = new ZipFile(FileConsts.downloadZipFile);
         zipFile.extractAll(FileConsts.outputDir.getPath());
     }
@@ -103,6 +115,4 @@ public class GithubDownloader {
             ioEx.printStackTrace();
         }
     }
-
-    public enum ReleaseDownloadStatus {NewReleaseDownloaded, NoNewRelease}
 }
