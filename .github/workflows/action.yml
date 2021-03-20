@@ -21,7 +21,11 @@ jobs:
   build:
     name: Upload Release Asset
     runs-on: ubuntu-latest
-    steps:        
+    steps:    
+      - name: Get time
+        id: get_time
+        run: echo "::set-output name=date::$(date +'%s')"
+
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Build project # This would actually build your project, using zip for an example artifact
@@ -34,8 +38,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: Release$(date+"%s")
-          release_name: Release$(date+"%s")
+          tag_name: r${{steps.date.outputs.date}}
+          release_name: Release ${{steps.date.outputs.date}}
           draft: false
           prerelease: false
           
