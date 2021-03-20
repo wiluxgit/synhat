@@ -15,14 +15,15 @@ dependencies {
     //testCompile group: 'junit', name: 'junit', version: '4.12'
     compile 'net.lingala.zip4j:zip4j:2.7.0'
     compile 'com.google.code.gson:gson:2.8.2'
+    compile 'org.kohsuke:github-api:1.124'
 }
 
 jar {
     archiveName = "${rootProject.name}-${rootProject.version}.jar"
     manifest {
         attributes(
-                'Premain-Class': 'Agent',
-                'Agent-Class':'Agent',
+                'Premain-Class': 'root.Main',
+                'Agent-Class':'root.Main',
 
                 'Can-Redefine-Classes': 'true',
                 'Can-Retransform-Classes': 'true',

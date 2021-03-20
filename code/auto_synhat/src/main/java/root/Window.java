@@ -1,6 +1,4 @@
-package manager;
-
-import jdk.nashorn.internal.scripts.JO;
+package root;
 
 import javax.swing.*;
 
