@@ -29,4 +29,13 @@ jobs:
       - uses: actions/upload-artifact@v1
         with:
           name: my-artifact
-          path: ${{ github.workspace }}/result.zip
+          path: ${{github.workspace}}/result.zip
+        
+      - name: Update GitHub Profile README
+        uses: OscarDahlqvist/synhat@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          header: "Header Lorem Ipsum"
+          subhead: "Subhead Lorem Ipsum"
+          footer: "Footer Lorem Ipsum"
