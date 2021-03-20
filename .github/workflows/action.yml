@@ -37,7 +37,8 @@ jobs:
           tag_name: tag-${{ github.run_number }}
           release_name: release-${{ github.run_number }}
           body: |
-            Automatically Generated Release
+            Download: ${{ steps.create_release.outputs.upload_url }}
+            *this file was automatically generated*
           draft: false
           prerelease: true
           
