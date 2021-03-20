@@ -31,5 +31,6 @@ jobs:
     - name: Bump version and push tag
       uses: OscarDahlqvist/synhat@master
       env:
+        branch: master
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         REPO_OWNER: OscarDahlqvist
