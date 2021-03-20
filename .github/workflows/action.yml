@@ -21,16 +21,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Create Release Folder
-      run: rsync -arv --exclude='.git/' --exclude='.github/' --exclude='.gitignore' . ./release
-    - name: Switch to Release Folder
-      run: |
-        cd release
-        ls -la
-    - name: Bump version and push tag
+    - uses: actions/checkout@master
+    - name: Archive Release
       uses: OscarDahlqvist/synhat@master
-      env:
-        branch: master
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        REPO_OWNER: OscarDahlqvist
+      with:
+        filename: 'release.zip'
+        exclusions: '*.git* *.github*'
