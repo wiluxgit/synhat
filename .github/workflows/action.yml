@@ -21,21 +21,26 @@ jobs:
   zip-files:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: papeloto/action-zip@v1
-        with:
-          files: assets/ 
-          dest: result.zip
-      - uses: actions/upload-artifact@v1
-        with:
-          name: my-artifact
-          path: ${{github.workspace}}/result.zip
-        
-      - name: Update GitHub Profile README
-        uses: theboi/github-update-readme@master
+#     - uses: actions/checkout@v2
+#     - uses: papeloto/action-zip@v1
+#       with:
+#         files: assets/ 
+#         dest: result.zip
+#     - uses: actions/upload-artifact@v1
+#       with:
+#         name: my-artifact
+#         path: ${{github.workspace}}/result.zip
+            
+      - name: Create GitHub release  
+      - uses: actions/checkout@master
+      - name: Create release
+        uses: Roang-zero1/github-create-release-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create GitHub release
+        uses: Roang-zero1/github-upload-release-artifacts-action@master
         with:
-          header: "Header Lorem Ipsum"
-          subhead: "Subhead Lorem Ipsum"
-          footer: "Footer Lorem Ipsum"
+          args:
+            assets/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
