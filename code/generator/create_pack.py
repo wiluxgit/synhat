@@ -12,9 +12,9 @@ def __init__(doFinal=False, defaultItemModelDir=R"C:\Users\Ananas\AppData\Roamin
     packInDir = "../../assets"
     declrPath = ""
     if doFinal:
-        declrPath = "../../assets/%PERM/models.json"
+        declrPath = "../../assets/%INTERNAL/perm.json"
     else:
-        declrPath = "../../assets/%WIP/models.json"
+        declrPath = "../../assets/%INTERNAL/wip.json"
 
     setUpBaseRP(packOutDir,"assets",6)
 

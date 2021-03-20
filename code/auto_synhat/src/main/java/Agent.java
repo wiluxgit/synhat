@@ -1,7 +1,7 @@
 import manager.Generator;
 import manager.GithubDownloader;
+import manager.Window;
 
-import java.io.File;
 import java.lang.instrument.Instrumentation;
 import java.util.logging.Logger;
 
@@ -13,13 +13,13 @@ public class Agent {
 
         //proof that code executes
         if(Window.yesNoQuery("BETA: Download synhat?", "Update Available")){
-            GithubDownloader.download();
-            Window.msgBox("download complete");
+            //GithubDownloader.download();
+            //Window.msgBox("download complete");
             Generator generator = new Generator();
             generator.write(Generator.GeneratorSource.PERM);
             Window.msgBox("generator complete");
         }
-        //throw new Exception("sucks to suck");
+        throw new Exception("sucks to suck");
 
         /*
         try {
@@ -44,25 +44,6 @@ public class Agent {
 
     }
 
-    //THIS NEVER RUNS, probably something minecraft shuffling jars
-    public static void agentmain(String args, Instrumentation instrumentation){
-        /*
-        Logger log = Logger.getGlobal();
-        log.warning("hello from AGENT main");
-
-        try {
-            FileWriter fw = new FileWriter("synhat/main.log");
-            BufferedWriter bw = new BufferedWriter(fw);
-
-            bw.write("Args:\n"+args);
-
-            bw.write("Instrumentation:");
-            for (Class c:instrumentation.getAllLoadedClasses()) {
-                bw.write("\n"+c.getName());
-            }
-            bw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
-    }
+    //THIS NEVER RUNS, but it is still required.
+    public static void agentmain(String args, Instrumentation instrumentation){}
 }

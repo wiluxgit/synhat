@@ -6,13 +6,10 @@ import datetime
 import simplejson
 
 def __init__(args=""):
-    permModelPath = "../../assets/%PERM/models.json"
-    permPacksPath = "../../assets/%PERM/packs.json"
+    permFilePath = "../../assets/%INTERNAL/perm.json"
+    wipFilePath = "../../assets/%INTERNAL/wip.json"
 
-    wipModelPath = "../../assets/%WIP/models.json"
-    wipPacksPath = "../../assets/%WIP/packs.json"
-
-    permModelJson = json.load(open(permModelPath))
+    permModelJson = json.load(open(permFilePath))
     permModels = permModelJson["models"]
     cmpTime = str(datetime.datetime.now())
 
@@ -21,39 +18,33 @@ def __init__(args=""):
         permModelPaths.append(x["path"])
 
     packdiff(
-        permPacksPath=permPacksPath,
         cmpTime = cmpTime,
-        permModelPaths = permModelPath,
+        permModelPaths = permModelPaths,
         permModels = permModels
     )
 
     print(permModelJson)
     
     writePermModel(
-        overwrite=False,
-        permModelPath=permModelPath,
-        wipModelPath=wipModelPath,
+        overwrite=True,
+        permFilePath=permFilePath,
+        wipFilePath=wipFilePath,
         permModelJson=permModelJson
     )
 
-def packdiff(permPacksPath="",cmpTime="",permModelPaths="",permModels=""):
+def packdiff(cmpTime="",permModelPaths="",permModels=""):
     packs = getPackDeclrs()
-    permpacks = json.load(open(permPacksPath))
-
-    permpackPaths = []
-    for permpackDeclr in permpacks["packs"]:
-        permpackPaths.append(permpackDeclr["path"])
 
     for (packName,packDeclr) in packs.items():
         safePackDeclr = toSafePackDeclr(packName,packDeclr, cmpTime=cmpTime)
         #TODO not merge if same hash
         mergeWithPermModels(safePackDeclr, permModelPaths=permModelPaths, permModels=permModels)
 
-def writePermModel(overwrite=False, permModelPath="", wipModelPath="", permModelJson=""):
+def writePermModel(overwrite=False, permFilePath="", wipFilePath="", permModelJson=""):
     if overwrite:
-        f = open(permModelPath,"w+")
+        f = open(permFilePath,"w+")
     else:
-        f = open(wipModelPath,"w+")
+        f = open(wipFilePath,"w+")
     f.write(simplejson.dumps(
         permModelJson, indent=4, sort_keys=True
     ))

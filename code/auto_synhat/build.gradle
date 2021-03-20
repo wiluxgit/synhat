@@ -1,9 +1,9 @@
 plugins {
     id 'java'
 }
-
+apply plugin: 'java'
 group 'synhathack'
-version '1.0-SNAPSHOT'
+version '0.1-SNAPSHOT'
 
 sourceCompatibility = 1.8
 
@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    //testCompile group: 'junit', name: 'junit', version: '4.12'
     compile 'net.lingala.zip4j:zip4j:2.7.0'
     compile 'com.google.code.gson:gson:2.8.2'
 }
@@ -31,4 +31,17 @@ jar {
                 'Implementation-Version': rootProject.version
         )
     }
+}
+
+task fatJar(type: Jar) {
+    manifest.from jar.manifest
+    classifier = 'fat'
+    from {
+        configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
+    } {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+    with jar
 }

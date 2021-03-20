@@ -1,7 +1,5 @@
 package manager;
 
-import sun.management.Agent;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -12,6 +10,7 @@ import java.net.URL;
 public class GithubDownloader {
 
     public static void copyURLToFile(URL url, File file) {
+        file.getParentFile().mkdirs();
 
         try {
             InputStream input = url.openStream();
@@ -48,7 +47,7 @@ public class GithubDownloader {
 
     public static void download() {
         //URL pointing to the file
-        String sUrl = "https://github.com/OscarDahlqvist/synhat_export/archive/refs/heads/master.zip";
+        String sUrl = "https://github.com/OscarDahlqvist/synhat/archive/refs/heads/master.zip";
 
         URL url = null;
         try {

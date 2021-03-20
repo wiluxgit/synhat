@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Implementation-Title: ClassLogger
 Premain-Class: Agent
-Implementation-Version: 1.0-SNAPSHOT
+Implementation-Version: 0.1-SNAPSHOT
 Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true

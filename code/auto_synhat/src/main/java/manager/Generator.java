@@ -1,5 +1,6 @@
 package manager;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import net.lingala.zip4j.ZipFile;
@@ -13,12 +14,16 @@ public class Generator {
     ZipFile zipFile;
 
     public Generator(){
+        System.out.println("Generator run");
+        FileConsts.downloadDir.mkdirs();
+        FileConsts.outputDir.mkdirs();
+        FileConsts.assetsDir.mkdirs();
         zipFile = new ZipFile(FileConsts.downloadFileZip);
     }
 
     public void write(GeneratorSource generatorSource){
         try {
-            zipFile.extractAll(String.valueOf(FileConsts.workingDir));
+            zipFile.extractAll(String.valueOf(FileConsts.downloadDir));
         } catch (ZipException e) {
             e.printStackTrace();
         }
@@ -26,17 +31,18 @@ public class Generator {
         File modeldeclrFile;
         switch (generatorSource) {
             case PERM:
-                modeldeclrFile = new File(FileConsts.workingDir, "%PERM/models.json"); break;
+                modeldeclrFile = new File(FileConsts.assetsDir, "%PERM/models.json"); break;
             case WIP:
-                modeldeclrFile = new File(FileConsts.workingDir, "%WIP/models.json"); break;
+                modeldeclrFile = new File(FileConsts.assetsDir, "%WIP/models.json"); break;
             default:
                 throw new IllegalStateException("Unexpected value: " + generatorSource);
         }
 
-        JsonElement modeldecr = readJFile(modeldeclrFile);
-
+        JsonArray modeldeclr = readJFile(modeldeclrFile).getAsJsonObject().get("models").getAsJsonArray();
+        Window.msgBox(modeldeclr.toString());
     }
     public JsonElement readJFile(File file){
+        Window.msgBox(file.getAbsolutePath());
         JsonParser jsonParser = new JsonParser();
 
         try (FileReader reader = new FileReader(file))
@@ -50,5 +56,5 @@ public class Generator {
         return null;
     }
 
-    public enum GeneratorSource { PERM, WIP}
+    public enum GeneratorSource {PERM, WIP}
 }

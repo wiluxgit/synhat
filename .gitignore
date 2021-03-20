@@ -1,3 +1,5 @@
 pack_output/*
-assets/%WIP/*
+assets/%INTERNAL/wip.json
 code/auto_synhat/build/*
+code/auto_synhat/.gradle/*
+code/auto_synhat/build/.
