@@ -12,11 +12,12 @@ public class Agent {
         log.warning("hello from AGENT premain");
 
         //proof that code executes
-        if(Window.yesNoQuery("A new update of the auto-synhat core is available, download?", "update available")){
+        if(Window.yesNoQuery("BETA: Download synhat?", "Update Available")){
             GithubDownloader.download();
             Window.msgBox("download complete");
             Generator generator = new Generator();
             generator.write(Generator.GeneratorSource.PERM);
+            Window.msgBox("generator complete");
         }
         //throw new Exception("sucks to suck");
 
