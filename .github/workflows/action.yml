@@ -35,7 +35,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: Release $(date +'%Y-%m-%d')
+          release_name: Release $(date +'%Y-%m-%dT%H:%M:%S')
           draft: false
           prerelease: false
           
