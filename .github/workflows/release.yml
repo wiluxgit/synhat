@@ -35,7 +35,6 @@ jobs:
           cd code/generator
           pip install checksumdir
           pip install simplejson
-          pip install shutil
           python perm_creator.py
           python create_pack.py
         
