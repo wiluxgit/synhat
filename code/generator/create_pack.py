@@ -5,6 +5,7 @@ import datetime
 import simplejson
 from distutils.dir_util import copy_tree
 from pathlib import Path
+from operator import itemgetter
 
 packOutDir = "../../pack_output"
 packInDir = "../../assets"
@@ -32,9 +33,11 @@ def __init__():
             raise Exception(f"{path} not implemented")
 
         if not mcItem in cmNext: # REALLY UGLY
-            cmNext[mcItem] = 1
-        if mcItem == "clock":
-            cmNext[mcItem] = -1
+            if mcItem == "clock":
+                cmNext[mcItem] = -1
+            else:
+                cmNext[mcItem] = 1
+
         freeIndex = cmNext[mcItem]
         cmNext[mcItem] = nextCmdKey(freeIndex)
 
@@ -59,8 +62,15 @@ def __init__():
 
     #make mcitem jsons
     for (k,v) in itemModelJson.items():
-        f = json.dump(v, open(f"{packOutDir}/assets/minecraft/models/item/{k}.json","w+"))
+        v["overrides"] = sorted(v["overrides"], key=getCMData)
+        f = open(f"{packOutDir}/assets/minecraft/models/item/{k}.json","w+")
+        f.write(simplejson.dumps(
+            v, indent=4, sort_keys=False
+        ))
         print(f"generated {k}.json")
+
+def getCMData(dc): #Not safe, funky if cmdata doesn't exist
+    return dc["predicate"]["custom_model_data"]
 
 #TODO make parent models work
 def cloneAssetToOut(path, pack):

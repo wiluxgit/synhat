@@ -13,9 +13,11 @@ public class Main {
         Logger log = Logger.getGlobal();
         log.warning("Synhat is enabled");
 
-        for (String s: args.split(",")){
-            if (s.equals("beta")) argBeta = true;
-            if (s.equals("slow")) argShowDownload = true;
+        if(args != null){
+            for (String s: args.split(",")){
+                if (s.equals("beta")) argBeta = true;
+                if (s.equals("slow")) argShowDownload = true;
+            }
         }
 
         propertyFile = new PermaFile(FileConsts.permanentStorageFile);
