@@ -32,7 +32,7 @@ jobs:
           path: ${{github.workspace}}/result.zip
         
       - name: Update GitHub Profile README
-        uses: OscarDahlqvist/synhat@master
+        uses: theboi/github-update-readme@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
