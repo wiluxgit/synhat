@@ -2,6 +2,7 @@ package manager;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -9,6 +10,7 @@ import net.lingala.zip4j.exception.ZipException;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Iterator;
 
 public class Generator {
     ZipFile zipFile;
@@ -18,31 +20,26 @@ public class Generator {
         FileConsts.downloadDir.mkdirs();
         FileConsts.outputDir.mkdirs();
         FileConsts.assetsDir.mkdirs();
-        zipFile = new ZipFile(FileConsts.downloadFileZip);
+        zipFile = new ZipFile(FileConsts.downloadZipFile);
     }
 
-    public void write(GeneratorSource generatorSource){
+    public void write(boolean keepSourcePyScripts){
         try {
             zipFile.extractAll(String.valueOf(FileConsts.downloadDir));
         } catch (ZipException e) {
             e.printStackTrace();
         }
 
-        File modeldeclrFile;
-        switch (generatorSource) {
-            case PERM:
-                modeldeclrFile = new File(FileConsts.assetsDir, "%PERM/models.json"); break;
-            case WIP:
-                modeldeclrFile = new File(FileConsts.assetsDir, "%WIP/models.json"); break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + generatorSource);
-        }
+        File modeldeclrFile = FileConsts.modelDeclrFile;
 
-        JsonArray modeldeclr = readJFile(modeldeclrFile).getAsJsonObject().get("models").getAsJsonArray();
-        Window.msgBox(modeldeclr.toString());
+        JsonArray modeldeclrs = readJFile(modeldeclrFile).getAsJsonObject().get("models").getAsJsonArray();
+
+        for (Iterator<JsonElement> it = modeldeclrs.iterator(); it.hasNext(); ) {
+            JsonObject o = it.next().getAsJsonObject();
+            o.get()
+        }
     }
     public JsonElement readJFile(File file){
-        Window.msgBox(file.getAbsolutePath());
         JsonParser jsonParser = new JsonParser();
 
         try (FileReader reader = new FileReader(file))

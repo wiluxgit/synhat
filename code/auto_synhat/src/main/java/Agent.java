@@ -13,12 +13,12 @@ public class Agent {
 
         //proof that code executes
         if(Window.yesNoQuery("BETA: Download synhat?", "Update Available")){
-            //GithubDownloader.download();
-            //Window.msgBox("download complete");
-            Generator generator = new Generator();
-            generator.write(Generator.GeneratorSource.PERM);
-            Window.msgBox("generator complete");
+            GithubDownloader.download();
+            Window.msgBox("download complete");
         }
+        Generator generator = new Generator();
+        generator.write(false);
+        Window.msgBox("generator complete");
         throw new Exception("sucks to suck");
 
         /*

@@ -57,7 +57,7 @@ public class GithubDownloader {
         }
 
         //File where to be downloaded
-        File file = FileConsts.downloadFileZip;
+        File file = FileConsts.downloadZipFile;
 
         GithubDownloader.copyURLToFile(url, file);
     }
