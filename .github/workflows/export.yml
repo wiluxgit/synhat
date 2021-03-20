@@ -28,7 +28,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        repository: ${{ github.repository }}
+        fetch-depth: 2
     - run: git checkout HEAD^
     
     - uses: actions/setup-python@v2
