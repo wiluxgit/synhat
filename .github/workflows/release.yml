@@ -42,6 +42,12 @@ jobs:
         run: |
           cd pack_output
           zip -r ../release ./*
+          
+      - name: Push perm.json
+        run:
+          git add assets\%INTERNAL\perm.json
+          git commit -m "auto" commit
+          git push
            
       - name: Create Release
         id: create_release
