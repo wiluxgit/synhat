@@ -44,7 +44,7 @@ jobs:
           zip -r ../release ./*
           
       - name: Push perm.json
-        run:
+        run: |
           git add assets\%INTERNAL\perm.json
           git commit -m "auto" commit
           git push
