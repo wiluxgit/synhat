@@ -46,7 +46,7 @@ jobs:
       - name: Push perm.json
         run: |
           git add assets/*/perm.json
-          git commit -m "auto" commit
+          git commit -m "auto commit" 
           git push
            
       - name: Create Release
