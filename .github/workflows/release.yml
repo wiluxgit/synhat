@@ -45,6 +45,8 @@ jobs:
           
       - name: Push perm.json
         run: |
+          git config --global user.email "wilux00@gmail.com"
+          git config --global user.name "Robot Wilux"
           git add assets/*/perm.json
           git commit -m "auto commit" 
           git push
