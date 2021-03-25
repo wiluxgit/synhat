@@ -33,6 +33,5 @@ X     | Add in all old hats to the new system
 X     | Code to Generate Player Plushies
 X     | Auto-Synhat Downloading stuff
 X     | Custom Player models 👀
-Maybe Later | Auto-Synhat Directly Building the rp?
 
 
