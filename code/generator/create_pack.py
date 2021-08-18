@@ -15,7 +15,7 @@ declrPath = "../../assets/%INTERNAL/perm.json"
 def __init__():
     defaultItemModelDir="assets/mc"
 
-    setUpBaseRP("assets",6)
+    setUpBaseRP("assets", 6)
 
     cmNext = {}
     itemModelJson = {}
@@ -79,27 +79,28 @@ def cloneAssetToOut(path, pack):
     Path(destDir).mkdir(parents=True, exist_ok=True)
 
     shutil.copy(
-        f"{packInDir}/{pack}/models/{path}.json",
+        f"{packInDir}/{pack}/minecraft/models/{path}.json",
         destFile
     )
 
     js = json.load(open(destFile))
-    for (k,v) in js["textures"].items():
-        js["textures"][k] = f"synhat/{pack}/{v}"
-    js["credit"] = "Synhat Auto Generated"
+    if "textures" in js:
+        for (k,v) in js["textures"].items():
+            js["textures"][k] = f"synhat/{pack}/{v}"
+        js["credit"] = "Synhat Auto Generated"
 
-    f = open(destFile,"w")
-    f.write(simplejson.dumps(
-        js, indent=4, sort_keys=False
-    ))
+        f = open(destFile,"w")
+        f.write(simplejson.dumps(
+            js, indent=4, sort_keys=False
+        ))
 
 def copyTextureAssets(packList):
     for packName in packList:
         destPath = f"{packOutDir}/assets/minecraft/textures/synhat/{packName}"
         srcPath = f"{packInDir}/{packName}/minecraft/textures"
         
-        Path(f"{destPath}").mkdir(parents=True, exist_ok=True)
-        Path(f"{srcPath}").mkdir(parents=True, exist_ok=True)
+        Path(destPath).mkdir(parents=True, exist_ok=True)
+        Path(srcPath).mkdir(parents=True, exist_ok=True)
 
         copy_tree(srcPath, destPath)
     return -1

@@ -2,8 +2,8 @@ plugins {
     id 'java'
 }
 apply plugin: 'java'
-group 'synhathack'
-version '0.1-SNAPSHOT'
+group 'synhat'
+version ''
 
 sourceCompatibility = 1.8
 
@@ -22,8 +22,9 @@ jar {
     archiveName = "${rootProject.name}-${rootProject.version}.jar"
     manifest {
         attributes(
-                'Premain-Class': 'root.Main',
-                'Agent-Class':'root.Main',
+                'Main-Class':'program.Main',
+                'Premain-Class': 'agent.AgentMain',
+                'Agent-Class':'agent.AgentMain',
 
                 'Can-Redefine-Classes': 'true',
                 'Can-Retransform-Classes': 'true',

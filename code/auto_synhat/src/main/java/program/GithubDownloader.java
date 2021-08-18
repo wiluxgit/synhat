@@ -1,10 +1,11 @@
-package root;
+package program;
 
 import com.google.gson.*;
 import net.lingala.zip4j.ZipFile;
 import org.kohsuke.github.GHRelease;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
+import agent.AgentMain;
 
 import java.io.*;
 import java.net.URL;

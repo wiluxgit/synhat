@@ -1,8 +1,7 @@
-package root;
+package program;
 
 import javax.swing.*;
 
-import static javax.swing.JOptionPane.showMessageDialog;
 public class Window {
     public static void msgBox(String message){
         JOptionPane.showMessageDialog(
