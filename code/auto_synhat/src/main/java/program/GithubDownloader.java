@@ -10,60 +10,55 @@ import agent.AgentMain;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.rmi.UnexpectedException;
 import java.util.Scanner;
 
 public class GithubDownloader {
-    public static boolean isOutdated() {
-        try {
-            GitHub github = GitHub.connect();
-            github.checkApiUrlValidity();
-            GHRepository repo = github.getRepository("OscarDahlqvist/synhat");
-            GHRelease latestRelease = repo.getLatestRelease();
-            String latestReleaseName = latestRelease.getName();
+    public static boolean isOutdated() throws IOException {
+        GitHub github = GitHub.connect();
+        github.checkApiUrlValidity();
+        GHRepository repo = github.getRepository("OscarDahlqvist/synhat");
+        GHRelease latestRelease = repo.getLatestRelease();
+        String latestReleaseName = latestRelease.getName();
 
-            String installedReleaseName = Main.propertyFile.content.get(PermaFile.installedPackName).getAsString();
+        String installedReleaseName = Main.propertyFile.content.get(PermaFile.installedPackName).getAsString();
 
-            //Window.msgBox(installedReleaseName + ":" + latestReleaseName);
+        //Window.msgBox(installedReleaseName + ":" + latestReleaseName);
 
-            return !installedReleaseName.equals(latestReleaseName);
-        } catch (IOException e){
-            return false;
-        }
+        return !installedReleaseName.equals(latestReleaseName);
     }
-    public static String downloadLatestZip() throws Exception {
+    public static String downloadLatestZip() throws IOException {
         FileConsts.outputDir.mkdirs();
 
-        try {
-            GitHub github = GitHub.connect();
-            GHRepository repo = github.getRepository("OscarDahlqvist/synhat");
-            GHRelease latestRelease = repo.getLatestRelease();
-            String latestReleaseName = latestRelease.getName();
+        GitHub github = GitHub.connect();
+        GHRepository repo = github.getRepository("OscarDahlqvist/synhat");
+        GHRelease latestRelease = repo.getLatestRelease();
+        String latestReleaseName = latestRelease.getName();
 
-            String latestReleaseUrl = latestRelease.getAssetsUrl();
+        String latestReleaseUrl = latestRelease.getAssetsUrl();
 
-            JsonParser jsonParser = new JsonParser();
-            String releaseApiString = downloadStringFromURL(latestReleaseUrl);
-            JsonArray releaseApiJson = jsonParser.parse(releaseApiString).getAsJsonArray();
+        Main.windowHandler.publishInfo(latestReleaseUrl);
 
-            JsonObject releaseReleaseZipJson = releaseApiJson.get(0).getAsJsonObject();
-            String releaseFileName = releaseReleaseZipJson.getAsJsonObject().get("name").getAsString();
+        JsonParser jsonParser = new JsonParser();
+        String releaseApiString = downloadStringFromURL(latestReleaseUrl);
+        JsonArray releaseApiJson = jsonParser.parse(releaseApiString).getAsJsonArray();
 
-            if(!releaseFileName.equals("release.zip")) throw new Exception("Invalid File Json");
+        JsonObject releaseReleaseZipJson = releaseApiJson.get(0).getAsJsonObject();
+        String releaseFileName = releaseReleaseZipJson.getAsJsonObject().get("name").getAsString();
 
-            String latestReleaseDownloadUrl = releaseReleaseZipJson.get("browser_download_url").getAsString();
-
-            copyURLToFile(new URL(latestReleaseDownloadUrl), FileConsts.downloadZipFile);
-
-            Main.propertyFile.content.add(PermaFile.installedPackName, new JsonPrimitive(latestReleaseName));
-            //TODO: save creation date
-            Main.propertyFile.save();
-
-            return latestReleaseName;
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(!releaseFileName.equals("release.zip")) {
+            throw new UnexpectedException("INVALID RELEASE NAME, BLAME WILUX");
         }
-        return null;
+
+        String latestReleaseDownloadUrl = releaseReleaseZipJson.get("browser_download_url").getAsString();
+
+        copyURLToFile(new URL(latestReleaseDownloadUrl), FileConsts.downloadZipFile);
+
+        Main.propertyFile.content.add(PermaFile.installedPackName, new JsonPrimitive(latestReleaseName));
+        //TODO: save creation date
+        Main.propertyFile.save();
+
+        return latestReleaseName;
     }
 
     public static void unzip() throws IOException {
