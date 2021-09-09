@@ -1,0 +1,11 @@
+{
+    "parent": "item/generated",
+    "textures": {
+        "layer0": "item/apple"
+    },"overrides":[
+{"predicate":{"custom_model_data":0},"model":"item/apple"},
+{"predicate":{"custom_model_data":1},"model":"tool/food/jam_apple"},
+{"predicate":{"custom_model_data":2},"model":"tool/food/jam_fruity"},
+{"predicate":{"custom_model_data":3},"model":"tool/food/juice_apple"},
+{"predicate":{"custom_model_data":4},"model":"hat/misc/_beta"}
+]}

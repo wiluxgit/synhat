@@ -1,7 +1,0 @@
-{
-	"author":"Wilux",
-	"models":[
-		{"path":"fortress_warrior", "author":"Wilux"},
-		{"path":"tool/baugette_blade", "author":"Wilux", "type":"sword"}
-	]
-}

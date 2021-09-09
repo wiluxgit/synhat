@@ -1,0 +1,6 @@
+{
+    "parent": "tool/parent/3232unscaled",
+    "textures": {
+        "layer0": "tool/terraria/excalibur2"
+    }
+}

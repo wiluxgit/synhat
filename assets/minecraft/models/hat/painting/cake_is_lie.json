@@ -1,0 +1,6 @@
+{
+    "parent": "hat/painting",
+    "textures": {
+		"0": "hat/painting/cake_is_lie"
+    }
+}

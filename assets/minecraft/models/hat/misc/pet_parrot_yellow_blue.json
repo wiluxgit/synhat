@@ -1,0 +1,6 @@
+{
+    "parent": "hat/pet_parrot",
+    "textures": {
+		"0": "hat/misc/pet_parrot_yellow_blue"
+    }
+}

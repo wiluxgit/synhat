@@ -1,0 +1,14 @@
+{
+    "parent": "item/generated",
+    "textures": {
+        "layer0": "item/cooked_porkchop"
+    },"overrides":[
+{"predicate":{"custom_model_data":0},"model":"item/cooked_porkchop"},
+{"predicate":{"custom_model_data":1},"model":"tool/food/minced_pork"},
+{"predicate":{"custom_model_data":2},"model":"tool/food/pizza_vesuvio"},
+{"predicate":{"custom_model_data":3},"model":"tool/food/pizza_capricciosa"},
+{"predicate":{"custom_model_data":4},"model":"tool/food/pizza_pollo"},
+{"predicate":{"custom_model_data":5},"model":"tool/food/pizza_speciale"},
+{"predicate":{"custom_model_data":6},"model":"tool/food/bacon"},
+{"predicate":{"custom_model_data":7},"model":"hat/misc/_beta"}
+]}

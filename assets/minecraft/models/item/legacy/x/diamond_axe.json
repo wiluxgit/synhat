@@ -1,0 +1,9 @@
+{
+    "parent": "item/handheld",
+    "textures": {
+        "layer0": "item/diamond_axe"
+    },"overrides":[
+{"predicate":{"custom_model_data":0},"model":"item/diamond_axe"},
+{"predicate":{"custom_model_data":1},"model":"tool/thaumic_exo_axe"},
+{"predicate":{"custom_model_data":2},"model":"hat/misc/_beta"}
+]}

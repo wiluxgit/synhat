@@ -1,0 +1,10 @@
+{
+    "parent": "item/generated",
+    "textures": {
+        "layer0": "item/mushroom_stew"
+    },"overrides":[
+{"predicate":{"custom_model_data":0},"model":"item/mushroom_stew"},
+{"predicate":{"custom_model_data":1},"model":"tool/food/moldy_cheese"},
+{"predicate":{"custom_model_data":2},"model":"tool/food/cheese"},
+{"predicate":{"custom_model_data":3},"model":"hat/misc/_beta"}
+]}

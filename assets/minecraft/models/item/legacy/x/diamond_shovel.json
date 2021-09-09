@@ -1,0 +1,10 @@
+{
+    "parent": "item/handheld",
+    "textures": {
+        "layer0": "item/diamond_shovel"
+    },"overrides":[
+{"predicate":{"custom_model_data":0},"model":"item/diamond_shovel"},
+{"predicate":{"custom_model_data":1},"model":"tool/thaumic_exo_shovel"},
+{"predicate":{"custom_model_data":2},"model":"tool/shovel_knight"},
+{"predicate":{"custom_model_data":3},"model":"hat/misc/_beta"}
+]}

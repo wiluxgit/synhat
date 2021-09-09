@@ -1,0 +1,9 @@
+{
+    "parent": "item/generated",
+    "textures": {
+        "layer0": "item/cooked_salmon"
+    },"overrides":[
+{"predicate":{"custom_model_data":0},"model":"item/cooked_salmon"},
+{"predicate":{"custom_model_data":1},"model":"tool/food/cheese"},
+{"predicate":{"custom_model_data":2},"model":"hat/misc/_beta"}
+]}

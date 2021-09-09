@@ -1,0 +1,13 @@
+{
+    "parent": "item/handheld",
+    "textures": {
+        "layer0": "item/diamond_pickaxe"
+    },"overrides":[
+{"predicate":{"custom_model_data":0},"model":"item/diamond_pickaxe"},
+{"predicate":{"custom_model_data":1},"model":"tool/thaumic_exo_pick"},
+{"predicate":{"custom_model_data":2},"model":"tool/terraria/digging_claw"},
+{"predicate":{"custom_model_data":3},"model":"tool/terraria/picksaw"},
+{"predicate":{"custom_model_data":4},"model":"tool/terraria/candy_cane_pickaxe"},
+{"predicate":{"custom_model_data":5},"model":"tool/terraria/stardust_pickaxe"},
+{"predicate":{"custom_model_data":6},"model":"hat/misc/_beta"}
+]}
