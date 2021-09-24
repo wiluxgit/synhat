@@ -3,12 +3,7 @@
 		"replace": true,
 		"sounds": [
 			{
-				"name": "records/11",
-				"stream": true,
-				"weight": 3
-			},
-			{
-				"name": "megalovania",
+				"name": "deltarune",
 				"stream": true,
 				"weight": 1
 			}	
