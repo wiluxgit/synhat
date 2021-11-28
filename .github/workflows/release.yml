@@ -32,7 +32,7 @@ jobs:
           
       - name: execute py script # run the run.py to get the latest data
         run: |
-          cd .github/workflows
+          cd $GITHUB_WORKSPACE/.github/workflows
           python updateJson.py 0.0.${{ github.run_number }}
           
       - name: Pack assets
