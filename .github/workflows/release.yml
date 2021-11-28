@@ -25,44 +25,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         
-      - name: setup python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8 #install the python needed
-          
-      - name: execute py script # run the run.py to get the latest data
+      - name: Build project # This would actually build your project
         run: |
-          cd code/generator
-          pip install checksumdir
-          pip install simplejson
-          python perm_creator.py
-          python create_pack.py
-        
-      - name: Build project # This would actually build your project, using zip for an example artifact
-        run: |
-          cd pack_output
+          cd assets
           zip -r ../release ./*
-          
-      - name: Push perm.json
-        run: |
-          git config --global user.email "oscdah@student.chalmers.se"
-          git config --global user.name "Robot Wilux"
-          git add assets/*/perm.json
-          git commit -m "auto commit v0.0.${{ github.run_number }}" 
-          git push
-           
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v0.0.${{ github.run_number }}
-          release_name: Release 0.0.${{ github.run_number }}
-          body: |
-            This file was automatically generated.
-          draft: false
-          prerelease: false
           
       - name: Upload Release Asset
         id: upload-release-asset 
