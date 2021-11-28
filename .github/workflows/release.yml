@@ -30,14 +30,14 @@ jobs:
         with:
           python-version: 3.10.0 #install the python needed
           
-      - name: execute py script # run the run.py to get the latest data
+      - name: Execute py script # run the run.py to get the latest data
         run: |
-          cd $GITHUB_WORKSPACE/.github/workflows
-          python updateJson.py 0.0.${{ github.run_number }}
+          cd $GITHUB_WORKSPACE
+          cd .github/workflows
+          python updateJson.py 1.3.${{ github.run_number }}
           
-      - name: Pack assets
+      - name: Zip assets
         run: |
-          cd .
           zip -q -r release . -i "assets/*" pack.mcmeta pack.png 
           
       - name: Create Release
@@ -46,8 +46,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v0.0.${{ github.run_number }}
-          release_name: Release 0.0.${{ github.run_number }}
+          tag_name: v1.3.${{ github.run_number }}
+          release_name: Release 1.3.${{ github.run_number }}
           body: |
             This release was automatically generated.
           draft: false
