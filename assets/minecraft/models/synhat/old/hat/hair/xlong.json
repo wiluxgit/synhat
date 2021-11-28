@@ -1,0 +1,6 @@
+{
+    "parent": "hat/hair",
+    "textures": {
+		"layer0": "hat/hair/xlong"
+    }
+}

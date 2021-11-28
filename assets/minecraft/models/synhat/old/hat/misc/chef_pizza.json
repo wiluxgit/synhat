@@ -1,0 +1,212 @@
+{
+	"credit": "Made with Blockbench",
+	"textures": {
+		"2": "hat/misc/chef/hat_yellow",
+		"3": "hat/misc/chef/mumbostashe",
+		"4": "tool/food/pizza_cheese2",
+		"particle": "hat/misc/chef/hat_yellow"
+	},
+	"elements": [
+		{
+			"from": [3.5, 6, 3.5],
+			"to": [12.5, 10, 12.5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [12, 14, 12]},
+			"faces": {
+				"north": {"uv": [0, 12, 9, 16], "texture": "#2"},
+				"east": {"uv": [0, 12, 9, 16], "texture": "#2"},
+				"south": {"uv": [0, 12, 9, 16], "texture": "#2"},
+				"west": {"uv": [0, 12, 9, 16], "texture": "#2"},
+				"up": {"uv": [8, 0, 16, 8], "texture": "#2"},
+				"down": {"uv": [8, 0, 16, 8], "texture": "#2"}
+			}
+		},
+		{
+			"from": [3.5, -1, 3.5],
+			"to": [12.5, 3, 3.5],
+			"faces": {
+				"north": {"uv": [0, 8, 16, 16], "texture": "#3"}
+			}
+		},
+		{
+			"from": [3, 10, 3],
+			"to": [13, 14, 13],
+			"rotation": {"angle": 0, "axis": "y", "origin": [12, 18, 12]},
+			"faces": {
+				"north": {"uv": [6, 8, 16, 12], "texture": "#2"},
+				"east": {"uv": [6, 8, 16, 12], "texture": "#2"},
+				"south": {"uv": [6, 8, 16, 12], "texture": "#2"},
+				"west": {"uv": [6, 8, 16, 12], "texture": "#2"},
+				"up": {"uv": [8, 0, 16, 8], "texture": "#2"},
+				"down": {"uv": [8, 0, 16, 8], "texture": "#2"}
+			}
+		},
+		{
+			"name": "pizza_cheese2_0",
+			"from": [6.5, 8.5, 2.5],
+			"to": [9.5, 15.5, 3],
+			"rotation": {"angle": 0, "axis": "x", "origin": [8, 12, -1]},
+			"faces": {
+				"north": {"uv": [5, 1, 11, 15], "rotation": 180, "texture": "#4"},
+				"east": {"uv": [10, 1, 11, 15], "rotation": 180, "texture": "#4"},
+				"south": {"uv": [5, 15, 11, 1], "texture": "#4"},
+				"west": {"uv": [5, 1, 6, 15], "rotation": 180, "texture": "#4"},
+				"up": {"uv": [5, 14, 11, 15], "texture": "#4"},
+				"down": {"uv": [11, 1, 5, 2], "rotation": 180, "texture": "#4"}
+			}
+		},
+		{
+			"name": "pizza_cheese2_1",
+			"from": [5.5, 9, 2.5],
+			"to": [6.5, 15, 3],
+			"rotation": {"angle": 0, "axis": "x", "origin": [8, 12, -1]},
+			"faces": {
+				"north": {"uv": [3, 2, 5, 14], "rotation": 180, "texture": "#4"},
+				"east": {"uv": [4, 2, 5, 14], "rotation": 180, "texture": "#4"},
+				"south": {"uv": [3, 14, 5, 2], "texture": "#4"},
+				"west": {"uv": [3, 2, 4, 14], "rotation": 180, "texture": "#4"},
+				"up": {"uv": [3, 13, 5, 14], "texture": "#4"},
+				"down": {"uv": [5, 2, 3, 3], "rotation": 180, "texture": "#4"}
+			}
+		},
+		{
+			"name": "pizza_cheese2_2",
+			"from": [9.5, 9, 2.5],
+			"to": [10.5, 15, 3],
+			"rotation": {"angle": 0, "axis": "x", "origin": [8, 12, -1]},
+			"faces": {
+				"north": {"uv": [11, 2, 13, 14], "rotation": 180, "texture": "#4"},
+				"east": {"uv": [12, 2, 13, 14], "rotation": 180, "texture": "#4"},
+				"south": {"uv": [11, 14, 13, 2], "texture": "#4"},
+				"west": {"uv": [11, 2, 12, 14], "rotation": 180, "texture": "#4"},
+				"up": {"uv": [11, 13, 13, 14], "texture": "#4"},
+				"down": {"uv": [13, 2, 11, 3], "rotation": 180, "texture": "#4"}
+			}
+		},
+		{
+			"name": "pizza_cheese2_3",
+			"from": [5, 9.5, 2.5],
+			"to": [5.5, 14.5, 3],
+			"rotation": {"angle": 0, "axis": "x", "origin": [8, 12, -1]},
+			"faces": {
+				"north": {"uv": [2, 3, 3, 13], "rotation": 180, "texture": "#4"},
+				"east": {"uv": [2, 3, 3, 13], "rotation": 180, "texture": "#4"},
+				"south": {"uv": [2, 13, 3, 3], "texture": "#4"},
+				"west": {"uv": [2, 3, 3, 13], "rotation": 180, "texture": "#4"},
+				"up": {"uv": [2, 12, 3, 13], "texture": "#4"},
+				"down": {"uv": [3, 3, 2, 4], "rotation": 180, "texture": "#4"}
+			}
+		},
+		{
+			"name": "pizza_cheese2_4",
+			"from": [10.5, 9.5, 2.5],
+			"to": [11, 14.5, 3],
+			"rotation": {"angle": 0, "axis": "x", "origin": [8, 12, -1]},
+			"faces": {
+				"north": {"uv": [13, 3, 14, 13], "rotation": 180, "texture": "#4"},
+				"east": {"uv": [13, 3, 14, 13], "rotation": 180, "texture": "#4"},
+				"south": {"uv": [13, 13, 14, 3], "texture": "#4"},
+				"west": {"uv": [13, 3, 14, 13], "rotation": 180, "texture": "#4"},
+				"up": {"uv": [13, 12, 14, 13], "texture": "#4"},
+				"down": {"uv": [14, 3, 13, 4], "rotation": 180, "texture": "#4"}
+			}
+		},
+		{
+			"name": "pizza_cheese2_5",
+			"from": [4.5, 10, 2.5],
+			"to": [5, 14, 3],
+			"rotation": {"angle": 0, "axis": "x", "origin": [8, 12, -1]},
+			"faces": {
+				"north": {"uv": [1, 4, 2, 12], "rotation": 180, "texture": "#4"},
+				"east": {"uv": [1, 4, 2, 12], "rotation": 180, "texture": "#4"},
+				"south": {"uv": [1, 12, 2, 4], "texture": "#4"},
+				"west": {"uv": [1, 4, 2, 12], "rotation": 180, "texture": "#4"},
+				"up": {"uv": [1, 11, 2, 12], "texture": "#4"},
+				"down": {"uv": [2, 4, 1, 5], "rotation": 180, "texture": "#4"}
+			}
+		},
+		{
+			"name": "pizza_cheese2_6",
+			"from": [11, 10, 2.5],
+			"to": [11.5, 14, 3],
+			"rotation": {"angle": 0, "axis": "x", "origin": [8, 12, -1]},
+			"faces": {
+				"north": {"uv": [14, 4, 15, 12], "rotation": 180, "texture": "#4"},
+				"east": {"uv": [14, 4, 15, 12], "rotation": 180, "texture": "#4"},
+				"south": {"uv": [14, 12, 15, 4], "texture": "#4"},
+				"west": {"uv": [14, 4, 15, 12], "rotation": 180, "texture": "#4"},
+				"up": {"uv": [14, 11, 15, 12], "texture": "#4"},
+				"down": {"uv": [15, 4, 14, 5], "rotation": 180, "texture": "#4"}
+			}
+		},
+		{
+			"name": "pizza_cheese2_7",
+			"from": [4, 10.5, 2.5],
+			"to": [4.5, 13.5, 3],
+			"rotation": {"angle": 0, "axis": "x", "origin": [8, 12, -1]},
+			"faces": {
+				"north": {"uv": [0, 5, 1, 11], "rotation": 180, "texture": "#4"},
+				"east": {"uv": [0, 5, 1, 11], "rotation": 180, "texture": "#4"},
+				"south": {"uv": [0, 11, 1, 5], "texture": "#4"},
+				"west": {"uv": [0, 5, 1, 11], "rotation": 180, "texture": "#4"},
+				"up": {"uv": [0, 10, 1, 11], "texture": "#4"},
+				"down": {"uv": [1, 5, 0, 6], "rotation": 180, "texture": "#4"}
+			}
+		},
+		{
+			"name": "pizza_cheese2_8",
+			"from": [11.5, 10.5, 2.5],
+			"to": [12, 13.5, 3],
+			"rotation": {"angle": 0, "axis": "x", "origin": [8, 12, -1]},
+			"faces": {
+				"north": {"uv": [15, 5, 16, 11], "rotation": 180, "texture": "#4"},
+				"east": {"uv": [15, 5, 16, 11], "rotation": 180, "texture": "#4"},
+				"south": {"uv": [15, 11, 16, 5], "texture": "#4"},
+				"west": {"uv": [15, 5, 16, 11], "rotation": 180, "texture": "#4"},
+				"up": {"uv": [15, 10, 16, 11], "texture": "#4"},
+				"down": {"uv": [16, 5, 15, 6], "rotation": 180, "texture": "#4"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"translation": [0, -0.75, 0],
+			"scale": [0.8, 0.8, 0.8]
+		},
+		"thirdperson_lefthand": {
+			"translation": [0, -0.75, 0],
+			"scale": [0.8, 0.8, 0.8]
+		},
+		"firstperson_righthand": {
+			"translation": [0, -0.75, 0],
+			"scale": [0.8, 0.8, 0.8]
+		},
+		"firstperson_lefthand": {
+			"translation": [0, -0.75, 0],
+			"scale": [0.8, 0.8, 0.8]
+		},
+		"ground": {
+			"translation": [0, 4.5, 0]
+		},
+		"gui": {
+			"rotation": [30, 135, 0],
+			"translation": [0, 0.75, 0],
+			"scale": [0.8, 0.8, 0.8]
+		},
+		"head": {
+			"translation": [0, 4, 0],
+			"scale": [1.7, 1.7, 1.7]
+		},
+		"fixed": {
+			"rotation": [0, -180, 0],
+			"translation": [0, 16.5, 21],
+			"scale": [4, 4, 4]
+		}
+	},
+	"groups": [0, 1, 2,
+		{
+			"name": "pizza_cheese2",
+			"origin": [8, 8, 8],
+			"children": [3, 4, 5, 6, 7, 8, 9, 10, 11]
+		}
+	]
+}

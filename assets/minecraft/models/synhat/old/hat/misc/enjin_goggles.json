@@ -1,0 +1,6 @@
+{
+    "parent": "hat/skull",
+    "textures": {
+		"0": "hat/misc/enjin_goggles"
+    }
+}

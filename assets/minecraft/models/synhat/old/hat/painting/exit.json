@@ -1,0 +1,6 @@
+{
+    "parent": "hat/painting1612",
+    "textures": {
+		"0": "hat/painting/exit"
+    }
+}

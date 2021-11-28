@@ -1,0 +1,6 @@
+{
+    "parent": "hat/block",
+    "textures": {
+		"0": "hat/misc/crate"
+    }
+}

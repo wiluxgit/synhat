@@ -1,0 +1,6 @@
+{
+    "parent": "hat/classic",
+    "textures": {
+		"1": "hat/misc/pepe"
+    }
+}
