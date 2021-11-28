@@ -25,10 +25,33 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         
-      - name: Build project # This would actually build your project
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10 #install the python needed
+          
+      - name: execute py script # run the run.py to get the latest data
         run: |
-          cd assets
-          zip -r ../release ./*
+          cd .github/workflows
+          python updateJson.py 0.0.${{ github.run_number }}
+          
+      - name: Pack assets
+        run: |
+          cd .
+          zip -q -r release . -i "assets/*" pack.mcmeta pack.png 
+          
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v0.0.${{ github.run_number }}
+          release_name: Release 0.0.${{ github.run_number }}
+          body: |
+            This release was automatically generated.
+          draft: false
+          prerelease: false          
           
       - name: Upload Release Asset
         id: upload-release-asset 
@@ -37,6 +60,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./release.zip
+          asset_path: release.zip
           asset_name: release.zip
           asset_content_type: application/zip
