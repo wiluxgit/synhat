@@ -2,25 +2,81 @@
     "pack": {
         "pack_format": 6,
         "description": [
-			{"bold":true,
-			"text":"S","color":"#e56f11"},
-			{"text":"y","color":"#e87c12"},
-			{"text":"n","color":"#ec8913"},
-			{"text":"h","color":"#ef9613"},
-			{"text":"a","color":"#f2a314"},
-			{"text":"t ","color":"#f6b015"},
-			
-			{"bold":false,"text":"I","color":"#c5bfd5"},
-			{"bold":false,"text":"n","color":"#bab5c9"},
-			{"bold":false,"text":"f","color":"#afabbd"},
-			{"bold":false,"text":"i","color":"#a4a1b1"},
-			{"bold":false,"text":"n","color":"#9997a4"},
-			{"bold":false,"text":"i","color":"#8e8d98"},
-			{"bold":false,"text":"t","color":"#83838c"},
-			{"bold":false,"text":"y ","color":"#787980"},
-			
-			{"bold":false,"text":"(v1.3)","color":"#444444"}
-		]
+            {
+                "bold": true,
+                "text": "S",
+                "color": "#e56f11"
+            },
+            {
+                "bold": true,
+                "text": "y",
+                "color": "#e87c12"
+            },
+            {
+                "bold": true,
+                "text": "n",
+                "color": "#ec8913"
+            },
+            {
+                "bold": true,
+                "text": "h",
+                "color": "#ef9613"
+            },
+            {
+                "bold": true,
+                "text": "a",
+                "color": "#f2a314"
+            },
+            {
+                "bold": true,
+                "text": "t ",
+                "color": "#f6b015"
+            },
+            {
+                "bold": false,
+                "text": "I",
+                "color": "#c5bfd5"
+            },
+            {
+                "bold": false,
+                "text": "n",
+                "color": "#bab5c9"
+            },
+            {
+                "bold": false,
+                "text": "f",
+                "color": "#afabbd"
+            },
+            {
+                "bold": false,
+                "text": "i",
+                "color": "#a4a1b1"
+            },
+            {
+                "bold": false,
+                "text": "n",
+                "color": "#9997a4"
+            },
+            {
+                "bold": false,
+                "text": "i",
+                "color": "#8e8d98"
+            },
+            {
+                "bold": false,
+                "text": "t",
+                "color": "#83838c"
+            },
+            {
+                "bold": false,
+                "text": "y ",
+                "color": "#787980"
+            },
+            {
+                "bold": false,
+                "text": "(v0.0.1)",
+                "color": "#444444"
+            }
+        ]
     }
 }
-"&#&#&#&#&#&#&#&#
