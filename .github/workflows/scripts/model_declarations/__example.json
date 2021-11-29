@@ -1,0 +1,36 @@
+{"models": [
+	{"item": "minecraft:clock", "model": "synhat/old/hat/snowmobile", "displayName": "Snowmobile", "lore":"I forgor☠"},
+	{"item": "minecraft:netherite_sword", "model": "synhat/wilux/deltarune/rude_buster", "type": "held", "displayName": "Small Rude Buster"},
+	{"item": "minecraft:netherite_sword", "model": "synhat/wilux/deltarune/rude_buster_xl", "type": "held", "displayName": "Rude Buster"},
+	{"item": "minecraft:netherite_sword", "model": "synhat/wilux/deltarune/holy_halberd", "type": "held", "displayName": "Holy Halberd"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/deltarune/big_shot", "displayName": "Big Shot", "lore":"DO YOU WANT TO BE A [[BIG SHOT]]!!?"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/hermit/tree", "displayName": "Tree Diguise"},
+	{"item": "minecraft:netherite_sword", "model": "synhat/wilux/marvel/infinity_gauntlet", "type": "held", "displayName": "Infinity Gauntlet"},
+	{"item": "minecraft:netherite_sword", "model": "synhat/wilux/marvel/infinity_gauntlet_front", "type": "held", "displayName": "Infinity Gauntlet (Front)"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/hat/feather_ears", "displayName": "Feather Ears"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/hat/feather_ears_hat", "displayName": "Asterix"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/hat/villager/fletcher", "displayName": "Fletcher Hat"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/hat/valve/portal_gun", "type": "held", "displayName": "Portal Gun", "credit":"xXxFrostFirexXx @ https://blockmodels.com/model/71/"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/hat/valve/gravity_gun", "type": "held", "displayName": "Gravity Gun"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/hat/amoung_us/red", "displayName": "The Amogus Guy", "lore":"sus"},
+	
+	{"item": "minecraft:clock", "model": "synhat/wilux/painting/meme/rickroll", "type": "painting", "displayName": "Rick Astley", "lore":"I wonder where that link goes https://youtu.be/G8iEMVr7GFg"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/painting/meme/rickroll_xl", "type": "painting", "displayName": "Rick Astley", "lore":"I wonder where that link goes https://youtu.be/G8iEMVr7GFg"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/painting/meme/doge", "type": "painting", "displayName": "Funny Yellow Dog"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/painting/meme/doge_xl", "type": "painting", "displayName": "Funny Yellow Dog"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/painting/meme/pepe", "type": "painting", "displayName": "Pepe"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/painting/meme/pepe_xl", "type": "painting", "displayName": "Sad Pepe"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/painting/meme/troll", "type": "painting", "displayName": "Small Troll"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/painting/meme/troll_xl", "type": "painting", "displayName": "Big Troll"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/painting/meme/nyan", "type": "painting", "displayName": "Nyan Cat"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/painting/meme/im_stuff", "type": "painting", "displayName": "I'm Stuff"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/painting/meme/winnie_the_pooh", "type": "painting", "displayName": "Winne The Pooh", "lore":"李洪志 Free Tibet 六四天安門事件 The Tiananmen Square 1989 天安門大屠殺"},
+	
+	{"item": "minecraft:clock", "model": "synhat/wilux/hat/glasses_lmao", "displayName": "LMAO Glasses"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/hat/glasses_cool", "displayName": "Cool Glasses"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/hat/glasses_girl_boss", "displayName": "Certified Girlboss", "lore":"Are You Interested in my Essential Oils?"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/hat/rubix", "displayName": "Rubix Cube"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/hat/mad_hoe", "displayName": "Hoe's Mad"},
+	
+	{"item": "minecraft:clock", "model": "synhat/wilux/hat/christmas_sombrero", "displayName": "Christmas Sombrero"}
+]}
