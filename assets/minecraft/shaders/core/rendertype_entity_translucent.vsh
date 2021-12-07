@@ -57,8 +57,8 @@ out float wx_isEdited;
 #define SCALEDIR_Y_MINUS (3<<6)
 #define F_ENABLED (0x80)
 
-int getPerpendicularLength(int faceId, int isAlex);
-void writeUVBounds(int faceId, int isAlex);
+int getPerpendicularLength(int faceId, bool isAlex);
+void writeUVBounds(int faceId, bool isAlex);
 void fixScaling(int faceId);
 
 void main() {
@@ -76,7 +76,7 @@ void main() {
         int header2 = int(topRightPixel.b + 0.1);
 
         if(header0 == 0xda && header1 == 0x67){ 
-            int isAlex = (header2 == 1) ? 1:0;
+            bool isAlex = (header2 == 1);
 
             int faceId = gl_VertexID / 4;
             int cornerId = gl_VertexID % 4;
@@ -227,7 +227,7 @@ void main() {
 }
 
 // retuns the length (in pixels) of the parallel face
-int getPerpendicularLength(int faceId, int isAlex) {
+int getPerpendicularLength(int faceId, bool isAlex) {
     int facetype = faceId/6;
     int faceAxis = faceId%6;
     int perpendicularLength;
@@ -260,7 +260,7 @@ int getPerpendicularLength(int faceId, int isAlex) {
 }
 
 // Can be optimized
-void writeUVBounds(int faceId, int isAlex){
+void writeUVBounds(int faceId, bool isAlex){
     switch(faceId){
     // ======== Hat ========
     case 36: //Left Hat
