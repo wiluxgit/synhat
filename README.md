@@ -4,7 +4,7 @@ This is the github for the synhat resource pack
 ## Installation guide:
 
 **1**
-Download `synhat.jar` <link>
+Download `synhat.jar` \<link\>
 
 **2**
 Go into the minecraft launcher*, select the installation(s) you want synhat for and open its 
