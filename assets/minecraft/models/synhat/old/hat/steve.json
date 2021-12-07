@@ -1,0 +1,6 @@
+{
+    "parent": "synhat/old/_parent/classic",
+    "textures": {
+        "1": "synhat/old/hat/misc/steve"
+    }
+}

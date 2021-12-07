@@ -1,0 +1,119 @@
+{
+    "credit": "Made with Blockbench",
+    "display": {
+        "firstperson_lefthand": {
+            "translation": [
+                0,
+                3,
+                0
+            ]
+        },
+        "firstperson_righthand": {
+            "translation": [
+                0,
+                3,
+                0
+            ]
+        },
+        "fixed": {
+            "rotation": [
+                0,
+                180,
+                0
+            ],
+            "scale": [
+                3,
+                3,
+                3
+            ],
+            "translation": [
+                0,
+                12.5,
+                22.5
+            ]
+        },
+        "ground": {
+            "translation": [
+                0,
+                2,
+                0
+            ]
+        },
+        "gui": {
+            "rotation": [
+                30,
+                135,
+                0
+            ],
+            "translation": [
+                0,
+                2.5,
+                0
+            ]
+        },
+        "head": {
+            "scale": [
+                1.7,
+                1.7,
+                1.7
+            ],
+            "translation": [
+                0,
+                6,
+                0
+            ]
+        },
+        "thirdperson_lefthand": {
+            "rotation": [
+                32,
+                0,
+                0
+            ],
+            "translation": [
+                0,
+                0,
+                6
+            ]
+        },
+        "thirdperson_righthand": {
+            "rotation": [
+                32,
+                0,
+                0
+            ],
+            "translation": [
+                0,
+                0,
+                6
+            ]
+        }
+    },
+    "elements": [
+        {
+            "faces": {
+                "north": {
+                    "texture": "#0",
+                    "uv": [
+                        0,
+                        0,
+                        16,
+                        16
+                    ]
+                }
+            },
+            "from": [
+                4,
+                0,
+                4
+            ],
+            "to": [
+                12,
+                8,
+                12
+            ]
+        }
+    ],
+    "textures": {
+        "0": "synhat/old/hat/misc/mumbostashe"
+    }
+}

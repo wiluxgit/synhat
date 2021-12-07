@@ -1,0 +1,549 @@
+{
+    "credit": "Made with Blockbench",
+    "display": {
+        "fixed": {
+            "rotation": [
+                0,
+                -180,
+                0
+            ],
+            "scale": [
+                2,
+                2,
+                2
+            ],
+            "translation": [
+                4.5,
+                7.5,
+                19
+            ]
+        },
+        "ground": {
+            "rotation": [
+                -1,
+                0,
+                0
+            ],
+            "scale": [
+                0.8,
+                0.8,
+                0.8
+            ],
+            "translation": [
+                0,
+                9.5,
+                0
+            ]
+        },
+        "gui": {
+            "rotation": [
+                30,
+                135,
+                0
+            ],
+            "translation": [
+                5,
+                7.75,
+                0
+            ]
+        },
+        "head": {
+            "translation": [
+                -2,
+                4.25,
+                0.75
+            ]
+        },
+        "thirdperson_lefthand": {
+            "scale": [
+                0.5,
+                0.5,
+                0.5
+            ],
+            "translation": [
+                0,
+                0,
+                4
+            ]
+        },
+        "thirdperson_righthand": {
+            "scale": [
+                0.5,
+                0.5,
+                0.5
+            ],
+            "translation": [
+                0,
+                0,
+                4
+            ]
+        }
+    },
+    "elements": [
+        {
+            "faces": {
+                "down": {
+                    "texture": "#2",
+                    "uv": [
+                        0,
+                        0,
+                        5,
+                        1
+                    ]
+                },
+                "east": {
+                    "texture": "#2",
+                    "uv": [
+                        4,
+                        0,
+                        5,
+                        1
+                    ]
+                },
+                "north": {
+                    "rotation": 180,
+                    "texture": "#2",
+                    "uv": [
+                        0,
+                        1,
+                        5,
+                        0
+                    ]
+                },
+                "south": {
+                    "texture": "#2",
+                    "uv": [
+                        0,
+                        0,
+                        5,
+                        1
+                    ]
+                },
+                "up": {
+                    "rotation": 180,
+                    "texture": "#2",
+                    "uv": [
+                        5,
+                        0,
+                        0,
+                        1
+                    ]
+                },
+                "west": {
+                    "texture": "#2",
+                    "uv": [
+                        0,
+                        0,
+                        1,
+                        1
+                    ]
+                }
+            },
+            "from": [
+                11,
+                4,
+                0
+            ],
+            "name": "monocle_0",
+            "to": [
+                16,
+                5,
+                1
+            ]
+        },
+        {
+            "faces": {
+                "down": {
+                    "texture": "#2",
+                    "uv": [
+                        0,
+                        4,
+                        1,
+                        5
+                    ]
+                },
+                "east": {
+                    "texture": "#2",
+                    "uv": [
+                        0,
+                        1,
+                        1,
+                        5
+                    ]
+                },
+                "north": {
+                    "rotation": 180,
+                    "texture": "#2",
+                    "uv": [
+                        0,
+                        5,
+                        1,
+                        1
+                    ]
+                },
+                "south": {
+                    "texture": "#2",
+                    "uv": [
+                        0,
+                        1,
+                        1,
+                        5
+                    ]
+                },
+                "up": {
+                    "rotation": 180,
+                    "texture": "#2",
+                    "uv": [
+                        1,
+                        1,
+                        0,
+                        2
+                    ]
+                },
+                "west": {
+                    "texture": "#2",
+                    "uv": [
+                        0,
+                        1,
+                        1,
+                        5
+                    ]
+                }
+            },
+            "from": [
+                11,
+                0,
+                0
+            ],
+            "name": "monocle_2",
+            "to": [
+                12,
+                4,
+                1
+            ]
+        },
+        {
+            "faces": {
+                "down": {
+                    "texture": "#2",
+                    "uv": [
+                        4,
+                        4,
+                        5,
+                        5
+                    ]
+                },
+                "east": {
+                    "texture": "#2",
+                    "uv": [
+                        4,
+                        1,
+                        5,
+                        5
+                    ]
+                },
+                "north": {
+                    "rotation": 180,
+                    "texture": "#2",
+                    "uv": [
+                        4,
+                        5,
+                        5,
+                        1
+                    ]
+                },
+                "south": {
+                    "texture": "#2",
+                    "uv": [
+                        4,
+                        1,
+                        5,
+                        5
+                    ]
+                },
+                "up": {
+                    "rotation": 180,
+                    "texture": "#2",
+                    "uv": [
+                        5,
+                        1,
+                        4,
+                        2
+                    ]
+                },
+                "west": {
+                    "texture": "#2",
+                    "uv": [
+                        4,
+                        1,
+                        5,
+                        5
+                    ]
+                }
+            },
+            "from": [
+                15,
+                0,
+                0
+            ],
+            "name": "monocle_3",
+            "to": [
+                16,
+                4,
+                1
+            ]
+        },
+        {
+            "faces": {
+                "down": {
+                    "texture": "#2",
+                    "uv": [
+                        1,
+                        4,
+                        4,
+                        5
+                    ]
+                },
+                "east": {
+                    "texture": "#2",
+                    "uv": [
+                        3,
+                        4,
+                        4,
+                        5
+                    ]
+                },
+                "north": {
+                    "rotation": 180,
+                    "texture": "#2",
+                    "uv": [
+                        1,
+                        5,
+                        4,
+                        4
+                    ]
+                },
+                "south": {
+                    "texture": "#2",
+                    "uv": [
+                        1,
+                        4,
+                        4,
+                        5
+                    ]
+                },
+                "up": {
+                    "rotation": 180,
+                    "texture": "#2",
+                    "uv": [
+                        4,
+                        4,
+                        1,
+                        5
+                    ]
+                },
+                "west": {
+                    "texture": "#2",
+                    "uv": [
+                        1,
+                        4,
+                        2,
+                        5
+                    ]
+                }
+            },
+            "from": [
+                12,
+                0,
+                0
+            ],
+            "name": "monocle_6",
+            "to": [
+                15,
+                1,
+                1
+            ]
+        },
+        {
+            "faces": {
+                "north": {
+                    "rotation": 270,
+                    "texture": "#2",
+                    "uv": [
+                        13,
+                        0,
+                        16,
+                        5
+                    ]
+                }
+            },
+            "from": [
+                11.96,
+                1.97,
+                0.45
+            ],
+            "name": "monocle_3",
+            "rotation": {
+                "angle": 45,
+                "axis": "z",
+                "origin": [
+                    17.14,
+                    -2.47,
+                    6
+                ]
+            },
+            "to": [
+                15.66,
+                4.19,
+                0.45
+            ]
+        },
+        {
+            "faces": {
+                "up": {
+                    "rotation": 90,
+                    "texture": "#2",
+                    "uv": [
+                        13,
+                        0,
+                        16,
+                        5
+                    ]
+                }
+            },
+            "from": [
+                8.195,
+                0.73,
+                -0.66
+            ],
+            "name": "monocle_4",
+            "rotation": {
+                "angle": 22.5,
+                "axis": "z",
+                "origin": [
+                    16.89,
+                    -2.97,
+                    6
+                ]
+            },
+            "to": [
+                11.895,
+                0.73,
+                1.56
+            ]
+        },
+        {
+            "faces": {
+                "north": {
+                    "rotation": 270,
+                    "texture": "#2",
+                    "uv": [
+                        13,
+                        0,
+                        16,
+                        5
+                    ]
+                }
+            },
+            "from": [
+                5.29,
+                -3.91,
+                0.265
+            ],
+            "name": "monocle_4",
+            "to": [
+                8.99,
+                -1.69,
+                0.265
+            ]
+        },
+        {
+            "faces": {
+                "up": {
+                    "rotation": 90,
+                    "texture": "#2",
+                    "uv": [
+                        13,
+                        0,
+                        16,
+                        5
+                    ]
+                }
+            },
+            "from": [
+                6.195,
+                -2.77,
+                -4.66
+            ],
+            "name": "monocle_5",
+            "rotation": {
+                "angle": 22.5,
+                "axis": "y",
+                "origin": [
+                    16.89,
+                    -2.97,
+                    6
+                ]
+            },
+            "to": [
+                9.895,
+                -2.77,
+                -2.44
+            ]
+        },
+        {
+            "faces": {
+                "west": {
+                    "rotation": 270,
+                    "texture": "#2",
+                    "uv": [
+                        13,
+                        0,
+                        16,
+                        5
+                    ]
+                }
+            },
+            "from": [
+                3.155,
+                -3.91,
+                5.9
+            ],
+            "name": "monocle_5",
+            "rotation": {
+                "angle": -22.5,
+                "axis": "y",
+                "origin": [
+                    16.89,
+                    -2.97,
+                    6
+                ]
+            },
+            "to": [
+                3.155,
+                -1.69,
+                9.6
+            ]
+        }
+    ],
+    "groups": [
+        {
+            "children": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8
+            ],
+            "name": "monocle"
+        }
+    ],
+    "textures": {
+        "2": "synhat/old/hat/misc/monocle",
+        "particle": "synhat/old/hat/misc/monocle"
+    }
+}

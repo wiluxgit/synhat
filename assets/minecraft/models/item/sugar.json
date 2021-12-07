@@ -1,9 +1,0 @@
-{
-    "parent": "item/generated",
-    "textures": {
-        "layer0": "item/sugar"
-    },"overrides":[
-{"predicate":{"custom_model_data":0},"model":"item/sugar"},
-{"predicate":{"custom_model_data":1},"model":"tool/food/jam_berry"},
-{"predicate":{"custom_model_data":2},"model":"hat/misc/_beta"}
-]}

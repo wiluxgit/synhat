@@ -1,0 +1,6 @@
+{
+    "parent": "synhat/old/_parent/skull",
+    "textures": {
+        "0": "synhat/old/hat/misc/herbex"
+    }
+}

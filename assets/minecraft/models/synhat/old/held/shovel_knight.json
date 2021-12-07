@@ -1,0 +1,76 @@
+{
+    "display": {
+        "firstperson_lefthand": {
+            "rotation": [
+                0,
+                90,
+                -25
+            ],
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "translation": [
+                1.13,
+                3.2,
+                1.13
+            ]
+        },
+        "firstperson_righthand": {
+            "rotation": [
+                0,
+                -90,
+                25
+            ],
+            "scale": [
+                1,
+                1,
+                1
+            ],
+            "translation": [
+                1.13,
+                3.2,
+                1.13
+            ]
+        },
+        "thirdperson_lefthand": {
+            "rotation": [
+                0,
+                90,
+                -55
+            ],
+            "scale": [
+                1.85,
+                1.85,
+                0.85
+            ],
+            "translation": [
+                0,
+                4.0,
+                0.5
+            ]
+        },
+        "thirdperson_righthand": {
+            "rotation": [
+                0,
+                -90,
+                55
+            ],
+            "scale": [
+                1.85,
+                1.85,
+                0.85
+            ],
+            "translation": [
+                0,
+                4.0,
+                0.5
+            ]
+        }
+    },
+    "parent": "item/generated",
+    "textures": {
+        "layer0": "synhat/old/held/shovel_knight"
+    }
+}

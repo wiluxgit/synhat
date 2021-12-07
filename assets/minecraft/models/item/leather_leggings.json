@@ -1,9 +1,0 @@
-{"parent":"item/generated","textures":
-{"layer0":"item/leather_leggings","layer1":"item/leather_leggings_overlay"},"overrides":[
-{"predicate":{"damaged":0,"damage":0},"model":"item/leather_leggings"},
-{"predicate":{"damaged":0,"damage":0.013157894736842105},"model":"hat/dye/headphones"},
-{"predicate":{"damaged":0,"damage":0.02631578947368421},"model":"hat/dye/owodiepie"},
-{"predicate":{"damaged":0,"damage":0.039473684210526314},"model":"hat/dye/dfortress_warrior"},
-{"predicate":{"damaged":0,"damage":0.05263157894736842},"model":"hat/dye/monochrome_block"},
-{"predicate":{"damaged":0,"damage":0.06578947368421052},"model":"hat/dye/cap"},
-{"predicate":{"damaged":1,"damage":0},"model":"item/leather_leggings"}]}

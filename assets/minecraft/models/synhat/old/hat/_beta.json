@@ -1,0 +1,124 @@
+{
+    "credit": "Made with Blockbench",
+    "display": {
+        "firstperson_lefthand": {
+            "rotation": [
+                -180,
+                0,
+                0
+            ],
+            "scale": [
+                0.5,
+                0.5,
+                0.5
+            ]
+        },
+        "firstperson_righthand": {
+            "rotation": [
+                -180,
+                0,
+                0
+            ],
+            "scale": [
+                0.5,
+                0.5,
+                0.5
+            ]
+        },
+        "fixed": {
+            "scale": [
+                1.2,
+                1.2,
+                1.2
+            ],
+            "translation": [
+                0,
+                0,
+                -0.5
+            ]
+        },
+        "ground": {
+            "rotation": [
+                90,
+                0,
+                0
+            ],
+            "scale": [
+                0.5,
+                0.5,
+                0.5
+            ]
+        },
+        "gui": {
+            "rotation": [
+                0,
+                180,
+                0
+            ]
+        },
+        "head": {
+            "scale": [
+                1.7,
+                1.7,
+                1.7
+            ],
+            "translation": [
+                0,
+                20.5,
+                0
+            ]
+        },
+        "thirdperson_lefthand": {
+            "scale": [
+                0.38,
+                0.38,
+                0.4
+            ],
+            "translation": [
+                0,
+                0,
+                0.5
+            ]
+        },
+        "thirdperson_righthand": {
+            "scale": [
+                0.4,
+                0.4,
+                0.4
+            ],
+            "translation": [
+                0,
+                0,
+                0.5
+            ]
+        }
+    },
+    "elements": [
+        {
+            "faces": {
+                "north": {
+                    "texture": "#0",
+                    "uv": [
+                        0,
+                        0,
+                        16,
+                        16
+                    ]
+                }
+            },
+            "from": [
+                0,
+                0,
+                8
+            ],
+            "to": [
+                16,
+                16,
+                8
+            ]
+        }
+    ],
+    "textures": {
+        "0": "synhat/old/hat/misc/_beta"
+    }
+}

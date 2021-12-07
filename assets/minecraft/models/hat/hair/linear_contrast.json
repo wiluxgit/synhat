@@ -1,6 +1,0 @@
-{
-    "parent": "hat/hair",
-    "textures": {
-		"layer0": "hat/hair/linear_contrast"
-    }
-}

@@ -1,0 +1,6 @@
+{
+    "parent": "synhat/wilux/_parent/3232unscaled",
+    "textures": {
+        "layer0": "synhat/wilux/deltarune/rude_buster"
+    }
+}

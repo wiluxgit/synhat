@@ -1,0 +1,6 @@
+{
+    "parent": "synhat/old/_parent/pet_parrot",
+    "textures": {
+        "0": "synhat/old/hat/misc/pet_parrot_grey"
+    }
+}

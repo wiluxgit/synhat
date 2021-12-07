@@ -1,0 +1,145 @@
+{
+    "credit": "Made with Blockbench",
+    "display": {
+        "fixed": {
+            "rotation": [
+                -90,
+                0,
+                0
+            ],
+            "scale": [
+                4,
+                4,
+                4
+            ],
+            "translation": [
+                0,
+                0,
+                -18
+            ]
+        },
+        "ground": {
+            "scale": [
+                4,
+                4,
+                4
+            ]
+        },
+        "gui": {
+            "rotation": [
+                30,
+                135,
+                0
+            ],
+            "scale": [
+                0.3,
+                0.3,
+                0.3
+            ]
+        },
+        "head": {
+            "scale": [
+                4,
+                4,
+                4
+            ]
+        },
+        "thirdperson_lefthand": {
+            "scale": [
+                4,
+                4,
+                4
+            ],
+            "translation": [
+                -5.5,
+                0,
+                0
+            ]
+        },
+        "thirdperson_righthand": {
+            "scale": [
+                4,
+                4,
+                4
+            ],
+            "translation": [
+                -5.5,
+                0,
+                0
+            ]
+        }
+    },
+    "elements": [
+        {
+            "faces": {
+                "down": {
+                    "texture": "#0",
+                    "uv": [
+                        0,
+                        0,
+                        12,
+                        12
+                    ]
+                },
+                "east": {
+                    "texture": "#0",
+                    "uv": [
+                        0,
+                        0,
+                        12,
+                        12
+                    ]
+                },
+                "north": {
+                    "texture": "#0",
+                    "uv": [
+                        0,
+                        0,
+                        12,
+                        12
+                    ]
+                },
+                "south": {
+                    "texture": "#0",
+                    "uv": [
+                        0,
+                        0,
+                        12,
+                        12
+                    ]
+                },
+                "up": {
+                    "texture": "#0",
+                    "uv": [
+                        0,
+                        0,
+                        12,
+                        12
+                    ]
+                },
+                "west": {
+                    "texture": "#0",
+                    "uv": [
+                        0,
+                        0,
+                        12,
+                        12
+                    ]
+                }
+            },
+            "from": [
+                -16,
+                -16,
+                -16
+            ],
+            "to": [
+                32,
+                32,
+                32
+            ]
+        }
+    ],
+    "textures": {
+        "0": "synhat/old/hat/misc/i_am_an_asshole"
+    }
+}
