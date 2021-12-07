@@ -67,8 +67,10 @@ void main() {
     lightMapColor = texelFetch(Sampler2, UV2 / 16, 0);
     overlayColor = texelFetch(Sampler1, UV1, 0);
     texCoord0 = UV0;
-    normal = ProjMat * ModelViewMat * vec4(Normal, 0.0);    
+    normal = ProjMat * ModelViewMat * vec4(Normal, 0.0);  
 
+    wx_isEdited = 0  
+    
     if(gl_VertexID >= 18*8){ //is second layer
         vec4 topRightPixel = texelFetch(Sampler0, ivec2(0, 0), 0)*256; //Macs can't texelfetch in vertex shader?
         int header0 = int(topRightPixel.r + 0.1);
