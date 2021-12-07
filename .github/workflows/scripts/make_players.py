@@ -6,27 +6,32 @@ from PIL import Image, ImageDraw
 import PIL as PIL
 import os
 from pathlib import Path
+from sorttable import xsort
 
 actuallyDoRealRequests = False
 requestAllUsers = False
 
 def run():
-    file = "__master_models_table.json"
+    fpath = "__master_models_table.json"
 
-    inFile = open(file)
-    hatData = json.load(inFile)
+    with open(fpath,"r") as inFile:
+        hatData = json.load(inFile)
 
-    for x in hatData["models"]:
-        if(x["data"] <= 0): continue
-        if(x["item"] != "minecraft:clock"): continue
+        for x in hatData["models"]:
+            if(x["data"] <= 0): continue
+            if(x["item"] != "minecraft:clock"): continue
 
-        uuid = x["uuid"]
-        img = Image.open("temp/32xtest.png")
-        (userName, path) = makeSkin(uuid)
-        x["displayName"] = userName
-        x["model"] = path
+            uuid = x["uuid"]
+            img = Image.open("temp/32xtest.png")
+            (userName, path) = makeSkin(uuid)
+            x["displayName"] = userName
+            x["model"] = path
 
-        if not requestAllUsers: break
+            if not requestAllUsers: break
+
+    with open(fpath,"w+") as inFile:
+        json.dump(hatData, inFile)
+    xsort()
 
 def makeSkin(uuid):         
     (userName, skinUrl, skinType) = getProfileData(uuid)
