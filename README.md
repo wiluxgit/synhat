@@ -24,7 +24,7 @@ Open the `More Options` tab
 ![enter image description here](https://media.discordapp.net/attachments/519088004812505088/917837115025391636/unknown.png)
 
 **6**
-Edit the `JVM arguments` field and add `-javaagent:synhat.jar` at the end it
+Edit the `JVM arguments` field and add ` -javaagent:synhat.jar` at the end it
 ![enter image description here](https://media.discordapp.net/attachments/519088004812505088/917837559059591229/unknown.png)
 
 **6**
