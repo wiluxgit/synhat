@@ -1,8 +1,8 @@
 {
 	"credit": "Made with Blockbench",
 	"textures": {
-		"1": "hat/misc/cat_red",
-		"particle": "hat/misc/cat_red"
+		"1": "synhat/old/hat/misc/cat_red",
+		"particle": "synhat/old/hat/misc/cat_red"
 	},
 	"elements": [
 		{

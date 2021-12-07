@@ -111,7 +111,7 @@ void main() {
             }
             //</debug>*/
 
-            if(data0 & F_ENABLED){
+            if((data0 & F_ENABLED) != 0){
                 wx_isEdited = 1; 
 
                 writeUVBounds(faceId, isAlex);
@@ -137,7 +137,7 @@ void main() {
                         break;
                 }
 
-                int isSelectedCorner = (1<<cornerId) & cornerBits;
+                bool isSelectedCorner = ((1<<cornerId) & cornerBits) != 0;
                 vec2 size = wx_maxUV-wx_minUV; //Could be used to generalize wx_scaling i think
 
                 if(float(uvX)/64.0 + wx_minUV.x >= 1) uvX -= 64; // Seeings as UV frag cut is capped inside 0..1 this 
