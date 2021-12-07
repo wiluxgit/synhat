@@ -2,13 +2,13 @@
 This is the github for the synhat resource pack
 
 ## Installation guide:
+This installation guide is for the vanilla launcher, but all the steps are repeatable in any launcher.
 
 **1**
 Download `synhat.jar` \<link\>
 
 **2**
-Go into the minecraft launcher*, select the installation(s) you want synhat for and open its 
-location
+Go into the minecraft launcher*, select the installation(s) you want synhat for and open its location
 ![enter image description here](https://cdn.discordapp.com/attachments/519088004812505088/917835683685609523/unknown.png)
 
 **3**
@@ -30,7 +30,4 @@ Edit the `JVM arguments` field and add ` -javaagent:synhat.jar` at the end it 
 **7**
 Start minecraft, a synhat window should then appear and download the latest version
 ![enter image description here](https://cdn.discordapp.com/attachments/519088004812505088/917837993295880213/unknown.png)
-
-
-
 
