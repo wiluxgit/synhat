@@ -69,8 +69,8 @@ void main() {
     texCoord0 = UV0;
     normal = ProjMat * ModelViewMat * vec4(Normal, 0.0);  
 
-    wx_isEdited = 0  
-    
+    wx_isEdited = 0;
+
     if(gl_VertexID >= 18*8){ //is second layer
         vec4 topRightPixel = texelFetch(Sampler0, ivec2(0, 0), 0)*256; //Macs can't texelfetch in vertex shader?
         int header0 = int(topRightPixel.r + 0.1);
