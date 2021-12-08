@@ -1,0 +1,5 @@
+{"models": [
+	{"item": "minecraft:clock", "model": "synhat/wilux/deltarune/holy_halberd", "displayName": "Holy Halberd", "lore":"Smell Like Frozen Chicken"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/deltarune/rude_buster", "displayName": "Rude Buster"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/deltarune/rude_buster_xl", "displayName": "Rude Buster"}
+]}

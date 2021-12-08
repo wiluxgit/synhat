@@ -3,6 +3,7 @@
 	"textures": {
 		"0": "synhat/wilux/painting/meme/troll"
 	},
+	"gui_light": "front",
 	"elements": [
 		{
 			"from": [7, 2.25, 1.5],

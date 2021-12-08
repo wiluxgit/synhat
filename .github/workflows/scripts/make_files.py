@@ -1,5 +1,6 @@
 import json
 from sort_table import sortaReadableJson
+from datetime import datetime
 
 def make_mc_files():
     file = "__master_models_table.json"
@@ -41,7 +42,7 @@ def make_mc_files():
         with open(getMcModelPath(k),"w+") as f:
             f.write(jsonDump)
 
-    print("done",hash(inFile))
+    print("done", datetime.now().strftime("%H:%M:%S"))
     
 
 def getMcModelPath(item):

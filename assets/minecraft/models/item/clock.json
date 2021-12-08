@@ -1,4 +1,8 @@
 {"parent": "item/_clock_state/clock_00", "overrides": [
+	{"predicate": {"custom_model_data": -257}, "model": "synhat/wilux/deltarune/holy_halberd"},
+	{"predicate": {"custom_model_data": -256}, "model": "synhat/wilux/deltarune/rude_buster_xl"},
+	{"predicate": {"custom_model_data": -255}, "model": "synhat/wilux/deltarune/rude_buster"},
+	{"predicate": {"custom_model_data": -254}, "model": "synhat/developedtea57/vending_machine"},
 	{"predicate": {"custom_model_data": -253}, "model": "synhat/wilux/hat/christmas_sombrero"},
 	{"predicate": {"custom_model_data": -252}, "model": "synhat/wilux/hat/mad_hoe"},
 	{"predicate": {"custom_model_data": -251}, "model": "synhat/wilux/hat/rubix_cube"},
