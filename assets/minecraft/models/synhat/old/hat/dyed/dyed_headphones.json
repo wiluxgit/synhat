@@ -1,7 +1,7 @@
 {
 	"credit": "Made with Blockbench",
 	"textures": {
-		"0": "hat/dye/headphones"
+		"0": "synhat/old/hat/misc/dye/headphones"
 	},
 	"elements": [
 		{

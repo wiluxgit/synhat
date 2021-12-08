@@ -1,6 +1,6 @@
 {
-    "parent": "hat/skull",
+    "parent": "synhat/old/_parent/skull",
     "textures": {
-		"0": "hat/dye/monochrome_block"
+		"0": "synhat/old/hat/misc/dye/monochrome_block"
     }
 }

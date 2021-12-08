@@ -1,6 +1,6 @@
 {
-    "parent": "tool/parent/3232unscaled",
+    "parent": "synhat/old/held/_parent/3232unscaled",
     "textures": {
-        "layer0": "tool/terraria/candy_cane_pickaxe"
+        "layer0": "synhat/old/held/terraria/candy_cane_pickaxe"
     }
 }

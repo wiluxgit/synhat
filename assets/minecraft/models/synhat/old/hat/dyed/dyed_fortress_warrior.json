@@ -1,7 +1,7 @@
 {
 	"credit": "Made with Blockbench",
 	"textures": {
-		"0": "hat/dye/dye_fortress_warrior"
+		"0": "synhat/old/hat/misc/dye/dye_fortress_warrior"
 	},
 	"elements": [
 		{

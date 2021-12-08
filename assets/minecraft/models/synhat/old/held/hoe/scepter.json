@@ -1,6 +1,6 @@
 {
-    "parent": "tool/parent/3232unscaled_notrev",
+    "parent": "synhat/old/held/_parent/3232unscaled_notrev",
     "textures": {
-        "layer0": "tool/hoe/scepter"
+        "layer0": "synhat/old/held/hoe/scepter"
     }
 }

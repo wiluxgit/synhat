@@ -1,6 +1,6 @@
 {
     "parent": "item/handheld",
     "textures": {
-        "layer0": "tool/hoe/obsidian_hoe"
+        "layer0": "synhat/old/held/hoe/obsidian_hoe"
     }
 }

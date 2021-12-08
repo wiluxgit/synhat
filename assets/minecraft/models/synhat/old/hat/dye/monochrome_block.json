@@ -1,6 +1,0 @@
-{
-    "parent": "hat/skull",
-    "textures": {
-		"0": "hat/dye/monochrome_block"
-    }
-}

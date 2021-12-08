@@ -1,4 +1,10 @@
 {"models": [
+	{"item": "minecraft:leather_horse_armor", "model": "synhat/old/hat/dye/headphones", "displayName": "Dyeable Headphones"},
+	{"item": "minecraft:leather_horse_armor", "model": "synhat/old/hat/dye/owodiepie", "displayName": "Dyeable Pewdiepie Headphones"},
+	{"item": "minecraft:leather_horse_armor", "model": "synhat/old/hat/dye/dfortress_warrior", "displayName": "Dyeable Fortress Warrior"},
+	{"item": "minecraft:leather_horse_armor", "model": "synhat/old/hat/dye/monochrome_block", "displayName": "Dyeable Block"},
+	{"item": "minecraft:leather_horse_armor", "model": "synhat/old/hat/dye/cap", "displayName": "Dyeable Cap"},
+	
 	{"item": "minecraft:clock", "model": "synhat/wilux/deltarune/holy_halberd", "displayName": "Holy Halberd", "lore":"Smell Like Frozen Chicken"},
 	{"item": "minecraft:clock", "model": "synhat/wilux/deltarune/rude_buster", "displayName": "Rude Buster"},
 	{"item": "minecraft:clock", "model": "synhat/wilux/deltarune/rude_buster_xl", "displayName": "Rude Buster"}

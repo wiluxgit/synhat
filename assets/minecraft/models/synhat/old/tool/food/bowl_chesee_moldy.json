@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "tool/food/bowl_chesee_moldy"
-  }
-}

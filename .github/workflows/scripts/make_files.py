@@ -22,15 +22,17 @@ def make_mc_files():
                 with open(getMcModelPath(item)) as f:
                     modelJson = json.load(f)
                     # keep vanilla overrides
+                    if "overrides" not in modelJson:
+                        modelJson["overrides"] = []
+
                     modelJson["overrides"] = [x for x in modelJson["overrides"] if cmdata_is_zero(x)]
                     #print(modelJson["overrides"])
                     item2Model[item] = modelJson
             except FileNotFoundError:
-                #print(f"Can not add {cropBegining(path)}:{data} since {item}.json does not exist")
+                print(f"Can not add {cropBegining(path)}:{data} since {item}.json does not exist")
                 continue
 
-        overrides = item2Model[item]["overrides"]
-        overrides.append(
+        item2Model[item]["overrides"].append(
             {"predicate":{"custom_model_data":data},"model":path}
         )
     
@@ -38,9 +40,10 @@ def make_mc_files():
         v["overrides"].sort(
             key=lambda x: get_cmdata(x)
         )
-        jsonDump = sortaReadableJson(item2Model["clock"])
+        jsonDump = sortaReadableJson(v)
         with open(getMcModelPath(k),"w+") as f:
             f.write(jsonDump)
+        print(k)
 
     print("done", datetime.now().strftime("%H:%M:%S"))
     

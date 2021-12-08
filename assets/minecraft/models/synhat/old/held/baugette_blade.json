@@ -1,5 +1,5 @@
 {
-    "parent": "tool/parent/3232unscaled",
+    "parent": "synhat/old/held/_parent/3232unscaled",
     "textures": {
         "layer0": "synhat/old/held/baugette_blade"
     }
