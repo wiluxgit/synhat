@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "tool/food/jam_berry"
+    "layer0": "synhat/old/held/food/jam_berry"
   }
 }

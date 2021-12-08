@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "tool/food/magic_lasagna"
+    "layer0": "synhat/old/held/food/magic_lasagna"
   }
 }

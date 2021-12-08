@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "tool/food/omelette_japan"
+    "layer0": "synhat/old/held/food/omelette_japan"
   }
 }

@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "tool/material/coin_pride"
+    "layer0": "synhat/old/held/material/coin_pride"
   }
 }

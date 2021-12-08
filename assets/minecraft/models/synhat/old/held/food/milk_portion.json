@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "tool/food/milk_portion"
+    "layer0": "synhat/old/held/food/milk_portion"
   }
 }

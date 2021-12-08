@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "tool/food/liquid_life"
+    "layer0": "synhat/old/held/food/liquid_life"
   }
 }

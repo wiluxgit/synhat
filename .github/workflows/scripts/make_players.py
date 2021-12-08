@@ -1,17 +1,17 @@
 import json
 import requests
-from requests.auth import HTTPDigestAuth
 import base64
 from PIL import Image, ImageDraw
 import PIL as PIL
 import os
 from pathlib import Path
-from sorttable import xsort
+from sort_table import xsort
+
+import sys
 
 actuallyDoRealRequests = False
-requestAllUsers = False
 
-def run():
+def run(minData = 0, maxData = 1):
     fpath = "__master_models_table.json"
 
     with open(fpath,"r") as inFile:
@@ -21,17 +21,23 @@ def run():
             if(x["data"] <= 0): continue
             if(x["item"] != "minecraft:clock"): continue
 
+            if not (minData <= x["data"] <= maxData):
+                continue
+
             uuid = x["uuid"]
-            img = Image.open("temp/32xtest.png")
+            #img = Image.open("temp/32xtest.png")
             (userName, path) = makeSkin(uuid)
             x["displayName"] = userName
             x["model"] = path
 
-            if not requestAllUsers: break
-
     with open(fpath,"w+") as inFile:
         json.dump(hatData, inFile)
     xsort()
+
+def getSkinModelPath(uuid):
+    return f"../../../assets/minecraft/models/synhat/player/player/{uuid}.json"
+def getSkinTexturePath(uuid):
+    return f"../../../assets/minecraft/textures/synhat/player/player/{uuid}.png"
 
 def makeSkin(uuid):         
     (userName, skinUrl, skinType) = getProfileData(uuid)
@@ -40,10 +46,10 @@ def makeSkin(uuid):
     path = "synhat/player/player/"+uuid
     model = {"parent":f"synhat/player/{skinType}","textures":{"1":path}}
 
-    modelFile = open(safeDir(f"temp/out/model/{path}.json"), "w+")
+    modelFile = open(safeDir(getSkinModelPath(uuid)), "w+")
     modelFile.write(json.dumps(model))
     modelFile.close()
-    img.save(safeDir(f"temp/out/texture/{path}.png"))
+    img.save(safeDir(getSkinTexturePath(uuid)))
 
     return(userName, path)
 
@@ -52,7 +58,6 @@ def safeDir(path):
     if not os.path.exists(dir):
         os.makedirs(dir)
     return path
-
 
 def downloadTextureFromURL(url):
     img_data = requests.get(url, stream=True).content
@@ -72,7 +77,7 @@ def getProfileData(uuid):
         skinType = skinData["textures"]["SKIN"]["metadata"]["model"]
     except Exception: ""
 
-    print(userName, skinUrl,skinType)
+    print(f"{uuid}: {userName} {skinType}")
     return(userName, skinUrl, skinType)
 
 def downloadSite(url):
@@ -126,4 +131,26 @@ def fixImage(img):
 def cropSized(img, x, y, xsize, ysize):
     return img.crop((x, y, x+xsize, y+ysize))
 
-run()
+if __name__ == '__main__':
+    parseSuccess = False
+    try:
+        [minTxt,maxTxt] = sys.argv[1].split("-")
+        if len(maxTxt) == 0: 
+            maxp = 65536
+        else:
+            maxp = int(maxTxt)
+        minp = int(minTxt)
+        parseSuccess = True
+    except Exception:
+        parseSuccess = False
+    
+    if parseSuccess:
+        print(f"\nDownloading player(s) {minp}-{maxp}\n")
+        actuallyDoRealRequests = True
+        run(minp,maxp)
+    else:
+        print("""
+Running debug player download
+run \"make_player.py <min>-<max>\" for real player range
+""")
+        run()

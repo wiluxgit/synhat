@@ -1,8 +1,8 @@
 {
 	"credit": "Made with Blockbench",
 	"textures": {
-		"0": "synhat/wilux/hat/rubix",
-		"particle": "synhat/wilux/hat/rubix"
+		"0": "synhat/wilux/hat/rubix_cube",
+		"particle": "synhat/wilux/hat/rubix_cube"
 	},
 	"elements": [
 		{

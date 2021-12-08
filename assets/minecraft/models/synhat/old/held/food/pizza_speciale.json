@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "tool/food/pizza_speciale"
+    "layer0": "synhat/old/held/food/pizza_speciale"
   }
 }

@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "tool/food/fish_dish"
+    "layer0": "synhat/old/held/food/fish_dish"
   }
 }

@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "tool/food/cheese_executive_platter"
+    "layer0": "synhat/old/held/food/cheese_executive_platter"
   }
 }

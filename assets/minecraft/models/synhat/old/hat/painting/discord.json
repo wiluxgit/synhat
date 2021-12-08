@@ -1,6 +1,6 @@
 {
-    "parent": "hat/painting",
+    "parent": "synhat/old/_parent/painting/painting",
     "textures": {
-		"0": "hat/painting/discord"
+		"0": "synhat/old/painting/discord"
     }
 }

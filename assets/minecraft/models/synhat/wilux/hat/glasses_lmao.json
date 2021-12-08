@@ -1,8 +1,8 @@
 {
 	"credit": "Made with Blockbench",
 	"textures": {
-		"0": "synhat/wilux/hat/lmao_glasses",
-		"particle": "synhat/wilux/hat/lmao_glasses"
+		"0": "synhat/wilux/hat/glasses_lmao",
+		"particle": "synhat/wilux/hat/glasses_lmao"
 	},
 	"elements": [
 		{

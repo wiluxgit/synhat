@@ -1,6 +1,6 @@
 import json
 import sys
-from sorttable import xsort
+from sort_table import xsort
 
 def insertNew():
     if len(sys.argv) != 2:
