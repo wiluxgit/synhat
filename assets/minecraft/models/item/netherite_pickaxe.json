@@ -1,0 +1,6 @@
+{"parent": "minecraft:item/handheld", "textures": {"layer0": "minecraft:item/netherite_pickaxe"}, "overrides": [
+	{"predicate": {"custom_model_data": 1}, "model": "synhat/old/held/thaumic_exo_pick"},
+	{"predicate": {"custom_model_data": 2}, "model": "synhat/old/held/terraria/digging_claw"},
+	{"predicate": {"custom_model_data": 3}, "model": "synhat/old/held/terraria/picksaw"},
+	{"predicate": {"custom_model_data": 4}, "model": "synhat/old/held/terraria/candy_cane_pickaxe"},
+	{"predicate": {"custom_model_data": 5}, "model": "synhat/old/held/terraria/stardust_pickaxe"}]}

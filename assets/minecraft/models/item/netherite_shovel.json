@@ -1,0 +1,3 @@
+{"parent": "minecraft:item/handheld", "textures": {"layer0": "minecraft:item/netherite_shovel"}, "overrides": [
+	{"predicate": {"custom_model_data": 1}, "model": "synhat/old/held/thaumic_exo_shovel"},
+	{"predicate": {"custom_model_data": 2}, "model": "synhat/old/held/shovel_knight"}]}

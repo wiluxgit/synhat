@@ -1,0 +1,8 @@
+{"parent": "minecraft:item/handheld", "textures": {"layer0": "minecraft:item/netherite_hoe"}, "overrides": [
+	{"predicate": {"custom_model_data": 1}, "model": "synhat/old/held/hoe/scepter"},
+	{"predicate": {"custom_model_data": 2}, "model": "synhat/old/held/hoe/runic_hoe"},
+	{"predicate": {"custom_model_data": 3}, "model": "synhat/old/held/hoe/druidic_hoe"},
+	{"predicate": {"custom_model_data": 4}, "model": "synhat/old/held/hoe/demon_hoe"},
+	{"predicate": {"custom_model_data": 5}, "model": "synhat/old/held/hoe/phoenix_hoe"},
+	{"predicate": {"custom_model_data": 6}, "model": "synhat/old/held/hoe/ornamental_hoe"},
+	{"predicate": {"custom_model_data": 7}, "model": "synhat/old/held/hoe/obsidian_hoe"}]}
