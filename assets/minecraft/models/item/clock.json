@@ -1,4 +1,6 @@
 {"parent": "item/_clock_state/clock_00", "overrides": [
+	{"predicate": {"custom_model_data": -259}, "model": "synhat/wilux/painting/synhat"},
+	{"predicate": {"custom_model_data": -258}, "model": "synhat/wilux/painting/meme/winnie_the_pooh_small"},
 	{"predicate": {"custom_model_data": -257}, "model": "synhat/wilux/deltarune/holy_halberd"},
 	{"predicate": {"custom_model_data": -256}, "model": "synhat/wilux/deltarune/rude_buster_xl"},
 	{"predicate": {"custom_model_data": -255}, "model": "synhat/wilux/deltarune/rude_buster"},

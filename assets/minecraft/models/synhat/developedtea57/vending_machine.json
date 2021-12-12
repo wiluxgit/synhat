@@ -72,11 +72,10 @@
 		"80": "synhat/developedtea57/vending_machine/popcornlabel",
 		"particle": "synhat/developedtea57/vending_machine/colourvend"
 	},
-	"gui_light": "front",
 	"elements": [
 		{
 			"from": [1, -16, 1],
-			"to": [31, -8, 15],
+			"to": [31, -8, 16],
 			"faces": {
 				"north": {"uv": [0, 0, 16, 16], "texture": "#1"},
 				"east": {"uv": [0, 0, 16, 16], "texture": "#1"},
@@ -2044,7 +2043,7 @@
 		},
 		{
 			"from": [1, -12, 1],
-			"to": [31, -4, 15],
+			"to": [31, -4, 16],
 			"faces": {
 				"north": {"uv": [0, 0, 16, 16], "texture": "#1"},
 				"east": {"uv": [0, 0, 16, 16], "texture": "#1"},
@@ -2152,7 +2151,7 @@
 		},
 		{
 			"from": [1, -16, 1],
-			"to": [5, 32, 15],
+			"to": [5, 32, 16],
 			"faces": {
 				"north": {"uv": [0, 0, 16, 1], "rotation": 90, "texture": "#1"},
 				"east": {"uv": [0, 0, 16, 1], "rotation": 90, "texture": "#1"},
@@ -2164,7 +2163,7 @@
 		},
 		{
 			"from": [29, -16, 1],
-			"to": [31, 32, 15],
+			"to": [31, 32, 16],
 			"faces": {
 				"north": {"uv": [0, 0, 16, 1], "rotation": 90, "texture": "#1"},
 				"east": {"uv": [0, 0, 16, 1], "rotation": 90, "texture": "#1"},
@@ -2176,7 +2175,7 @@
 		},
 		{
 			"from": [1, 29, 1],
-			"to": [31, 32, 15],
+			"to": [31, 32, 16],
 			"faces": {
 				"north": {"uv": [0, 0, 16, 1], "rotation": 90, "texture": "#1"},
 				"east": {"uv": [0, 0, 16, 1], "rotation": 90, "texture": "#1"},
@@ -2188,7 +2187,7 @@
 		},
 		{
 			"from": [5, -4, 14],
-			"to": [29, 29, 15],
+			"to": [29, 29, 16],
 			"faces": {
 				"north": {"uv": [0, 0, 16, 1], "rotation": 90, "texture": "#1"},
 				"east": {"uv": [0, 0, 16, 1], "rotation": 90, "texture": "#1"},
@@ -2206,6 +2205,7 @@
 			}
 		}
 	],
+	"gui_light": "front",
 	"display": {
 		"thirdperson_righthand": {
 			"rotation": [-180, 90, -180],
@@ -2238,8 +2238,7 @@
 			"scale": [0.52, 0.52, 0.52]
 		},
 		"fixed": {
-			"rotation": [-90, 0, 0],
-			"translation": [0.25, 0, -47],
+			"translation": [0, 0, -14],
 			"scale": [2, 2, 2]
 		}
 	},

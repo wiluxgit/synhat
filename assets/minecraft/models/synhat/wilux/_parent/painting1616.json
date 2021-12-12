@@ -3,7 +3,6 @@
 	"textures": {
 		"0": "synhat/wilux/painting/meme/troll"
 	},
-	"gui_light": "front",
 	"elements": [
 		{
 			"from": [7, 2.25, 1.5],
@@ -33,6 +32,7 @@
 			}
 		}
 	],
+	"gui_light": "front",
 	"display": {
 		"thirdperson_righthand": {
 			"rotation": [45, 0, 0],
@@ -62,7 +62,7 @@
 		"gui": {
 			"rotation": [30, 135, 0],
 			"translation": [3, 1.5, 0],
-			"scale": [0.6, 0.6, 0.8]
+			"scale": [0.7, 0.7, 0.8]
 		},
 		"head": {
 			"rotation": [19, 0, 0],
