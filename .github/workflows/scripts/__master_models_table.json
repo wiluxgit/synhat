@@ -608,6 +608,7 @@
 	{"item": "minecraft:apple", "data": 1, "model": "synhat/old/held/food/jam_apple", "displayName": "Apple Jam", "type": "held"},
 	{"item": "minecraft:apple", "data": 2, "model": "synhat/old/held/food/jam_fruity", "displayName": "Fruity Jam", "type": "held"},
 	{"item": "minecraft:apple", "data": 3, "model": "synhat/old/held/food/juice_apple", "displayName": "Apple Juice", "type": "held"},
+	{"item": "minecraft:bat_spawn_egg", "data": 1, "model": "synhat/wilux/train/minecart_train", "displayName": "Minecart Train", "lore": "Can only be placed in fl but can be pasted in cr //copy -e"},
 	{"item": "minecraft:beetroot", "data": 1, "model": "synhat/old/held/food/eggplant", "displayName": "Eggplant", "type": "held"},
 	{"item": "minecraft:bow", "data": 1, "model": "synhat/old/held/ryno", "displayName": "Ryno", "type": "held", "lore": "Probably the best model here"},
 	{"item": "minecraft:bow", "data": 2, "model": "synhat/old/held/pump_gun", "displayName": "Pump Gun", "type": "held"},

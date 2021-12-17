@@ -1,4 +1,3 @@
 {"models": [
-	{"item": "minecraft:clock", "model": "synhat/wilux/painting/meme/winnie_the_pooh_small", "displayName": "Winnie The Pooh", "type": "painting", "lore": "\u674e\u6d2a\u5fd7 Free Tibet \u516d\u56db\u5929\u5b89\u9580\u4e8b\u4ef6 The Tiananmen Square 1989 \u5929\u5b89\u9580\u5927\u5c60\u6bba"},
-	{"item": "minecraft:clock", "model": "synhat/wilux/painting/synhat", "displayName": "Synhat Galaxy"}
+		{"item": "minecraft:bat_spawn_egg", "model": "synhat/wilux/train/minecart_train", "displayName": "Minecart Train", "lore": "Can only be placed in fl but can be pasted in cr //copy -e", "data":"[attached=false,attached=north,powered=true]"}
 ]}
