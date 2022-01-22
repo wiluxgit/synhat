@@ -1,0 +1,113 @@
+{
+	"credit": "Made with Blockbench",
+	"textures": {
+		"0": "synhat/wilux/boardgame/standard_card/back",
+		"1": "synhat/wilux/boardgame/standard_card/blank",
+		"2": "synhat/wilux/boardgame/standard_card/clubs",
+		"particle": "synhat/wilux/boardgame/standard_card/back"
+	},
+	"elements": [
+		{
+			"name": "back_0",
+			"from": [3, 1.1, 2],
+			"to": [6, 1.1, 7],
+			"faces": {
+				"up": {"uv": [0, 0, 3, 5], "texture": "#2"}
+			}
+		},
+		{
+			"name": "back_1",
+			"from": [7, 1.1, 7],
+			"to": [12, 1.1, 14],
+			"faces": {
+				"up": {"uv": [9, 11, 16, 16], "rotation": 270, "texture": "#2"}
+			}
+		},
+		{
+			"name": "back_1",
+			"from": [2, 0, 0],
+			"to": [13, 1, 16],
+			"faces": {
+				"north": {"uv": [13, 0, 2, 1], "texture": "#0"},
+				"east": {"uv": [12, 0, 13, 16], "rotation": 90, "texture": "#0"},
+				"south": {"uv": [2, 15, 13, 16], "texture": "#0"},
+				"west": {"uv": [2, 0, 3, 16], "rotation": 270, "texture": "#0"},
+				"up": {"uv": [2, 0, 13, 16], "texture": "#1"},
+				"down": {"uv": [2, 16, 13, 0], "texture": "#0"}
+			}
+		},
+		{
+			"name": "back_1",
+			"from": [1, 0, 1],
+			"to": [2, 1, 15],
+			"faces": {
+				"north": {"uv": [2, 1, 1, 2], "texture": "#0"},
+				"east": {"uv": [1, 1, 2, 15], "rotation": 90, "texture": "#0"},
+				"south": {"uv": [1, 14, 2, 15], "texture": "#0"},
+				"west": {"uv": [1, 1, 2, 15], "rotation": 270, "texture": "#0"},
+				"up": {"uv": [1, 1, 2, 15], "texture": "#1"},
+				"down": {"uv": [1, 15, 2, 1], "texture": "#0"}
+			}
+		},
+		{
+			"name": "back_2",
+			"from": [13, 0, 1],
+			"to": [14, 1, 15],
+			"faces": {
+				"north": {"uv": [14, 1, 13, 2], "texture": "#0"},
+				"east": {"uv": [13, 1, 14, 15], "rotation": 90, "texture": "#0"},
+				"south": {"uv": [13, 14, 14, 15], "texture": "#0"},
+				"west": {"uv": [13, 1, 14, 15], "rotation": 270, "texture": "#0"},
+				"up": {"uv": [13, 1, 14, 15], "texture": "#1"},
+				"down": {"uv": [13, 15, 14, 1], "texture": "#0"}
+			}
+		}
+	],
+	"gui_light": "front",
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [45, 0, 89],
+			"translation": [-3.5, -1, 2.3],
+			"scale": [0.3, 0.6, 0.3]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [45, 0, -90],
+			"translation": [3.5, -1, 2.3],
+			"scale": [0.3, 0.6, 0.3]
+		},
+		"firstperson_righthand": {
+			"rotation": [90, 0, 0],
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"firstperson_lefthand": {
+			"rotation": [90, 0, 0],
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"ground": {
+			"rotation": [-180, 0, 0],
+			"translation": [0, -7, 0],
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"gui": {
+			"rotation": [90, 0, 0]
+		},
+		"head": {
+			"rotation": [90, 0, -180],
+			"translation": [-0.5, 14.5, -7.5]
+		},
+		"fixed": {
+			"rotation": [-90, -180, 0],
+			"translation": [-0.5, 0, -8]
+		}
+	},
+	"groups": [
+		0,
+		1,
+		{
+			"name": "back",
+			"origin": [0, 0, 0],
+			"color": 0,
+			"children": [2, 3, 4]
+		}
+	]
+}

@@ -1,0 +1,6 @@
+{
+    "parent": "synhat/wilux/boardgame/standard_card/parent/10",
+    "textures": {
+		"2": "synhat/wilux/boardgame/standard_card/clubs"
+    }
+}
