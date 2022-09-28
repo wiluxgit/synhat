@@ -29,7 +29,7 @@ def make_mc_files():
                     #print(modelJson["overrides"])
                     item2Model[item] = modelJson
             except FileNotFoundError:
-                print(f"Can not add {cropBegining(path)}:{data} since {item}.json does not exist")
+                print(f"Can not add {cropBegining(path,25)}:{data} since {item}.json does not exist")
                 continue
 
         item2Model[item]["overrides"].append(
@@ -61,7 +61,7 @@ def cropBegining(str, max=15):
     if len(str) <= max:
         return str
     else:
-        return ".."+str[-15:]
+        return ".."+str[-max:]
 
 def cmdata_is_zero(override):
     return get_cmdata(override) == 0

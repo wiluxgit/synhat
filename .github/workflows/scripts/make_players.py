@@ -26,7 +26,7 @@ def run(minData = 0, maxData = 1):
 
             uuid = x["uuid"]
             #img = Image.open("temp/32xtest.png")
-            (userName, path) = makeSkin(uuid)
+            (userName, path) = makeSkin(uuid, x["data"])
             x["displayName"] = userName
             x["model"] = path
 
@@ -39,8 +39,15 @@ def getSkinModelPath(uuid):
 def getSkinTexturePath(uuid):
     return f"../../../assets/minecraft/textures/synhat/player/player/{uuid}.png"
 
-def makeSkin(uuid):         
-    (userName, skinUrl, skinType) = getProfileData(uuid)
+def makeSkin(uuid, procnum):
+    try:
+        (userName, skinUrl, skinType) = getProfileData(uuid)
+    except ValueError:
+        print(f"[Error] user data can not be fetched for: {uuid}")
+        return  ("error", "error")
+    else: 
+        print(f"{procnum} {uuid}: {userName} {skinType}")
+
     img = downloadTextureFromURL(skinUrl)
     img = fixImage(img)  
     path = "synhat/player/player/"+uuid
@@ -67,7 +74,12 @@ def downloadTextureFromURL(url):
 
 def getProfileData(uuid):
     url = "https://sessionserver.mojang.com/session/minecraft/profile/" + uuid
-    profileData = json.loads(downloadSite(url))
+    try:
+        siteDownload = downloadSite(url)
+        profileData = json.loads(siteDownload)
+    except:
+        print(f"user failed to download: {uuid}")
+        raise ValueError
     userName = profileData["name"]
     skinDataStr = base64.b64decode(profileData["properties"][0]["value"])
     skinData = json.loads(skinDataStr)
@@ -77,7 +89,6 @@ def getProfileData(uuid):
         skinType = skinData["textures"]["SKIN"]["metadata"]["model"]
     except Exception: ""
 
-    print(f"{uuid}: {userName} {skinType}")
     return(userName, skinUrl, skinType)
 
 def downloadSite(url):
@@ -105,7 +116,7 @@ def fixImage(img):
     outImg = Image.new(mode="RGBA",size=[64,64])
     outImg.paste(im=img)
 
-    imFlip = img.transpose(PIL.Image.FLIP_LEFT_RIGHT)
+    imFlip = img.transpose(PIL.Image.Transpose.FLIP_LEFT_RIGHT)
     #Legs
     region = cropSized(imFlip, 52, 20, 12, 12)
     outImg.paste(im=region,box=(16, 52))
