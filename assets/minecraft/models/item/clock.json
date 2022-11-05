@@ -1,4 +1,9 @@
 {"parent": "item/_clock_state/clock_00", "overrides": [
+	{"predicate": {"custom_model_data": -382}, "model": "synhat/wilux/hat/boring_tophat"},
+	{"predicate": {"custom_model_data": -381}, "model": "synhat/wilux/hat/black_mage"},
+	{"predicate": {"custom_model_data": -380}, "model": "synhat/wilux/mc_block/repeater_1tick_on"},
+	{"predicate": {"custom_model_data": -379}, "model": "synhat/wilux/mc_block/comparator_on_subtract"},
+	{"predicate": {"custom_model_data": -378}, "model": "synhat/wilux/mc_block/piston_extended"},
 	{"predicate": {"custom_model_data": -377}, "model": "synhat/wilux/boardgame/uno_card/yellow_stop"},
 	{"predicate": {"custom_model_data": -376}, "model": "synhat/wilux/boardgame/uno_card/yellow_reverse"},
 	{"predicate": {"custom_model_data": -375}, "model": "synhat/wilux/boardgame/uno_card/yellow_add2"},
@@ -467,7 +472,7 @@
 	{"predicate": {"custom_model_data": 38}, "model": "synhat/player/player/429157a6-40fb-40a5-bffc-0e630d149dbd"},
 	{"predicate": {"custom_model_data": 39}, "model": "synhat/player/player/44c30bc7-c26d-4a7a-8028-09a3aff0fe76"},
 	{"predicate": {"custom_model_data": 40}, "model": "synhat/player/player/470caf91-759d-420d-9094-60b2a0b1c667"},
-	{"predicate": {"custom_model_data": 41}, "model": "synhat/player/player/472aca8d-77c3-477d-ba53-05baa5b1da24"},
+	{"predicate": {"custom_model_data": 41}, "model": "error"},
 	{"predicate": {"custom_model_data": 42}, "model": "synhat/player/player/4ac08b9d-a103-44d0-9384-6105c29fcd5d"},
 	{"predicate": {"custom_model_data": 43}, "model": "synhat/player/player/4ad70143-e04f-475c-9e11-c6e06c98d7ce"},
 	{"predicate": {"custom_model_data": 44}, "model": "synhat/player/player/4d0429af-80d7-4877-886a-765e1163161b"},
@@ -867,7 +872,7 @@
 	{"predicate": {"custom_model_data": 438}, "model": "synhat/player/player/6410f14e-4a44-4ac5-955b-7b279bb1f394"},
 	{"predicate": {"custom_model_data": 439}, "model": "synhat/player/player/649cc64b-4b75-4f18-bc72-8f8c64064535"},
 	{"predicate": {"custom_model_data": 440}, "model": "synhat/player/player/031cb4ec-5369-4959-b82f-57d0b15cdbd6"},
-	{"predicate": {"custom_model_data": 441}, "model": "synhat/player/player/79ba8bb5-a07a-348d-a6ab-08fbcafc8132"},
+	{"predicate": {"custom_model_data": 441}, "model": "error"},
 	{"predicate": {"custom_model_data": 442}, "model": "synhat/player/player/70978636-7996-4836-9fb2-fc13dc115285"},
 	{"predicate": {"custom_model_data": 443}, "model": "synhat/player/player/95571e8d-23ee-4eff-b636-9479669d30a3"},
 	{"predicate": {"custom_model_data": 444}, "model": "synhat/player/player/5bf49587-0bf3-46f1-8b0f-6bc707532c17"},
@@ -882,4 +887,7 @@
 	{"predicate": {"custom_model_data": 453}, "model": "synhat/player/player/778e2265-8b5b-4ecd-8834-35400274c0b5"},
 	{"predicate": {"custom_model_data": 454}, "model": "synhat/player/player/89ce31a1-7614-469b-8e7b-fe4d58563f74"},
 	{"predicate": {"custom_model_data": 455}, "model": "synhat/player/player/896e5bdd-2009-45b7-b521-48b0054d564f"},
-	{"predicate": {"custom_model_data": 456}, "model": "synhat/player/player/453264c3-04e3-41dc-b98c-645db19641e4"}]}
+	{"predicate": {"custom_model_data": 456}, "model": "synhat/player/player/453264c3-04e3-41dc-b98c-645db19641e4"},
+	{"predicate": {"custom_model_data": 457}, "model": "synhat/player/player/25567ce4-c57c-4c5f-943c-35e358d0b5d6"},
+	{"predicate": {"custom_model_data": 458}, "model": "synhat/player/player/63247b9b-58ea-4503-842e-1029ef03195d"},
+	{"predicate": {"custom_model_data": 459}, "model": "synhat/player/player/b5af1689-0571-4a48-8181-bc0403643e81"}]}

@@ -5,4 +5,5 @@
 	{"predicate": {"custom_model_data": 4}, "model": "synhat/old/held/hoe/demon_hoe"},
 	{"predicate": {"custom_model_data": 5}, "model": "synhat/old/held/hoe/phoenix_hoe"},
 	{"predicate": {"custom_model_data": 6}, "model": "synhat/old/held/hoe/ornamental_hoe"},
-	{"predicate": {"custom_model_data": 7}, "model": "synhat/old/held/hoe/obsidian_hoe"}]}
+	{"predicate": {"custom_model_data": 7}, "model": "synhat/old/held/hoe/obsidian_hoe"},
+	{"predicate": {"custom_model_data": 8}, "model": "synhat/wilux/hat/mad_hoe"}]}
