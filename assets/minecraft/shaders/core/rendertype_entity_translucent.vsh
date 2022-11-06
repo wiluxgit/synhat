@@ -35,10 +35,15 @@ out vec4 overlayColor;
 out vec2 texCoord0;
 out vec4 normal;
 
-out vec4 wx_passColor;  //for debugging
-out vec3 wx_passMPos;   //for experimental normal calculation
-out vec3 wx_passNormal; //for debugging
-out vec2 wx_scalingOrigin; 
+out vec3 wx_passLight0_Direction;
+out vec3 wx_passLight1_Direction;
+out vec3 wx_passModelViewPos;
+out vec4 wx_passVertexColor;
+out vec3 wx_invMatrix0;
+out vec3 wx_invMatrix1;
+out vec3 wx_invMatrix2;
+
+out vec2 wx_scalingOrigin;
 out vec2 wx_scaling;
 out vec2 wx_maxUV;
 out vec2 wx_minUV;
@@ -214,8 +219,16 @@ void main() {
                         break;
                 }
 
-                wx_passColor = Color;
-                wx_passMPos = -(ModelViewMat * vec4(newPos, 1.0)).xyz;
+                // Used for Light calculation
+                wx_passLight0_Direction = Light0_Direction;
+                wx_passLight1_Direction = Light1_Direction;
+                wx_passModelViewPos = (ModelViewMat * vec4(newPos, 1.0)).xyz;
+                wx_passVertexColor = Color;
+                mat3 invMatrix = inverse(mat3(ProjMat)) * inverse(mat3(ModelViewMat));
+                wx_invMatrix0 = invMatrix[0];
+                wx_invMatrix1 = invMatrix[1];
+                wx_invMatrix2 = invMatrix[2];
+
                 gl_Position = ProjMat * ModelViewMat * vec4(newPos, 1.0);
             } else {
                 gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
@@ -228,7 +241,7 @@ void main() {
     }   
 }
 
-// retuns the length (in pixels) of the parallel face
+// retuns the length (in pixels) to the back face for a given face
 int getPerpendicularLength(int faceId, bool isAlex) {
     int facetype = faceId/6;
     int faceAxis = faceId%6;

@@ -22,9 +22,14 @@ in vec4 overlayColor;
 in vec2 texCoord0;
 in vec4 normal;
 
-in vec4 wx_passColor;
-in vec3 wx_passMPos;
-in vec3 wx_passNormal;
+in vec3 wx_passLight0_Direction;
+in vec3 wx_passLight1_Direction;
+in vec3 wx_passModelViewPos;
+in vec4 wx_passVertexColor;
+in vec3 wx_invMatrix0;
+in vec3 wx_invMatrix1;
+in vec3 wx_invMatrix2;
+
 in vec2 wx_scalingOrigin;
 in vec2 wx_scaling;
 in vec2 wx_maxUV;
@@ -36,6 +41,14 @@ out vec4 fragColor;
 
 #define MAX 1 
 
+vec4 getDirectionalColor(){
+    vec3 hackProjectedNormal = normalize(cross(dFdx(wx_passModelViewPos), dFdy(wx_passModelViewPos)));
+    hackProjectedNormal.z *= -1;
+    
+    mat3 wx_invMatrix = mat3(wx_invMatrix0, wx_invMatrix1, wx_invMatrix2);
+    vec3 normalInVertexShaderWorld = normalize(wx_invMatrix * hackProjectedNormal);
+    return minecraft_mix_light(wx_passLight0_Direction, wx_passLight1_Direction, normalInVertexShaderWorld, wx_passVertexColor);
+}
 void main() {
     vec4 color = texture(Sampler0, texCoord0);
     
@@ -57,7 +70,6 @@ void main() {
         */
         
         vec2 diff = texCoord0-wx_scalingOrigin;
-
         vec2 newTexCoord = (texCoord0 - diff) + (diff * wx_scaling);
         
         //float isIn1 = 0;
@@ -71,7 +83,7 @@ void main() {
             discard;
         }
         
-        vec4 vxColor = vec4(1,1,1,1);
+        vec4 vxColor = getDirectionalColor();
 
         color *= vxColor * ColorModulator;
         color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
