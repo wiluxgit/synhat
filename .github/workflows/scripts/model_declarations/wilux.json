@@ -1,8 +1,5 @@
 {"models": [
-	{"item": "minecraft:clock", "model": "synhat/wilux/mc_block/piston_extended", "displayName": "Upwards Piston"},
-	{"item": "minecraft:clock", "model": "synhat/wilux/mc_block/comparator_on_subtract", "displayName": "Comparator Hat"},
-	{"item": "minecraft:clock", "model": "synhat/wilux/mc_block/repeater_1tick_on", "displayName": "Repeater Hat"},
-	{"item": "minecraft:clock", "model": "synhat/wilux/hat/black_mage", "displayName": "Black Mage"},
-	{"item": "minecraft:clock", "model": "synhat/wilux/hat/boring_tophat", "displayName": "Classic Tophat"},
-	{"item": "minecraft:netherite_hoe", "model": "synhat/wilux/hat/mad_hoe", "displayName": "Hoe's Mad"}
+	{"item": "minecraft:clock", "model": "synhat/wilux/animal/fat_cat", "displayName": "Fat Cat", "lore": "Unhealthy"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/animal/turkey_shit", "displayName": "\"Turkey\"", "lore": "Is it a turkey, or a piece of shit?, (it's both)"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/hat/villager/nose", "displayName": "Villager Nose"}
 ]}
