@@ -12,14 +12,15 @@
 			<rendertexture />
 			<items>
 				<item name="steve" type="model">
-					<filepath>asset\model.obj</filepath>
+					<filepath>asset\steve.obj</filepath>
 					<grouponly>false</grouponly>
+					<y>-1</y>
 				</item>
 			</items>
 			<itemvalues />
 			<variables>
 				<variable type="float4x4" name="ProjMat" system="ViewProjection" />
-				<variable type="float4x4" name="ModelViewMat" system="Projection" />
+				<variable type="float4x4" name="ModelViewMat" system="GeometryTransform" />
 			</variables>
 			<macros />
 		</pass>
@@ -28,15 +29,15 @@
 		<object type="texture" path="asset\steve.png" vflip="true" min_filter="Linear" mag_filter="Nearest" wrap_s="Repeat" wrap_t="Repeat">
 			<bind slot="0" name="SHSimple" />
 		</object>
+		<object type="texture" name="keyboard" keyboard_texture="true" />
 	</objects>
 	<cameras />
 	<settings>
-		<entry type="property" name="SHSimple" item="pipe" />
 		<entry type="file" name="SHSimple" shader="vs" />
 		<entry type="file" name="SHSimple" shader="ps" />
 		<entry type="camera" fp="false">
-			<distance>6</distance>
-			<pitch>11</pitch>
+			<distance>5</distance>
+			<pitch>-23</pitch>
 			<yaw>354</yaw>
 			<roll>360</roll>
 		</entry>

@@ -1,15 +1,25 @@
-//#version 150
+/*#version 330
+
+uniform mat4 ProjMat;
+uniform mat4 ModelViewMat;
+
+layout (location = 0) in vec3 Position;
+layout (location = 1) in vec3 Normal;
+layout (location = 2) in vec2 uv;
+
+out vec4 p_color;
+out vec2 p_uv;
+
+void main() {
+   p_color = vec4(abs(Normal), 1.0);
+   p_uv = uv;
+   gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
+}*/
+
+
+#version 330
 
 //#moj_import <light.glsl>
-
-const vec3 LIGHT0_DIRECTION = vec3(0.2, 1.0, -0.7); // Default light 0 direction everywhere except in inventory
-const vec3 LIGHT1_DIRECTION = vec3(-0.2, 1.0, 0.7); // Default light 1 direction everywhere except in nether and inventory
-
-mat3 getWorldMat(vec3 light0, vec3 light1) {
-    mat3 V = mat3(LIGHT0_DIRECTION, LIGHT1_DIRECTION, cross(LIGHT0_DIRECTION, LIGHT1_DIRECTION));
-    mat3 W = mat3(light0, light1, cross(light0, light1));
-    return W * inverse(V);
-}
 
 layout (location = 0) in vec3 Position;
 layout (location = 1) in vec3 Normal;
@@ -26,14 +36,6 @@ out highp vec4 lightMapColor;
 out highp vec4 overlayColor;
 out highp vec2 texCoord0;
 out highp vec4 normal;
-
-out highp vec3 wx_passLight0_Direction;
-out highp vec3 wx_passLight1_Direction;
-out highp vec3 wx_passModelViewPos;
-out highp vec4 wx_passVertexColor;
-out highp vec3 wx_invMatrix0;
-out highp vec3 wx_invMatrix1;
-out highp vec3 wx_invMatrix2;
 
 out highp vec2 wx_scalingOrigin;
 out highp vec2 wx_scaling;
@@ -56,23 +58,26 @@ out highp float wx_isEdited;
 
 int getPerpendicularLength(int faceId, bool isAlex);
 void writeUVBounds(int faceId, bool isAlex);
-void fixScaling(int faceId);
 
 void main() {
     vertexDistance = length((ModelViewMat * vec4(Position, 1.0)).xyz);
-    vertexColor = vec4(1,1,1,1);
+    vertexColor = vec4(1,1,0,1);
+    if (gl_VertexID == 10) {
+    	vertexColor = vec4(1,0,1,1);
+    }
+    
     texCoord0 = UV0;
     normal = ProjMat * ModelViewMat * vec4(Normal, 0.0);  
 
     wx_isEdited = 0.0;
 
-    if(gl_VertexID >= 18*8){ //is second layer
+    if (true) { //(gl_VertexID >= 18*8){ //is second layer
         vec4 topRightPixel = texelFetch(Sampler0, ivec2(0, 0), 0)*256.0; //Macs can't texelfetch in vertex shader?
         int header0 = int(topRightPixel.r + 0.1);
         int header1 = int(topRightPixel.g + 0.1);
         int header2 = int(topRightPixel.b + 0.1);
 
-        if(header0 == 0xda && header1 == 0x67){ 
+        if (true){ //(header0 == 0xda && header1 == 0x67){ 
             bool isAlex = (header2 == 1);
 
             int faceId = gl_VertexID / 4;
@@ -83,7 +88,7 @@ void main() {
             int data0 = int(pxData.r+0.1);
             int data1 = int(pxData.g+0.1);
             int data2 = int(pxData.b+0.1); 
-            /*
+            
             //<debug>
             switch(faceId) {    
             //case 36: data0 = (1<<0) | (1<<3) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_X_PLUS; break; // Left hat
@@ -91,10 +96,10 @@ void main() {
             //case 38: data0 = (1<<0) | (1<<1) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_Y_MINUS; break; // Top hat 
             //case 39: data0 = (1<<2) | (1<<3) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_Y_MINUS; break; // Bottom hat 
             
-            case 54: data0 = (1<<0) | (1<<3) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_X_PLUS; break; // Left L-Shirt
-            case 55: data0 = (1<<1) | (1<<2) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_X_MINUS; break; // Right L-Shirt
-            case 56: data0 = (1<<0) | (1<<1) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_Y_MINUS; break; // Top L-Shirt 
-            case 57: data0 = (1<<2) | (1<<3) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_Y_MINUS; break; // Bottom L-Shirt 
+            //case 54: data0 = (1<<0) | (1<<3) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_X_PLUS; break; // Left L-Shirt
+            //case 55: data0 = (1<<1) | (1<<2) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_X_MINUS; break; // Right L-Shirt
+            //case 56: data0 = (1<<0) | (1<<1) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_Y_MINUS; break; // Top L-Shirt 
+            //case 57: data0 = (1<<2) | (1<<3) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_Y_MINUS; break; // Bottom L-Shirt 
 
             //case 42: data0 = (1<<0) | (1<<3) | TRANSFORM_OUTER | F_ENABLED; data1 = SCALEDIR_X_PLUS; break; // Left L-Pant
             //case 43: data0 = (1<<1) | (1<<2) | TRANSFORM_OUTER | F_ENABLED; data1 = SCALEDIR_X_MINUS; break; // Right L-Pant
@@ -106,7 +111,7 @@ void main() {
             //case 69: data0 = (1<<0) | (1<<1) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_Y_PLUS; break;  //Bottom jacket
             //case 71: data0 = (1<<2) | (1<<3) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_Y_PLUS; break;  //Back jacket
             }
-            //</debug>*/
+            //</debug>
 
             if((data0 & F_ENABLED) != 0){
                 wx_isEdited = 1.0; 
@@ -156,7 +161,6 @@ void main() {
                                 break;
                             }
                         break;
-
                     case TRANSFORM_OUTER_REVERSED:
                         float perpLen1 = float(getPerpendicularLength(faceId, isAlex));
 
@@ -209,12 +213,13 @@ void main() {
                         break;
                 }
 
-                gl_Position = ProjMat * ModelViewMat * vec4(newPos, 1.0);
+                gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
                 return;
             }
         }        
     }   
     gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
+    return;
 }
 
 // retuns the length (in pixels) to the back face for a given face
@@ -460,114 +465,3 @@ void writeUVBounds(int faceId, bool isAlex){
         return;
     }
 }
-
-    /*
-    if(gl_VertexID >= 5*8+4 && gl_VertexID <= 5*8+7){ //back body
-
-        mat3 fromWorld = getWorldMat(Light0_Direction,Light1_Direction);
-        mat3 toWorld = inverse(fromWorld);
-        vec3 wPos = toWorld*Position;
-        vec3 wNorm = toWorld*Normal;
-
-        //float anim = abs(fract(GameTime*600)-0.5)-0.25;
-
-        vec3 wDown = vec3(0,-1,0);
-        vec3 wSide = cross(wDown, wNorm);
-
-        if(gl_VertexID == 5*8+4){
-            wPos += -wSide/16.0*3;
-        } else if(gl_VertexID == 5*8+5){
-            wPos += wSide/16.0*3;
-        } else if(gl_VertexID == 5*8+6){
-            wPos += wSide/16.0*3;
-            wPos += wNorm/16*6;
-        } else if(gl_VertexID == 5*8+7){
-            wPos += -wSide/16.0*3;
-            wPos += wNorm/16*6;
-        }
-
-        gl_Position = ProjMat * ModelViewMat * vec4(fromWorld*wPos, 1.0);
-
-        overlayColor = vec4(abs(wPos)/4.0,0);
-    }*/
-    /*
-    isEdited = 0;
-    if(gl_VertexID >= (18+1)*8+4 && gl_VertexID <= (18+1)*8+7){ //bottom head
-
-        vec3 newPos = Position;
-        if(mod(gl_VertexID,8) == 6 || mod(gl_VertexID,8) == 7){ //back side
-            newPos += Normal*-AS_OUTER;
-        } else { //front side
-            newPos -= Normal/16.0*8.45;
-        }
-        gl_Position = ProjMat * ModelViewMat * vec4(newPos, 1.0);
-
-        passColor = Color;
-        passMPos = -(ModelViewMat * vec4(newPos, 1.0)).xyz;
-        passInvTrans = mat3(inverse(ProjMat * ModelViewMat));
-        isEdited = 1.0;
-    }
-    */
-    //
-    /*
-    T/B Hat     -> (Front,Back) x (Ears,Beard)
-    L/R Hat     -> (Front,Back) x (Side Ears)
-    L/R Jacket  -> (Front,Back) x (Wings)
-    T/B Jacket  -> (Front,Back,Left,Right) x (Collar,Coat)
-
-
-    /*
-    mat3 fromWorld = getWorldMat(Light0_Direction,Light1_Direction);
-    mat3 toWorld = inverse(fromWorld);
-    vec3 wPos = toWorld*Position;
-
-    overlayColor = vec4(abs(wPos)/4.0,0);
-
-
-
-    /*
-    if(gl_VertexID == 14*8+1){  
-        overlayColor = vec4(0,1,0,0);
-        
-        mat3 fromWorld = getWorldMat(Light0_Direction,Light1_Direction);
-        mat3 toWorld = inverse(fromWorld);
-        vec3 wPos = toWorld*Position;
-
-        vec3 wNorm = toWorld*Normal; //orthogonal to face
-        vec3 wPer = wNorm.xzy;
-
-        wPos += wNorm/16;
-
-        vec3 newPos = fromWorld*wPos;
-
-        gl_Position = ProjMat * ModelViewMat * vec4(newPos, 1.0); 
-    }
-    /*
-    
-    else if(texCoord0.x == 4.0/64.0){
-        overlayColor = vec4(1,1,0,0);
-
-        mat3 fromWorld = getWorldMat(Light0_Direction,Light1_Direction);
-        mat3 toWorld = inverse(fromWorld);
-        vec3 wPos = toWorld*Position;
-
-        vec3 wNorm = toWorld*Normal; //orthogonal to face
-        vec3 wPer = wNorm.xzy;
-
-        wPos += wNorm/16;
-
-        vec3 newPos = fromWorld*wPos;
-
-        gl_Position = ProjMat * ModelViewMat * vec4(newPos, 1.0); 
-        
-    }
-    else if(texCoord0.x == 8.0/64.0){
-        overlayColor = vec4(0,1,0,0);
-    }*/
-
-    //texCoord0.x += 2;
-    //texCoord0.y += 10;
-
-    //overlayColor.r = UV0.x;
-    //overlayColor.g = UV0.y;
-    //overlayColor.a = 0;

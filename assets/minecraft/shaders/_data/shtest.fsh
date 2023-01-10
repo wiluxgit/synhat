@@ -1,19 +1,21 @@
-//#version 150
+/*#version 330
 
-//#moj_import <fog.glsl>
-//#moj_import <light.glsl>
+in vec4 p_color;
+in vec2 p_uv;
 
 uniform sampler2D Sampler0;
+out vec4 outColor;
 
-//uniform vec4 ColorModulator;
-//uniform float FogStart;
-//uniform float FogEnd;
-//uniform vec4 FogColor;
-//uniform vec3 Light0_Direction;
-//uniform vec3 Light1_Direction;
+void main() {
+   	outColor = texture(Sampler0, p_uv);
+   	if (outColor.a < 0.1) {
+		discard;
+	}
+}*/
 
-//uniform mat4 ModelViewMat;
-//uniform mat4 ProjMat;
+#version 330
+
+uniform sampler2D Sampler0;
 
 in highp float vertexDistance;
 in highp vec4 vertexColor;
@@ -21,14 +23,6 @@ in highp vec4 lightMapColor;
 in highp vec4 overlayColor;
 in highp vec2 texCoord0;
 in highp vec4 normal;
-
-in highp vec3 wx_passLight0_Direction;
-in highp vec3 wx_passLight1_Direction;
-in highp vec3 wx_passModelViewPos;
-in highp vec4 wx_passVertexColor;
-in highp vec3 wx_invMatrix0;
-in highp vec3 wx_invMatrix1;
-in highp vec3 wx_invMatrix2;
 
 in highp vec2 wx_scalingOrigin;
 in highp vec2 wx_scaling;
@@ -43,8 +37,9 @@ out highp vec4 outColor;
 
 void main() {
     highp vec4 color = texture(Sampler0, texCoord0);
-    
-    if(wx_isEdited != 0.0){
+    color = vertexColor;
+	
+    if(wx_isEdited != 0){
         
         highp vec2 diff = texCoord0-wx_scalingOrigin;
         highp vec2 newTexCoord = (texCoord0 - diff) + (diff * wx_scaling);
@@ -56,6 +51,7 @@ void main() {
         newTexCoord += wx_UVDisplacement;
         
         color = texture(Sampler0, newTexCoord);
+        color = vec4(normalize(normal.xyz)/2+vec3(0.5,0.5,0.5), 1);
         if (color.a < 0.1) {
             discard;
         }
@@ -66,11 +62,5 @@ void main() {
             discard;
         }
 		outColor = color;
-        //fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
-
-        //vec3 fcs = vec3(inverse(ModelViewMat * ProjMat) * normal) - passNormal;
-        //vec3 fcs = (ModelViewMat * ProjMat * vec4(passNormal,0) - normal).xyz;
-        //fragColor = vec4(-normal.xyz,1);
-        //fragColor = vec4(max(0.0, dot(Light0_Direction, passNormal.xyz)),0,0,1);
     }
 }
