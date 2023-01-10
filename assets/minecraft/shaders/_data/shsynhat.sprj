@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<project version="2">
+	<pipeline>
+		<pass name="SHSimple" type="shader" active="true" patchverts="1">
+			<shader type="vs" path="shtest.vsh" entry="main" />
+			<shader type="ps" path="shtest.fsh" entry="main" />
+			<inputlayout>
+				<item value="Position" semantic="POSITION" />
+				<item value="Normal" semantic="NORMAL" />
+				<item value="Texcoord" semantic="TEXCOORD0" />
+			</inputlayout>
+			<rendertexture />
+			<items>
+				<item name="steve" type="model">
+					<filepath>asset\model.obj</filepath>
+					<grouponly>false</grouponly>
+				</item>
+			</items>
+			<itemvalues />
+			<variables>
+				<variable type="float4x4" name="ProjMat" system="ViewProjection" />
+				<variable type="float4x4" name="ModelViewMat" system="Projection" />
+			</variables>
+			<macros />
+		</pass>
+	</pipeline>
+	<objects>
+		<object type="texture" path="asset\steve.png" vflip="true" min_filter="Linear" mag_filter="Nearest" wrap_s="Repeat" wrap_t="Repeat">
+			<bind slot="0" name="SHSimple" />
+		</object>
+	</objects>
+	<cameras />
+	<settings>
+		<entry type="property" name="SHSimple" item="pipe" />
+		<entry type="file" name="SHSimple" shader="vs" />
+		<entry type="file" name="SHSimple" shader="ps" />
+		<entry type="camera" fp="false">
+			<distance>6</distance>
+			<pitch>11</pitch>
+			<yaw>354</yaw>
+			<roll>360</roll>
+		</entry>
+		<entry type="clearcolor" r="0" g="0" b="0" a="0" />
+		<entry type="usealpha" val="false" />
+	</settings>
+	<plugindata />
+</project>
