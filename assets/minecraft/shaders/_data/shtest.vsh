@@ -62,7 +62,7 @@ void writeUVBounds(int faceId, bool isAlex);
 void main() {
     vertexDistance = length((ModelViewMat * vec4(Position, 1.0)).xyz);
     vertexColor = vec4(1,1,0,1);
-    if (gl_VertexID == 10) {
+    if (gl_VertexID == 24) {
     	vertexColor = vec4(1,0,1,1);
     }
     
@@ -84,7 +84,8 @@ void main() {
             int cornerId = gl_VertexID % 4;
 
             vec3 newPos = Position;
-            vec4 pxData = texelFetch(Sampler0, ivec2((faceId-8)%8, (faceId-8)/8), 0)*256.0;
+            //vec4 pxData = texelFetch(Sampler0, ivec2((faceId-8)%8, (faceId-8)/8), 0)*256.0;
+            vec4 pxData = vec4(0,0,0,0);
             int data0 = int(pxData.r+0.1);
             int data1 = int(pxData.g+0.1);
             int data2 = int(pxData.b+0.1); 

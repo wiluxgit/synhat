@@ -37,7 +37,7 @@ out highp vec4 outColor;
 
 void main() {
     highp vec4 color = texture(Sampler0, texCoord0);
-    color = vertexColor;
+    //color = vertexColor;
 	
     if(wx_isEdited != 0){
         

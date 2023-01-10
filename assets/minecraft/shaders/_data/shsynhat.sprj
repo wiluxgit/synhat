@@ -33,12 +33,13 @@
 	</objects>
 	<cameras />
 	<settings>
+		<entry type="property" name="steve" item="pipe" />
 		<entry type="file" name="SHSimple" shader="vs" />
 		<entry type="file" name="SHSimple" shader="ps" />
 		<entry type="camera" fp="false">
-			<distance>5</distance>
-			<pitch>-23</pitch>
-			<yaw>354</yaw>
+			<distance>3</distance>
+			<pitch>19</pitch>
+			<yaw>118</yaw>
 			<roll>360</roll>
 		</entry>
 		<entry type="clearcolor" r="0" g="0" b="0" a="0" />
