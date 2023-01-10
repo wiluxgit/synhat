@@ -13,43 +13,34 @@ mat3 getWorldMat(vec3 light0, vec3 light1) {
 
 layout (location = 0) in vec3 Position;
 layout (location = 1) in vec3 Normal;
-in vec4 Color;
 layout (location = 2) in vec2 UV0;
-in ivec2 UV1;
-in ivec2 UV2;
 
 uniform sampler2D Sampler0;
-uniform sampler2D Sampler1;
-uniform sampler2D Sampler2;
 
 uniform mat4 ModelViewMat;
 uniform mat4 ProjMat;
 
-uniform vec3 Light0_Direction;
-uniform vec3 Light1_Direction;
-uniform vec3 ChunkOffset;
+out highp float vertexDistance;
+out highp vec4 vertexColor;
+out highp vec4 lightMapColor;
+out highp vec4 overlayColor;
+out highp vec2 texCoord0;
+out highp vec4 normal;
 
-out float vertexDistance;
-out vec4 vertexColor;
-out vec4 lightMapColor;
-out vec4 overlayColor;
-out vec2 texCoord0;
-out vec4 normal;
+out highp vec3 wx_passLight0_Direction;
+out highp vec3 wx_passLight1_Direction;
+out highp vec3 wx_passModelViewPos;
+out highp vec4 wx_passVertexColor;
+out highp vec3 wx_invMatrix0;
+out highp vec3 wx_invMatrix1;
+out highp vec3 wx_invMatrix2;
 
-out vec3 wx_passLight0_Direction;
-out vec3 wx_passLight1_Direction;
-out vec3 wx_passModelViewPos;
-out vec4 wx_passVertexColor;
-out vec3 wx_invMatrix0;
-out vec3 wx_invMatrix1;
-out vec3 wx_invMatrix2;
-
-out vec2 wx_scalingOrigin;
-out vec2 wx_scaling;
-out vec2 wx_maxUV;
-out vec2 wx_minUV;
-out vec2 wx_UVDisplacement;
-out float wx_isEdited;
+out highp vec2 wx_scalingOrigin;
+out highp vec2 wx_scaling;
+out highp vec2 wx_maxUV;
+out highp vec2 wx_minUV;
+out highp vec2 wx_UVDisplacement;
+out highp float wx_isEdited;
 
 #define AS_OUTER (32.0)   // how long to stretch along normal to simulate 90 deg face
 
@@ -69,9 +60,7 @@ void fixScaling(int faceId);
 
 void main() {
     vertexDistance = length((ModelViewMat * vec4(Position, 1.0)).xyz);
-    //vertexColor = minecraft_mix_light(Light0_Direction, Light1_Direction, Normal, Color);
-    lightMapColor = texelFetch(Sampler2, UV2 / 16, 0);
-    overlayColor = texelFetch(Sampler1, UV1, 0);
+    vertexColor = vec4(1,1,1,1);
     texCoord0 = UV0;
     normal = ProjMat * ModelViewMat * vec4(Normal, 0.0);  
 
@@ -194,52 +183,38 @@ void main() {
                         switch(strechDirection) {
                             case SCALEDIR_X_PLUS: 
                                 wx_scaling = vec2(perpLen2/(size.x*4.0), 1.12);
-                                wx_minUV += vec2(perpLen2, 0.0)/64;
-                                wx_maxUV += vec2(perpLen2, 0)/64;
+                                wx_minUV += vec2(perpLen2, 0)/64.0;
+                                wx_maxUV += vec2(perpLen2, 0)/64.0;
                                 wx_UVDisplacement += vec2(perpLen2, 0)/64.0; 
                                 break;
                             case SCALEDIR_X_MINUS: 
                                 wx_scaling = vec2(perpLen2/(size.x*4.0), 1.12);
-                                wx_minUV -= vec2(perpLen2, 0)/64;
-                                wx_maxUV -= vec2(perpLen2, 0)/64;
+                                wx_minUV -= vec2(perpLen2, 0)/64.0;
+                                wx_maxUV -= vec2(perpLen2, 0)/64.0;
                                 wx_UVDisplacement += vec2(perpLen2, 0)/64.0; 
                                 break;
                             case SCALEDIR_Y_PLUS: 
                                 wx_scaling = vec2(1.12, perpLen2/(size.y*4.0));                                
-                                wx_minUV += vec2(0, perpLen2)/64; 
-                                wx_maxUV += vec2(0, perpLen2)/64;
+                                wx_minUV += vec2(0, perpLen2)/64.0; 
+                                wx_maxUV += vec2(0, perpLen2)/64.0;
                                 wx_UVDisplacement += vec2(0, perpLen2)/64.0; 
                                 break;
                             case SCALEDIR_Y_MINUS: 
                                 wx_scaling = vec2(1.12, perpLen2/(size.y*4.0));                                
-                                wx_minUV -= vec2(0, perpLen2)/64; 
-                                wx_maxUV -= vec2(0, perpLen2)/64;
+                                wx_minUV -= vec2(0, perpLen2)/64.0; 
+                                wx_maxUV -= vec2(0, perpLen2)/64.0;
                                 wx_UVDisplacement += vec2(0, perpLen2)/64.0; 
                                 break;
                             }
                         break;
                 }
 
-                // Used for Light calculation
-                wx_passLight0_Direction = Light0_Direction;
-                wx_passLight1_Direction = Light1_Direction;
-                wx_passModelViewPos = (ModelViewMat * vec4(newPos, 1.0)).xyz;
-                wx_passVertexColor = Color;
-                mat3 invMatrix = inverse(mat3(ProjMat)) * inverse(mat3(ModelViewMat));
-                wx_invMatrix0 = invMatrix[0];
-                wx_invMatrix1 = invMatrix[1];
-                wx_invMatrix2 = invMatrix[2];
-
                 gl_Position = ProjMat * ModelViewMat * vec4(newPos, 1.0);
-            } else {
-                gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
-            }     
-        } else {
-            gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
+                return;
+            }
         }        
-    } else {
-        gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
     }   
+    gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
 }
 
 // retuns the length (in pixels) to the back face for a given face

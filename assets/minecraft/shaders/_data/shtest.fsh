@@ -41,52 +41,10 @@ out highp vec4 outColor;
 
 #define MAX 1 
 
-#define MINECRAFT_LIGHT_POWER   (0.6)
-#define MINECRAFT_AMBIENT_LIGHT (0.4)
-highp vec4 minecraft_mix_light(highp vec3 lightDir0, highp vec3 lightDir1, highp vec3 normal, highp vec4 color) {
-    lightDir0 = normalize(lightDir0);
-    lightDir1 = normalize(lightDir1);
-    highp float light0 = max(0.0, dot(lightDir0, normal));
-    highp float light1 = max(0.0, dot(lightDir1, normal));
-    highp float lightAccum = min(1.0, (light0 + light1) * MINECRAFT_LIGHT_POWER + MINECRAFT_AMBIENT_LIGHT);
-    return vec4(color.rgb * lightAccum, color.a);
-}
-highp vec4 linear_fog(highp vec4 inColor, highp float vertexDistance, highp float fogStart, highp float fogEnd, highp vec4 fogColor) {
-    if (vertexDistance <= fogStart) {
-        return inColor;
-    }
-
-    highp float fogValue = vertexDistance < fogEnd ? smoothstep(fogStart, fogEnd, vertexDistance) : 1.0;
-    return vec4(mix(inColor.rgb, fogColor.rgb, fogValue * fogColor.a), inColor.a);
-}
-
-highp vec4 getDirectionalColor(){
-    highp vec3 hackProjectedNormal = normalize(cross(dFdx(wx_passModelViewPos), dFdy(wx_passModelViewPos)));
-    hackProjectedNormal.z *= -1.0;
-    
-    highp mat3 wx_invMatrix = mat3(wx_invMatrix0, wx_invMatrix1, wx_invMatrix2);
-    highp vec3 normalInVertexShaderWorld = normalize(wx_invMatrix * hackProjectedNormal);
-    return minecraft_mix_light(wx_passLight0_Direction, wx_passLight1_Direction, normalInVertexShaderWorld, wx_passVertexColor);
-}
 void main() {
     highp vec4 color = texture(Sampler0, texCoord0);
     
     if(wx_isEdited != 0.0){
-        /*
-        // TESTING TO FIX LIGHTING
-        //`nnormal` is the badly calculated `normal`m 
-        //nnormal of skewed face == normal of unskwed face
-        vec3 nnormal = normalize(cross(dFdx(passMPos), dFdy(passMPos)));
-        nnormal.z*=-1;
-
-        //    normal = ProjMat * ModelViewMat * vec4(Normal, 0.0)
-        //=>? Normal = inv(ProjMat * ModelViewMat)*normal
-        vec3 nNormal = passInvTrans * nnormal;
-        nNormal = normalize(nNormal.xyz);
-        nNormal.z*=-1;
-
-        vec4 vxColor = minecraft_mix_light(Light0_Direction, Light1_Direction, nnormal, passColor);
-        */
         
         highp vec2 diff = texCoord0-wx_scalingOrigin;
         highp vec2 newTexCoord = (texCoord0 - diff) + (diff * wx_scaling);
@@ -101,31 +59,12 @@ void main() {
         if (color.a < 0.1) {
             discard;
         }
-        
-        highp vec4 vxColor = getDirectionalColor();
-
-        color *= vxColor ;//* ColorModulator;
-        color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
-        color *= lightMapColor;
-
 		outColor = color;
-        //fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
-        
-        //fragColor = vec4(mod(newTexCoord.x*8,1), mod(newTexCoord.y*8,1), isIn1, 1);
-        //fragColor = vec4(mod(newTexCoord.x*8,1), mod(newTexCoord.y*8,1), mod(newTexCoord.y*2,1), 1);
-        //float modx = dot(Light0_Direction, nnormal);
-        //fragColor = vec4(max(0.0, modx),0,0,1);
-        //fragColor = overlayColor;
     } else {
 
         if (color.a < 0.1) {
             discard;
         }
-
-        color *= vertexColor; //* ColorModulator;
-        color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
-        color *= lightMapColor;
-
 		outColor = color;
         //fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
 
