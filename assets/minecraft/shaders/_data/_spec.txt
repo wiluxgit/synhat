@@ -1,0 +1,91 @@
+faceinfo: 
+
+#n faces: 72
+
+F: enabled/modeltype
+O: Offset
+
+F---OOOO
+OOOOOOOO
+OOOOOOOO
+01234567
+89XXXXXX
+XXXXXXXX
+XXXXXXXX
+XXXXXXXX
+
+Normal * 8/16 = 1.125*8 pixels
+pixel = 1.125/16
+
+
+===== Modifiers =====
+4 bit: type [Displacement, UVOffset, UVCrop]
+X bit: [
+
+Displacement [19 bits]
+0] >4< Type Header
+1]  ^
+2]  ^
+3]  ^
+4] >1< [+/-]
+5] >1< assymetric: [+/-]
+6] >1< [local pixelsize/snap to other layer] 
+7]  -
+0] >6< offset, in pixels (as defined by pixelsize)
+1]  ^
+2]  ^
+3]  ^
+4]  ^
+6]  ^
+7] >2< Assymetric Type [none, specialA, specialB, specialC]
+5]  ^
+0] >6< Assymetric offset
+1]  ^
+2]  ^
+3]  ^
+4]  ^
+5]  ^
+6] >2< Assymetric Direction [Top, Botton, Right, Left]
+7]  ^
+0] >8< Continue
+..]
+
+1 bit: [+/-]
+1 bit: [local pixelsize/snap to other layer]
+2 bit: -
+6 bit: offset, in pixels* (as defined by pixelsize)
+// assymetric transforms
+1 bit: [local pixelsize/snap to other layer]
+2 bit: [+/-/specialA/specialB]
+1 bit: -
+6 bit: offset, in pixels* (as defined by pixelsize)
+       or special hardcoded displacement
+2 bit: [Top, Bot, Right, Left]
+5 bit: -
+8 bit: co
+
+
+
+UV Offset [24 bits]
+6 bit: uv.x max
+6 bit: uv.x min
+6 bit: uv.y max
+6 bit: uv.y min
+
+UV Crop [24 bits]
+6 bit: crop top
+6 bit: crop bot
+6 bit: crop right
+6 bit: crop left
+
+PostFlags [4 bits]
+4] top scale & clip uv to other layer
+5] bot scale & clip uv to other layer
+6] right scale & clip uv to other layer
+7] left scale & clip uv to other layer
+
+
+UV Offset
+UV Crop
+Displacement
+PostFlags

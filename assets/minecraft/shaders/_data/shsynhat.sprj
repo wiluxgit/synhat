@@ -14,7 +14,8 @@
 				<item name="steve" type="model">
 					<filepath>asset\steve.obj</filepath>
 					<grouponly>false</grouponly>
-					<y>-1</y>
+					<instanced>true</instanced>
+					<instancecount>1</instancecount>
 				</item>
 			</items>
 			<itemvalues />
@@ -33,13 +34,13 @@
 	</objects>
 	<cameras />
 	<settings>
-		<entry type="property" name="steve" item="pipe" />
+		<entry type="property" name="SHSimple" item="pipe" />
 		<entry type="file" name="SHSimple" shader="vs" />
 		<entry type="file" name="SHSimple" shader="ps" />
 		<entry type="camera" fp="false">
-			<distance>3</distance>
-			<pitch>19</pitch>
-			<yaw>118</yaw>
+			<distance>4</distance>
+			<pitch>52</pitch>
+			<yaw>119</yaw>
 			<roll>360</roll>
 		</entry>
 		<entry type="clearcolor" r="0" g="0" b="0" a="0" />

@@ -44,32 +44,69 @@ out highp vec2 wx_minUV;
 out highp vec2 wx_UVDisplacement;
 out highp float wx_isEdited;
 
-#define AS_OUTER (32.0)   // how long to stretch along normal to simulate 90 deg face
+vec3 NewPosition;
 
-#define TRANSFORM_NONE (0<<4)
-#define TRANSFORM_OUTER (1<<4)
-#define TRANSFORM_OUTER_REVERSED (2<<4)
-#define TRANSFORM_INNER_REVERSED (3<<4)
-#define SCALEDIR_X_PLUS (0<<6)
-#define SCALEDIR_X_MINUS (1<<6)
-#define SCALEDIR_Y_PLUS (2<<6)
-#define SCALEDIR_Y_MINUS (3<<6)
-#define F_ENABLED (0x80)
+// how long to stretch along normal to simulate 90 deg face
+#define AS_OUTER (32.0)
+
+#define MASK_TRANSFROM_TYPE (0x0f)
+#define TRANSFROM_TYPE_DISPLACEMENT (0)
+#define TRANSFROM_TYPE_UV_CROP (1)
+#define TRANSFROM_TYPE_UV_OFFSET (2)
+#define TRANSFROM_TYPE_POSTFLAG (3)
+
+#define FLAG_DISP_NEGATIVE (1<<4)
+#define FLAG_DISP_ASYM_NEGATIVE (1<<5)
+#define FLAG_DISP_OPPOSING_SNAP (1<<6)
+//#define FLAG_DISP_UNUSED (3<<6)
+#define MASK_DISP_OFFSET (0x3f)
+#define MASK_DISP_ASYM_OFFSET (0x3f)
+#define MASK_DISP_ASYM_TYPE (0xc0)
+#define MASK_DISP_ASYM_DIRECTION (0xc0)
+#define DISP_ASYM_DIRECTION_TOP (0<<6)
+#define DISP_ASYM_DIRECTION_BOT (1<<6)
+#define DISP_ASYM_DIRECTION_RIGHT (2<<6)
+#define DISP_ASYM_DIRECTION_LEFT (3<<6)
+#define DISP_ASYM_TYPE_SIMPLE (0<<6)
+#define DISP_ASYM_TYPE_FLIP_OUT (1<<6)
+#define DISP_ASYM_TYPE_FLIP_IN (2<<6)
+//#define DISP_ASYM_TYPE_UNUSED (3<<6)
+
+#define OVERLAYSCALE (1.125)
 
 int getPerpendicularLength(int faceId, bool isAlex);
 void writeUVBounds(int faceId, bool isAlex);
+int getMCVertID();
+vec4 getTfDataFromID(int faceDataSourceId);
+vec4 colorFromInt(int i); //DEBUG
+
+void applyDisplacement(bool isAlex, int vertId, int data0, int data1, int data2);
+void applyUVCrop      (bool isAlex, int vertId, int data0, int data1, int data2);
+void applyUVOffset    (bool isAlex, int vertId, int data0, int data1, int data2);
+void applyPostFlags   (bool isAlex, int vertId, int data0, int data1, int data2);
+
+bool isSecondaryLayer(int vertId);
+int getFaceId(int vertId);
+int getCornerId(int vertId);
+vec3 pixelNormal();
 
 void main() {
     vertexDistance = length((ModelViewMat * vec4(Position, 1.0)).xyz);
-    vertexColor = vec4(1,1,0,1);
-    if (gl_VertexID == 24) {
-    	vertexColor = vec4(1,0,1,1);
-    }
+    
+    int mcid = getMCVertID();
+    
+    vertexColor = vec4(0.5,0.5,0,1);
+    
+    float mcidx = float(mcid)/400;
+    float mcidy = float((mcid/4)%6)/6;
+	vertexColor = vec4(mcidx,mcidy,0,0.5);
     
     texCoord0 = UV0;
     normal = ProjMat * ModelViewMat * vec4(Normal, 0.0);  
 
     wx_isEdited = 0.0;
+    
+    NewPosition = Position;
 
     if (true) { //(gl_VertexID >= 18*8){ //is second layer
         vec4 topRightPixel = texelFetch(Sampler0, ivec2(0, 0), 0)*256.0; //Macs can't texelfetch in vertex shader?
@@ -77,150 +114,192 @@ void main() {
         int header1 = int(topRightPixel.g + 0.1);
         int header2 = int(topRightPixel.b + 0.1);
 
-        if (true){ //(header0 == 0xda && header1 == 0x67){ 
+        if (header0 == 0xda && header1 == 0x67) { 
             bool isAlex = (header2 == 1);
 
-            int faceId = gl_VertexID / 4;
-            int cornerId = gl_VertexID % 4;
+            int faceId = getFaceId(mcid);
+            int cornerId = getCornerId(mcid);
+			
+			int fileoffset = faceId + (4*6);
+			int dataC = fileoffset % 4;
+			int dataX = (fileoffset / 4) % 8;
+			int dataY = (fileoffset / (8*4));
+			
+			vec4 srcPixel = texelFetch(Sampler0, ivec2(dataX,dataY), 0)*256.0;
+			
+			//<DEBUG>
+			switch(faceId) {
+				case 38: // top hat
+					srcPixel = vec4(1,1,1,1); //use data block 1
+					break;
+			}
+			//</DEBUG>
 
-            vec3 newPos = Position;
-            //vec4 pxData = texelFetch(Sampler0, ivec2((faceId-8)%8, (faceId-8)/8), 0)*256.0;
-            vec4 pxData = vec4(0,0,0,0);
-            int data0 = int(pxData.r+0.1);
-            int data1 = int(pxData.g+0.1);
-            int data2 = int(pxData.b+0.1); 
-            
-            //<debug>
-            switch(faceId) {    
-            //case 36: data0 = (1<<0) | (1<<3) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_X_PLUS; break; // Left hat
-            //case 37: data0 = (1<<1) | (1<<2) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_X_MINUS; break; // Right hat
-            //case 38: data0 = (1<<0) | (1<<1) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_Y_MINUS; break; // Top hat 
-            //case 39: data0 = (1<<2) | (1<<3) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_Y_MINUS; break; // Bottom hat 
-            
-            //case 54: data0 = (1<<0) | (1<<3) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_X_PLUS; break; // Left L-Shirt
-            //case 55: data0 = (1<<1) | (1<<2) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_X_MINUS; break; // Right L-Shirt
-            //case 56: data0 = (1<<0) | (1<<1) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_Y_MINUS; break; // Top L-Shirt 
-            //case 57: data0 = (1<<2) | (1<<3) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_Y_MINUS; break; // Bottom L-Shirt 
-
-            //case 42: data0 = (1<<0) | (1<<3) | TRANSFORM_OUTER | F_ENABLED; data1 = SCALEDIR_X_PLUS; break; // Left L-Pant
-            //case 43: data0 = (1<<1) | (1<<2) | TRANSFORM_OUTER | F_ENABLED; data1 = SCALEDIR_X_MINUS; break; // Right L-Pant
-            //case 44: data0 = (1<<0) | (1<<1) | TRANSFORM_OUTER | F_ENABLED; data1 = SCALEDIR_Y_MINUS; break; // Top L-Pant 
-            //case 45: data0 = (1<<2) | (1<<3) | TRANSFORM_OUTER | F_ENABLED; data1 = SCALEDIR_Y_MINUS; break; // Bottom L-Pant 
-
-            //case 67: data0 = (1<<0) | (1<<3) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_X_PLUS; break;  //Right jacket
-            //case 66: data0 = (1<<1) | (1<<2) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_X_MINUS; break;  //Left jacket
-            //case 69: data0 = (1<<0) | (1<<1) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_Y_PLUS; break;  //Bottom jacket
-            //case 71: data0 = (1<<2) | (1<<3) | TRANSFORM_INNER_REVERSED | F_ENABLED; data1 = SCALEDIR_Y_PLUS; break;  //Back jacket
-            }
-            //</debug>
-
-            if((data0 & F_ENABLED) != 0){
-                wx_isEdited = 1.0; 
-
-                writeUVBounds(faceId, isAlex);
-                
-                int cornerBits = data0 & 0xf;
-                int transformType = data0 & 0x70;
-                int uvX = data1 & 0x3F;
-                int uvY = data2 & 0x3F;
-                int strechDirection = data1 & 0xC0;
-
-                switch(strechDirection){
-                    case SCALEDIR_X_PLUS: 
-                        wx_scalingOrigin = vec2(wx_minUV.x, (wx_maxUV.y+wx_minUV.y)/2.0);
-                        break;
-                    case SCALEDIR_X_MINUS: 
-                        wx_scalingOrigin = vec2(wx_maxUV.x, (wx_maxUV.y+wx_minUV.y)/2.0);
-                        break;
-                    case SCALEDIR_Y_PLUS: 
-                        wx_scalingOrigin = vec2((wx_maxUV.x+wx_minUV.x)/2.0, wx_minUV.y);
-                        break;
-                    case SCALEDIR_Y_MINUS: 
-                        wx_scalingOrigin = vec2((wx_maxUV.x+wx_minUV.x)/2.0, wx_maxUV.y);
-                        break;
-                }
-
-                bool isSelectedCorner = ((1<<cornerId) & cornerBits) != 0;
-                vec2 size = wx_maxUV-wx_minUV; //Could be used to generalize wx_scaling i think
-
-                if(float(uvX)/64.0 + wx_minUV.x >= 1.0) uvX -= 64; // Seeings as UV frag cut is capped inside 0..1 this 
-                if(float(uvY)/64.0 + wx_minUV.y >= 1.0) uvY -= 64; //  is needed for wrapping offsets
-                wx_UVDisplacement = vec2(uvX,uvY) / 64.0;
-
-                switch(transformType) {                    
-                    case TRANSFORM_OUTER:
-                        if(isSelectedCorner) 
-                            newPos += Normal*AS_OUTER;
-                        switch(strechDirection) {
-                            case SCALEDIR_X_PLUS: 
-                            case SCALEDIR_X_MINUS: 
-                                wx_scaling = vec2(AS_OUTER/(size.x*4.0), 1);
-                                break;
-                            case SCALEDIR_Y_PLUS: 
-                            case SCALEDIR_Y_MINUS: 
-                                wx_scaling = vec2(1, AS_OUTER/(size.y*4.0));
-                                break;
-                            }
-                        break;
-                    case TRANSFORM_OUTER_REVERSED:
-                        float perpLen1 = float(getPerpendicularLength(faceId, isAlex));
-
-                        newPos -= Normal*(perpLen1/16.0);
-                        if(isSelectedCorner) 
-                            newPos -= Normal*AS_OUTER;
-                        switch(strechDirection) {
-                            case SCALEDIR_X_PLUS: 
-                            case SCALEDIR_X_MINUS: 
-                                wx_scaling = vec2(AS_OUTER/(size.x*4.0), 1);
-                                break;
-                            case SCALEDIR_Y_PLUS: 
-                            case SCALEDIR_Y_MINUS: 
-                                wx_scaling = vec2(1, AS_OUTER/(size.y*4.0));
-                                break;
-                            }
-                        break;
-
-                    case TRANSFORM_INNER_REVERSED: // kinda broken for most faces
-                        float perpLen2 = float(getPerpendicularLength(faceId, isAlex));
-
-                        if(isSelectedCorner) 
-                            newPos -= Normal*perpLen2;
-                        switch(strechDirection) {
-                            case SCALEDIR_X_PLUS: 
-                                wx_scaling = vec2(perpLen2/(size.x*4.0), 1.12);
-                                wx_minUV += vec2(perpLen2, 0)/64.0;
-                                wx_maxUV += vec2(perpLen2, 0)/64.0;
-                                wx_UVDisplacement += vec2(perpLen2, 0)/64.0; 
-                                break;
-                            case SCALEDIR_X_MINUS: 
-                                wx_scaling = vec2(perpLen2/(size.x*4.0), 1.12);
-                                wx_minUV -= vec2(perpLen2, 0)/64.0;
-                                wx_maxUV -= vec2(perpLen2, 0)/64.0;
-                                wx_UVDisplacement += vec2(perpLen2, 0)/64.0; 
-                                break;
-                            case SCALEDIR_Y_PLUS: 
-                                wx_scaling = vec2(1.12, perpLen2/(size.y*4.0));                                
-                                wx_minUV += vec2(0, perpLen2)/64.0; 
-                                wx_maxUV += vec2(0, perpLen2)/64.0;
-                                wx_UVDisplacement += vec2(0, perpLen2)/64.0; 
-                                break;
-                            case SCALEDIR_Y_MINUS: 
-                                wx_scaling = vec2(1.12, perpLen2/(size.y*4.0));                                
-                                wx_minUV -= vec2(0, perpLen2)/64.0; 
-                                wx_maxUV -= vec2(0, perpLen2)/64.0;
-                                wx_UVDisplacement += vec2(0, perpLen2)/64.0; 
-                                break;
-                            }
-                        break;
-                }
-
-                gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
-                return;
-            }
+			
+			int faceDataSourceId = int(srcPixel[dataC]+0.1);
+			
+			vertexColor = colorFromInt(faceDataSourceId);
+			
+			while (faceDataSourceId != 0 && faceDataSourceId != 255) {
+				wx_isEdited = 1.0;
+			
+				vec4 transformData = getTfDataFromID(faceDataSourceId);
+			
+            	int data0 = int(transformData.r+0.1);
+        	    int data1 = int(transformData.g+0.1);
+    	        int data2 = int(transformData.b+0.1); 
+	            int data3 = int(transformData.a+0.1); 
+	            
+	            int type = MASK_TRANSFROM_TYPE & data0;
+	            
+	            switch (type) {
+	            	case TRANSFROM_TYPE_DISPLACEMENT:
+	            		applyDisplacement(isAlex, mcid, data0, data1, data2);
+	            		break;
+	            	case TRANSFROM_TYPE_UV_CROP:
+	            		applyUVCrop(isAlex, mcid, data0, data1, data2);
+	            		break;
+	            	case TRANSFROM_TYPE_UV_OFFSET:
+	            		applyUVOffset(isAlex, mcid, data0, data1, data2);
+	            		break;
+	            	case TRANSFROM_TYPE_POSTFLAG:
+	            		applyPostFlags(isAlex, mcid, data0, data1, data2);
+	            		break;
+	            }
+	            
+	            // read last 8 bits (alpha bits), if not UV_OFFSET (since that consuemes all bytes)
+	        	if (type != TRANSFROM_TYPE_UV_OFFSET) {
+	        		faceDataSourceId = data3;
+	        	} else {
+	        		faceDataSourceId = 0;
+	        	}     
+                faceDataSourceId = 0;    
+			}
+			
+			//if (wx_isEdited) {
+			//	writeDeaults()
+			//}
         }        
     }   
-    gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
+    gl_Position = ProjMat * ModelViewMat * vec4(NewPosition, 1.0);
     return;
+}
+
+void applyDisplacement(bool isAlex, int vertId, int data0, int data1, int data2) {
+	bool isNegativeOffset 			 = (data0 & FLAG_DISP_NEGATIVE) != 0;
+	bool opposingSnap				 = (data0 & FLAG_DISP_OPPOSING_SNAP) != 0;
+	bool asymmetric_isNegativeOffset = (data0 & FLAG_DISP_ASYM_NEGATIVE) != 0;
+		
+	float offset					 = float(data1 & MASK_DISP_OFFSET);
+	int assymetric_type 			 = data1 & MASK_DISP_ASYM_TYPE;
+	float assymetric_offset 		 = float(data2 & MASK_DISP_ASYM_OFFSET);
+	int assymetric_direction 		 = data2 & MASK_DISP_ASYM_DIRECTION;
+	
+	int faceId = getFaceId(vertId);
+	int cornerId = getCornerId(vertId);
+	int dirId = faceId % 6;
+	bool isSecondary = isSecondaryLayer(vertId);
+	int perpLenPixels = getPerpendicularLength(
+		getFaceId(vertId), isAlex
+	);
+	
+	float directionMod = 1;
+	if (isNegativeOffset) {
+		directionMod = -1;
+	}	
+	float asymmetric_directionMod = 1;
+	if (asymmetric_isNegativeOffset) {
+		asymmetric_directionMod = -1;
+	}	
+	float pixelSize = 1.0;
+	if (isSecondary != opposingSnap) { // isSecondary XOR snapToOpposing
+		pixelSize = OVERLAYSCALE;
+	}
+	
+	bool ignoreSnap = (assymetric_type == DISP_ASYM_TYPE_FLIP_IN); //hacky yes
+	if (opposingSnap && !ignoreSnap) {
+		float snapDirection = 1;
+		if (isSecondary) {
+			snapDirection = -1;
+		}
+		float layerExtention = snapDirection * (OVERLAYSCALE - 1) * float(perpLenPixels) / 2;
+		NewPosition += pixelNormal() * layerExtention;
+	}
+	NewPosition += pixelNormal() * offset * pixelSize * directionMod;
+	
+	const int[8] corners1 = int[8](0, 2, 0, 1, 2, 0, 3, 2);
+	const int[8] corners2 = int[8](1, 3, 3, 2, 3, 1, 1, 0);
+	int cornIndex = (assymetric_direction >> 6) | (dirId == 5 ? 1<<3 : 0);	
+	int corner1 = corners1[cornIndex];
+	int corner2 = corners2[cornIndex];
+	
+	if (cornerId == corner1 || cornerId == corner2) {
+		switch (assymetric_type) {
+			case DISP_ASYM_TYPE_SIMPLE:
+				NewPosition += pixelNormal() * pixelSize * assymetric_offset * directionMod;
+				break;
+			case DISP_ASYM_TYPE_FLIP_OUT:
+				NewPosition += pixelNormal() * pixelSize * AS_OUTER * directionMod;
+				//TODO: uv stuff
+				break;
+			case DISP_ASYM_TYPE_FLIP_IN:
+				// does not work for inner faces
+				float backheight = 19.125 * float(perpLenPixels);
+				NewPosition -= pixelNormal() * 1.0 * backheight; 
+				//TODO: uv stuff
+				break;
+		}
+	}
+}
+void applyUVCrop(bool isAlex, int vertId, int data0, int data1, int data2) {
+	return;
+}
+void applyUVOffset(bool isAlex, int vertId, int data0, int data1, int data2) {
+	return;
+}
+void applyPostFlags(bool isAlex, int vertId, int data0, int data1, int data2) {
+	return;
+}
+vec3 pixelNormal() {
+	return Normal * (1.125/16.0);
+}
+
+
+bool isSecondaryLayer(int vertId) {
+	return vertId >= 36*4;
+}
+int getFaceId(int vertId) {
+	return vertId / 4;
+}
+int getCornerId(int vertId) {
+	return vertId % 4;
+}
+
+
+vec4 getTfDataFromID(int faceDataSourceId) {
+	int faceDataX = faceDataSourceId % 8;
+	int faceDataY = faceDataSourceId / 8 + 3;
+	if (faceDataY >= 8) {
+		faceDataX += 24;
+		faceDataY -= 4;
+	}
+	return texelFetch(Sampler0, ivec2(faceDataX,faceDataY), 0)*256.0;
+}
+vec4 colorFromInt(int i) {
+	if (i<0) {
+		return vec4(0.2,0.2,0.2,1);
+	}
+	
+	switch (i%8) {
+		case 0: return vec4(1,0,0,1);
+		case 1: return vec4(0,1,0,1);
+		case 2: return vec4(0,0,1,1);
+		case 3: return vec4(1,1,0,1);
+		case 4: return vec4(0,1,1,1);
+		case 5: return vec4(1,0,1,1);
+		case 6: return vec4(1,1,1,1);
+		case 7: return vec4(0.5,0.5,0.5,1);
+	}
 }
 
 // retuns the length (in pixels) to the back face for a given face
@@ -465,4 +544,337 @@ void writeUVBounds(int faceId, bool isAlex){
         wx_maxUV = vec2(40, 48)/64.0;
         return;
     }
+}
+
+int faceIDLookup(int dirid, int uvu, int uvv);
+int getMCVertID() {
+	int dirid = (gl_VertexID/ 6) % 6;
+	int facevert = gl_VertexID % 6;
+	int corner;
+    switch(facevert){
+	case 0:
+	case 3:
+		corner = 0;
+		break;
+	case 2:
+	case 4:
+		corner = 2;
+		break;
+	case 1:
+		corner = 1;
+		break;
+	case 5:
+		corner = 3;
+		break;
+    }
+    int uvu = int(UV0.x*64.0 + 0.1);
+    int uvv = int(UV0.y*64.0 + 0.1);
+    int faceid = faceIDLookup(dirid, uvu, uvv);
+	return faceid*4 + corner;
+}
+
+int faceIDLookup(int dirid, int uvu, int uvv) {
+    switch(dirid){
+    case 0:
+        if ((uvu == 24) && (uvv == 8)) return 0;
+        if ((uvu == 16) && (uvv == 8)) return 0;
+        if ((uvu == 16) && (uvv == 16)) return 0;
+        if ((uvu == 24) && (uvv == 16)) return 0;
+        if ((uvu == 32) && (uvv == 20)) return 6;
+        if ((uvu == 28) && (uvv == 20)) return 6;
+        if ((uvu == 28) && (uvv == 32)) return 6;
+        if ((uvu == 32) && (uvv == 32)) return 6;
+        if ((uvu == 44) && (uvv == 52)) return 12;
+        if ((uvu == 40) && (uvv == 52)) return 12;
+        if ((uvu == 40) && (uvv == 64)) return 12;
+        if ((uvu == 44) && (uvv == 64)) return 12;
+        if ((uvu == 52) && (uvv == 20)) return 18;
+        if ((uvu == 48) && (uvv == 20)) return 18;
+        if ((uvu == 48) && (uvv == 32)) return 18;
+        if ((uvu == 52) && (uvv == 32)) return 18;
+        if ((uvu == 28) && (uvv == 52)) return 24;
+        if ((uvu == 24) && (uvv == 52)) return 24;
+        if ((uvu == 24) && (uvv == 64)) return 24;
+        if ((uvu == 28) && (uvv == 64)) return 24;
+        if ((uvu == 12) && (uvv == 20)) return 30;
+        if ((uvu == 8) && (uvv == 20)) return 30;
+        if ((uvu == 8) && (uvv == 32)) return 30;
+        if ((uvu == 12) && (uvv == 32)) return 30;
+        if ((uvu == 56) && (uvv == 8)) return 36;
+        if ((uvu == 48) && (uvv == 8)) return 36;
+        if ((uvu == 48) && (uvv == 16)) return 36;
+        if ((uvu == 56) && (uvv == 16)) return 36;
+        if ((uvu == 12) && (uvv == 36)) return 42;
+        if ((uvu == 8) && (uvv == 36)) return 42;
+        if ((uvu == 8) && (uvv == 48)) return 42;
+        if ((uvu == 12) && (uvv == 48)) return 42;
+        if ((uvu == 12) && (uvv == 52)) return 48;
+        if ((uvu == 8) && (uvv == 52)) return 48;
+        if ((uvu == 8) && (uvv == 64)) return 48;
+        if ((uvu == 12) && (uvv == 64)) return 48;
+        if ((uvu == 60) && (uvv == 52)) return 54;
+        if ((uvu == 56) && (uvv == 52)) return 54;
+        if ((uvu == 56) && (uvv == 64)) return 54;
+        if ((uvu == 60) && (uvv == 64)) return 54;
+        if ((uvu == 52) && (uvv == 36)) return 60;
+        if ((uvu == 48) && (uvv == 36)) return 60;
+        if ((uvu == 48) && (uvv == 48)) return 60;
+        if ((uvu == 52) && (uvv == 48)) return 60;
+        if ((uvu == 32) && (uvv == 36)) return 66;
+        if ((uvu == 28) && (uvv == 36)) return 66;
+        if ((uvu == 28) && (uvv == 48)) return 66;
+        if ((uvu == 32) && (uvv == 48)) return 66;
+        return -1;
+    case 1:
+        if ((uvu == 8) && (uvv == 8)) return 1;
+        if ((uvu == 0) && (uvv == 8)) return 1;
+        if ((uvu == 0) && (uvv == 16)) return 1;
+        if ((uvu == 8) && (uvv == 16)) return 1;
+        if ((uvu == 20) && (uvv == 20)) return 7;
+        if ((uvu == 16) && (uvv == 20)) return 7;
+        if ((uvu == 16) && (uvv == 32)) return 7;
+        if ((uvu == 20) && (uvv == 32)) return 7;
+        if ((uvu == 36) && (uvv == 52)) return 13;
+        if ((uvu == 32) && (uvv == 52)) return 13;
+        if ((uvu == 32) && (uvv == 64)) return 13;
+        if ((uvu == 36) && (uvv == 64)) return 13;
+        if ((uvu == 44) && (uvv == 20)) return 19;
+        if ((uvu == 40) && (uvv == 20)) return 19;
+        if ((uvu == 40) && (uvv == 32)) return 19;
+        if ((uvu == 44) && (uvv == 32)) return 19;
+        if ((uvu == 20) && (uvv == 52)) return 25;
+        if ((uvu == 16) && (uvv == 52)) return 25;
+        if ((uvu == 16) && (uvv == 64)) return 25;
+        if ((uvu == 20) && (uvv == 64)) return 25;
+        if ((uvu == 4) && (uvv == 20)) return 31;
+        if ((uvu == 0) && (uvv == 20)) return 31;
+        if ((uvu == 0) && (uvv == 32)) return 31;
+        if ((uvu == 4) && (uvv == 32)) return 31;
+        if ((uvu == 40) && (uvv == 8)) return 37;
+        if ((uvu == 32) && (uvv == 8)) return 37;
+        if ((uvu == 32) && (uvv == 16)) return 37;
+        if ((uvu == 40) && (uvv == 16)) return 37;
+        if ((uvu == 4) && (uvv == 36)) return 43;
+        if ((uvu == 0) && (uvv == 36)) return 43;
+        if ((uvu == 0) && (uvv == 48)) return 43;
+        if ((uvu == 4) && (uvv == 48)) return 43;
+        if ((uvu == 4) && (uvv == 52)) return 49;
+        if ((uvu == 0) && (uvv == 52)) return 49;
+        if ((uvu == 0) && (uvv == 64)) return 49;
+        if ((uvu == 4) && (uvv == 64)) return 49;
+        if ((uvu == 52) && (uvv == 52)) return 55;
+        if ((uvu == 48) && (uvv == 52)) return 55;
+        if ((uvu == 48) && (uvv == 64)) return 55;
+        if ((uvu == 52) && (uvv == 64)) return 55;
+        if ((uvu == 44) && (uvv == 36)) return 61;
+        if ((uvu == 40) && (uvv == 36)) return 61;
+        if ((uvu == 40) && (uvv == 48)) return 61;
+        if ((uvu == 44) && (uvv == 48)) return 61;
+        if ((uvu == 20) && (uvv == 36)) return 67;
+        if ((uvu == 16) && (uvv == 36)) return 67;
+        if ((uvu == 16) && (uvv == 48)) return 67;
+        if ((uvu == 20) && (uvv == 48)) return 67;
+        return -1;
+    case 2:
+        if ((uvu == 16) && (uvv == 0)) return 2;
+        if ((uvu == 8) && (uvv == 0)) return 2;
+        if ((uvu == 8) && (uvv == 8)) return 2;
+        if ((uvu == 16) && (uvv == 8)) return 2;
+        if ((uvu == 28) && (uvv == 16)) return 8;
+        if ((uvu == 20) && (uvv == 16)) return 8;
+        if ((uvu == 20) && (uvv == 20)) return 8;
+        if ((uvu == 28) && (uvv == 20)) return 8;
+        if ((uvu == 40) && (uvv == 48)) return 14;
+        if ((uvu == 36) && (uvv == 48)) return 14;
+        if ((uvu == 36) && (uvv == 52)) return 14;
+        if ((uvu == 40) && (uvv == 52)) return 14;
+        if ((uvu == 48) && (uvv == 16)) return 20;
+        if ((uvu == 44) && (uvv == 16)) return 20;
+        if ((uvu == 44) && (uvv == 20)) return 20;
+        if ((uvu == 48) && (uvv == 20)) return 20;
+        if ((uvu == 24) && (uvv == 48)) return 26;
+        if ((uvu == 20) && (uvv == 48)) return 26;
+        if ((uvu == 20) && (uvv == 52)) return 26;
+        if ((uvu == 24) && (uvv == 52)) return 26;
+        if ((uvu == 8) && (uvv == 16)) return 32;
+        if ((uvu == 4) && (uvv == 16)) return 32;
+        if ((uvu == 4) && (uvv == 20)) return 32;
+        if ((uvu == 8) && (uvv == 20)) return 32;
+        if ((uvu == 48) && (uvv == 0)) return 38;
+        if ((uvu == 40) && (uvv == 0)) return 38;
+        if ((uvu == 40) && (uvv == 8)) return 38;
+        if ((uvu == 48) && (uvv == 8)) return 38;
+        if ((uvu == 8) && (uvv == 32)) return 44;
+        if ((uvu == 4) && (uvv == 32)) return 44;
+        if ((uvu == 4) && (uvv == 36)) return 44;
+        if ((uvu == 8) && (uvv == 36)) return 44;
+        if ((uvu == 8) && (uvv == 48)) return 50;
+        if ((uvu == 4) && (uvv == 48)) return 50;
+        if ((uvu == 4) && (uvv == 52)) return 50;
+        if ((uvu == 8) && (uvv == 52)) return 50;
+        if ((uvu == 56) && (uvv == 48)) return 56;
+        if ((uvu == 52) && (uvv == 48)) return 56;
+        if ((uvu == 52) && (uvv == 52)) return 56;
+        if ((uvu == 56) && (uvv == 52)) return 56;
+        if ((uvu == 48) && (uvv == 32)) return 62;
+        if ((uvu == 44) && (uvv == 32)) return 62;
+        if ((uvu == 44) && (uvv == 36)) return 62;
+        if ((uvu == 48) && (uvv == 36)) return 62;
+        if ((uvu == 28) && (uvv == 32)) return 68;
+        if ((uvu == 20) && (uvv == 32)) return 68;
+        if ((uvu == 20) && (uvv == 36)) return 68;
+        if ((uvu == 28) && (uvv == 36)) return 68;
+        return -1;
+    case 3:
+        if ((uvu == 24) && (uvv == 8)) return 3;
+        if ((uvu == 16) && (uvv == 8)) return 3;
+        if ((uvu == 16) && (uvv == 0)) return 3;
+        if ((uvu == 24) && (uvv == 0)) return 3;
+        if ((uvu == 32) && (uvv == 20)) return 9;
+        if ((uvu == 28) && (uvv == 20)) return 9;
+        if ((uvu == 28) && (uvv == 16)) return 9;
+        if ((uvu == 36) && (uvv == 16)) return 9;
+        if ((uvu == 44) && (uvv == 52)) return 15;
+        if ((uvu == 40) && (uvv == 52)) return 15;
+        if ((uvu == 40) && (uvv == 48)) return 15;
+        if ((uvu == 44) && (uvv == 48)) return 15;
+        if ((uvu == 52) && (uvv == 20)) return 21;
+        if ((uvu == 48) && (uvv == 20)) return 21;
+        if ((uvu == 48) && (uvv == 16)) return 21;
+        if ((uvu == 52) && (uvv == 16)) return 21;
+        if ((uvu == 28) && (uvv == 52)) return 27;
+        if ((uvu == 24) && (uvv == 52)) return 27;
+        if ((uvu == 24) && (uvv == 48)) return 27;
+        if ((uvu == 28) && (uvv == 48)) return 27;
+        if ((uvu == 12) && (uvv == 20)) return 33;
+        if ((uvu == 8) && (uvv == 20)) return 33;
+        if ((uvu == 8) && (uvv == 16)) return 33;
+        if ((uvu == 12) && (uvv == 16)) return 33;
+        if ((uvu == 56) && (uvv == 8)) return 39;
+        if ((uvu == 48) && (uvv == 8)) return 39;
+        if ((uvu == 48) && (uvv == 0)) return 39;
+        if ((uvu == 56) && (uvv == 0)) return 39;
+        if ((uvu == 12) && (uvv == 36)) return 45;
+        if ((uvu == 8) && (uvv == 36)) return 45;
+        if ((uvu == 8) && (uvv == 32)) return 45;
+        if ((uvu == 12) && (uvv == 32)) return 45;
+        if ((uvu == 12) && (uvv == 52)) return 51;
+        if ((uvu == 8) && (uvv == 52)) return 51;
+        if ((uvu == 8) && (uvv == 48)) return 51;
+        if ((uvu == 12) && (uvv == 48)) return 51;
+        if ((uvu == 60) && (uvv == 52)) return 57;
+        if ((uvu == 56) && (uvv == 52)) return 57;
+        if ((uvu == 56) && (uvv == 48)) return 57;
+        if ((uvu == 60) && (uvv == 48)) return 57;
+        if ((uvu == 52) && (uvv == 36)) return 63;
+        if ((uvu == 48) && (uvv == 36)) return 63;
+        if ((uvu == 48) && (uvv == 32)) return 63;
+        if ((uvu == 52) && (uvv == 32)) return 63;
+        if ((uvu == 32) && (uvv == 36)) return 69;
+        if ((uvu == 28) && (uvv == 36)) return 69;
+        if ((uvu == 28) && (uvv == 32)) return 69;
+        if ((uvu == 36) && (uvv == 32)) return 69;
+        return -1;
+    case 4:
+        if ((uvu == 16) && (uvv == 8)) return 4;
+        if ((uvu == 8) && (uvv == 8)) return 4;
+        if ((uvu == 8) && (uvv == 16)) return 4;
+        if ((uvu == 16) && (uvv == 16)) return 4;
+        if ((uvu == 28) && (uvv == 20)) return 10;
+        if ((uvu == 20) && (uvv == 20)) return 10;
+        if ((uvu == 20) && (uvv == 32)) return 10;
+        if ((uvu == 28) && (uvv == 32)) return 10;
+        if ((uvu == 40) && (uvv == 52)) return 16;
+        if ((uvu == 36) && (uvv == 52)) return 16;
+        if ((uvu == 36) && (uvv == 64)) return 16;
+        if ((uvu == 40) && (uvv == 64)) return 16;
+        if ((uvu == 48) && (uvv == 20)) return 22;
+        if ((uvu == 44) && (uvv == 20)) return 22;
+        if ((uvu == 44) && (uvv == 32)) return 22;
+        if ((uvu == 48) && (uvv == 32)) return 22;
+        if ((uvu == 24) && (uvv == 52)) return 28;
+        if ((uvu == 20) && (uvv == 52)) return 28;
+        if ((uvu == 20) && (uvv == 64)) return 28;
+        if ((uvu == 24) && (uvv == 64)) return 28;
+        if ((uvu == 8) && (uvv == 20)) return 34;
+        if ((uvu == 4) && (uvv == 20)) return 34;
+        if ((uvu == 4) && (uvv == 32)) return 34;
+        if ((uvu == 8) && (uvv == 32)) return 34;
+        if ((uvu == 48) && (uvv == 8)) return 40;
+        if ((uvu == 40) && (uvv == 8)) return 40;
+        if ((uvu == 40) && (uvv == 16)) return 40;
+        if ((uvu == 48) && (uvv == 16)) return 40;
+        if ((uvu == 8) && (uvv == 36)) return 46;
+        if ((uvu == 4) && (uvv == 36)) return 46;
+        if ((uvu == 4) && (uvv == 48)) return 46;
+        if ((uvu == 8) && (uvv == 48)) return 46;
+        if ((uvu == 8) && (uvv == 52)) return 52;
+        if ((uvu == 4) && (uvv == 52)) return 52;
+        if ((uvu == 4) && (uvv == 64)) return 52;
+        if ((uvu == 8) && (uvv == 64)) return 52;
+        if ((uvu == 56) && (uvv == 52)) return 58;
+        if ((uvu == 52) && (uvv == 52)) return 58;
+        if ((uvu == 52) && (uvv == 64)) return 58;
+        if ((uvu == 56) && (uvv == 64)) return 58;
+        if ((uvu == 48) && (uvv == 36)) return 64;
+        if ((uvu == 44) && (uvv == 36)) return 64;
+        if ((uvu == 44) && (uvv == 48)) return 64;
+        if ((uvu == 48) && (uvv == 48)) return 64;
+        if ((uvu == 28) && (uvv == 36)) return 70;
+        if ((uvu == 20) && (uvv == 36)) return 70;
+        if ((uvu == 20) && (uvv == 48)) return 70;
+        if ((uvu == 28) && (uvv == 48)) return 70;
+        return -1;
+    case 5:
+        if ((uvu == 32) && (uvv == 8)) return 5;
+        if ((uvu == 24) && (uvv == 8)) return 5;
+        if ((uvu == 24) && (uvv == 16)) return 5;
+        if ((uvu == 32) && (uvv == 16)) return 5;
+        if ((uvu == 40) && (uvv == 20)) return 11;
+        if ((uvu == 32) && (uvv == 20)) return 11;
+        if ((uvu == 32) && (uvv == 32)) return 11;
+        if ((uvu == 40) && (uvv == 32)) return 11;
+        if ((uvu == 48) && (uvv == 52)) return 17;
+        if ((uvu == 44) && (uvv == 52)) return 17;
+        if ((uvu == 44) && (uvv == 64)) return 17;
+        if ((uvu == 48) && (uvv == 64)) return 17;
+        if ((uvu == 56) && (uvv == 20)) return 23;
+        if ((uvu == 52) && (uvv == 20)) return 23;
+        if ((uvu == 52) && (uvv == 32)) return 23;
+        if ((uvu == 56) && (uvv == 32)) return 23;
+        if ((uvu == 32) && (uvv == 52)) return 29;
+        if ((uvu == 28) && (uvv == 52)) return 29;
+        if ((uvu == 28) && (uvv == 64)) return 29;
+        if ((uvu == 32) && (uvv == 64)) return 29;
+        if ((uvu == 16) && (uvv == 20)) return 35;
+        if ((uvu == 12) && (uvv == 20)) return 35;
+        if ((uvu == 12) && (uvv == 32)) return 35;
+        if ((uvu == 16) && (uvv == 32)) return 35;
+        if ((uvu == 64) && (uvv == 8)) return 41;
+        if ((uvu == 56) && (uvv == 8)) return 41;
+        if ((uvu == 56) && (uvv == 16)) return 41;
+        if ((uvu == 64) && (uvv == 16)) return 41;
+        if ((uvu == 16) && (uvv == 36)) return 47;
+        if ((uvu == 12) && (uvv == 36)) return 47;
+        if ((uvu == 12) && (uvv == 48)) return 47;
+        if ((uvu == 16) && (uvv == 48)) return 47;
+        if ((uvu == 16) && (uvv == 52)) return 53;
+        if ((uvu == 12) && (uvv == 52)) return 53;
+        if ((uvu == 12) && (uvv == 64)) return 53;
+        if ((uvu == 16) && (uvv == 64)) return 53;
+        if ((uvu == 64) && (uvv == 52)) return 59;
+        if ((uvu == 60) && (uvv == 52)) return 59;
+        if ((uvu == 60) && (uvv == 64)) return 59;
+        if ((uvu == 64) && (uvv == 64)) return 59;
+        if ((uvu == 56) && (uvv == 36)) return 65;
+        if ((uvu == 52) && (uvv == 36)) return 65;
+        if ((uvu == 52) && (uvv == 48)) return 65;
+        if ((uvu == 56) && (uvv == 48)) return 65;
+        if ((uvu == 40) && (uvv == 36)) return 71;
+        if ((uvu == 32) && (uvv == 36)) return 71;
+        if ((uvu == 32) && (uvv == 48)) return 71;
+        if ((uvu == 40) && (uvv == 48)) return 71;
+        return -1;
+	}
+	return -1;
 }

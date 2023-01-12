@@ -1,5 +1,18 @@
 import numpy as np
 
+partname_head = "Head"
+partname_body = "Body"
+partname_rarm = "RArm"
+partname_larm = "LArm"
+partname_rleg = "RLeg"
+partname_lleg = "LLeg"
+partname_ohead = "oHead"
+partname_orleg = "oRLeg"
+partname_olleg = "oLLeg"
+partname_orarm = "oRArm"
+partname_olarm = "oLArm"
+partname_obody = "oBody"
+
 def run():
 #===================================
 #     ^ Up (+Y)    Towards Face (+Z)
@@ -28,6 +41,9 @@ def run():
 #    4: front
 #    5: back
 #===================================
+#
+# order: [head, body, rarm, larm, rleg, lleg, ohead, olleg, orleg, orarm, olarm, obody]
+#
     ordfaces = [
         (4,0,3,7), 
         (1,5,6,2), 
@@ -62,45 +78,65 @@ def run():
     rleg = center_rleg + mulin(pix1, [4,12,4])
     lleg = center_lleg + mulin(pix1, [4,12,4])
 
-    with open("me2.obj", "w+") as f:
+    overlayscale = 0.28125/0.25
+    ohead = center_head + mulin(pix1, [8,8,8]) * overlayscale
+    olleg = center_lleg + mulin(pix1, [4,12,4]) * overlayscale
+    orleg = center_rleg + mulin(pix1, [4,12,4]) * overlayscale
+    orarm = center_rarm + mulin(pix1, [4,12,4]) * overlayscale
+    olarm = center_larm + mulin(pix1, [4,12,4]) * overlayscale
+    obody = center_body + mulin(pix1, [8,12,4]) * overlayscale
+
+    origin_head = (0,0)
+    origin_body = (16,16)
+    origin_rarm = (32,48)
+    origin_larm = (40,16)
+    origin_rleg = (16,48)
+    origin_lleg = (0,16)
+
+    origin_ohead = (32, 0)
+    origin_olleg = (0, 32)
+    origin_orleg = (0, 48)
+    origin_orarm = (48, 48)
+    origin_olarm = (40, 32)
+    origin_obody = (16, 32)
+
+    parts = [
+        (partname_head, head, origin_head),
+        (partname_body, body, origin_body),
+        (partname_rarm, rarm, origin_rarm),
+        (partname_larm, larm, origin_larm),
+        (partname_rleg, rleg, origin_rleg),
+        (partname_lleg, lleg, origin_lleg),
+        (partname_ohead, ohead, origin_ohead),
+        (partname_olleg, olleg, origin_olleg),
+        (partname_orleg, orleg, origin_orleg),
+        (partname_orarm, orarm, origin_orarm),
+        (partname_olarm, olarm, origin_olarm),
+        (partname_obody, obody, origin_obody),
+    ]
+    generateUV2FaceidCode(parts)
+
+    with open("steve.obj", "w+") as f:
         f.write("# Made by Wilux\n")
         f.write("mtllib steve.mtl\n\n")
 
         _vid, _vtid, _vnid, _fid = (1,1,1,1)
 
-        f.write("o Head\n")
-        _vid, _vtid, _vnid, _fid = writeCube(f, ordfaces, cube=head, texOrg=(0,0), 
-            vid=_vid, vtid=_vtid, vnid=_vnid, fid=_fid
-        )        
-        f.write("o Body\n")
-        _vid, _vtid, _vnid, _fid = writeCube(f, ordfaces, cube=body, texOrg=(16,16), 
-            vid=_vid, vtid=_vtid, vnid=_vnid, fid=_fid
-        )      
-        f.write("o RArm\n")
-        _vid, _vtid, _vnid, _fid = writeCube(f, ordfaces, cube=rarm, texOrg=(32,48), 
-            vid=_vid, vtid=_vtid, vnid=_vnid, fid=_fid
-        ) 
-        f.write("o LArm\n")
-        _vid, _vtid, _vnid, _fid = writeCube(f, ordfaces, cube=larm, texOrg=(40,16), 
-            vid=_vid, vtid=_vtid, vnid=_vnid, fid=_fid
-        )
-        f.write("o RLeg\n")
-        _vid, _vtid, _vnid, _fid = writeCube(f, ordfaces, cube=rleg, texOrg=(16,48), 
-            vid=_vid, vtid=_vtid, vnid=_vnid, fid=_fid
-        )
-        f.write("o LLeg\n")
-        _vid, _vtid, _vnid, _fid = writeCube(f, ordfaces, cube=lleg, texOrg=(0,16), 
-            vid=_vid, vtid=_vtid, vnid=_vnid, fid=_fid
-        )
+        for (name, cube, texorigin) in parts:
+            f.write(f"o {name}\n")
+            _vid, _vtid, _vnid, _fid = writeCube(f, ordfaces, 
+                cube=cube, texOrg=texorigin, partName=name,
+                vid=_vid, vtid=_vtid, vnid=_vnid, fid=_fid
+            )
 
-def writeCube(f, ordfaces, cube, texOrg, vid, vtid, vnid, fid):
+def writeCube(f, ordfaces, cube, texOrg, partName, vid, vtid, vnid, fid):
 
     file_v = []
     file_vt = []
     file_vn = []
     file_f = []
 
-    cornUvs = corverUvs(texOrg, cube)
+    cornUvs = corverUvs(texOrg, partName)
     for cuv in cornUvs:
         vtid += 1
         file_vt.append(f"vt {cuv[0]} {cuv[1]}\n")
@@ -120,7 +156,7 @@ def writeCube(f, ordfaces, cube, texOrg, vid, vtid, vnid, fid):
         xn = vnid-1
         xv = vid-4
 
-        c0, c1, c2, c3 = counterClockwiseCornerIds(dirid, xt)
+        c0, c1, c2, c3 = counterClockwiseCornerUVIds(dirid, xt)
 
 
         file_f.append(
@@ -143,7 +179,7 @@ def writeCube(f, ordfaces, cube, texOrg, vid, vtid, vnid, fid):
         #f.write(f"fv {vcoord[0]} {vcoord[1]} {vcoord[2]}\n")
         #f.write(f"fv {vcoord[0]} {vcoord[2]} {vcoord[3]}\n")
 
-def counterClockwiseCornerIds(faceid, offset): 
+def counterClockwiseCornerUVIds(faceid, offset): 
     i = faceid
     if i == 0:
         return (offset + i for i in (6,5,10,11))
@@ -158,8 +194,8 @@ def counterClockwiseCornerIds(faceid, offset):
     elif i == 5:
         return (offset + i for i in (7,6,11,12))
 
-def corverUvs(texOrigin, cube):
-    size = cubeSize(cube)
+def corverUvs(texOrigin, partname):
+    size = cubeSizeInPixels(partname)
     x = size[0]
     y = size[1]
     z = size[2]
@@ -181,31 +217,58 @@ def corverUvs(texOrigin, cube):
     ]
     return [(u/64, 1-v/64) for (u,v) in uvpx]
 
-def cubeSize(cube):
-    return abs(cube[0]-cube[6])
+def cubeSizeInPixels(partname):
+    if partname in [partname_head, partname_ohead]:
+        return np.array([8,8,8])
+    elif partname in [partname_body, partname_obody]:
+        return np.array([8,12,4])
+    elif partname in [
+        partname_larm, partname_olarm, partname_lleg, partname_olleg,
+        partname_rarm, partname_orarm, partname_rleg, partname_orleg
+        ]:
+        return np.array([4,12,4])
+    raise ValueError(f"{partname} is not a known part")
     
 def faceNormal(faceid):
-    i = faceid
-    if i == 0:
-        return [1,0,0]
-    elif i == 1:
-        return [-1,0,0]
-    elif i == 2:
-        return [0,1,0]
-    elif i == 3:
-        return [0,-1,0]
-    elif i == 4:
-        return [0,0,1]
-    elif i == 5:
-        return [0,0,-1]
-
-
-
+    
+    match faceid:
+        case 0:
+            ret = np.array([1,0,0])
+        case 1:
+            ret = np.array([-1,0,0])
+        case 2:
+            ret = np.array([0,1,0])
+        case 3:
+            ret = np.array([0,-1,0])
+        case 4:
+            ret = np.array([0,0,1])
+        case 5:
+            ret = np.array([0,0,-1])
+    return ret*0.444
 
 def mulin(arr, scales):
     return np.array([(row * scales) for row in arr])
 def debugged(s):
     print(s)
     return s
+
+def generateUV2FaceidCode(cubeAndOriginPairs):
+    dump = ""
+    for dirid in range(6):
+        dump += f"    case {dirid}:\n"
+        for cubeId, (partname, cube, origin) in enumerate(cubeAndOriginPairs):
+            uvids = counterClockwiseCornerUVIds(dirid, 0)
+            uvId2Coord = corverUvs(origin, partname)
+            for uvid in uvids:
+                uvCoord = uvId2Coord[uvid]
+                faceId = cubeId*6 + dirid
+                uvu = int(uvCoord[0]*64)
+                uvv = int((1-uvCoord[1])*64)
+                dump += f"        if ((uvu == {uvu}) && (uvv == {uvv})) return {faceId};\n"
+        dump += "        return -1;\n"
+    with open("codedump.txt", "w+") as f:
+        f.write(dump)
+# case 4
+#   if (uvx == {uv.x} && uvy == {uv.x}) return {faceid}
 
 run()

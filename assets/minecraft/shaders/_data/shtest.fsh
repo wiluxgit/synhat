@@ -45,13 +45,14 @@ void main() {
         highp vec2 newTexCoord = (texCoord0 - diff) + (diff * wx_scaling);
         
         //float isIn1 = 0;
-        if(newTexCoord.y < wx_minUV.y || newTexCoord.y > wx_maxUV.y) discard;
-        if(newTexCoord.x < wx_minUV.x || newTexCoord.x > wx_maxUV.x) discard;
+        //if(newTexCoord.y < wx_minUV.y || newTexCoord.y > wx_maxUV.y) discard;
+        //if(newTexCoord.x < wx_minUV.x || newTexCoord.x > wx_maxUV.x) discard;
 
         newTexCoord += wx_UVDisplacement;
         
         color = texture(Sampler0, newTexCoord);
-        color = vec4(normalize(normal.xyz)/2+vec3(0.5,0.5,0.5), 1);
+        //color = vec4(normalize(normal.xyz)/2+vec3(0.5,0.5,0.5), 1);
+        color = vertexColor;
         if (color.a < 0.1) {
             discard;
         }
