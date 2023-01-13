@@ -199,9 +199,7 @@ void applyDisplacement(bool isAlex, int vertId, int data0, int data1, int data2)
 	int cornerId = getCornerId(vertId);
 	int dirId = faceId % 6;
 	bool isSecondary = isSecondaryLayer(vertId);
-	int perpLenPixels = getPerpendicularLength(
-		getFaceId(vertId), isAlex
-	);
+	int perpLenPixels = getPerpendicularLength(getFaceId(vertId), isAlex);
 	
 	float directionMod = 1;
 	if (isNegativeOffset) {
