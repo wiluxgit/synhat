@@ -39,7 +39,7 @@ async function main() {
     });
     const mesh = new THREE.Mesh(planeGeo, planeMat);
     mesh.rotation.x = Math.PI * -.5;
-    scene.add(mesh);
+    //scene.add(mesh);
   }
 
   {
@@ -107,15 +107,17 @@ async function main() {
           texture.wrapT = THREE.RepeatWrapping;
           texture.minFilter = THREE.NearestFilter;
           texture.magFilter = THREE.NearestFilter;
+          texture.flipY = false;
 
           const material = new THREE.ShaderMaterial( {
             uniforms: {
               Sampler0: { type: "t", value: texture }
             },   
             vertexShader: await fetch("shader/vertex.glsl", {credentials: 'same-origin'}).then((response) => response.text()),
-            fragmentShader: await fetch("shader/fragment.glsl", {credentials: 'same-origin'}).then((response) => response.text())
+            fragmentShader: await fetch("shader/fragment.glsl", {credentials: 'same-origin'}).then((response) => response.text()),
+            glslVersion: THREE.GLSL3,
+            side: THREE.DoubleSide,
           } );
-          material.extensions.glslVersion = THREE.GLSL1;
 
           child.material = material;
           //child.material.map = texture;
