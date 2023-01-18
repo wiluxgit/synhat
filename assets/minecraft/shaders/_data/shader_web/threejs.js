@@ -2,7 +2,7 @@
 
 /* global THREE */
 
-function main() {
+async function main() {
   const canvas = document.querySelector('#c');
   const renderer = new THREE.WebGLRenderer({canvas});
 
@@ -86,7 +86,60 @@ function main() {
   }
 
   {
+    const textureLoader = new THREE.TextureLoader();
     const objLoader = new THREE.OBJLoader2();
+
+    const texture = textureLoader.load('assets/steve.png')
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.minFilter = THREE.NearestFilter;
+    texture.magFilter = THREE.NearestFilter;
+
+    objLoader.load( 'assets/steve.obj', (event) => {
+      const root = event.detail.loaderRootNode;
+      scene.add(root);
+      
+      root.traverse( async (child) => {
+        if ( child.isMesh ) { 
+
+          const texture = textureLoader.load('assets/steve.png')
+          texture.wrapS = THREE.RepeatWrapping;
+          texture.wrapT = THREE.RepeatWrapping;
+          texture.minFilter = THREE.NearestFilter;
+          texture.magFilter = THREE.NearestFilter;
+
+          const material = new THREE.ShaderMaterial( {
+            uniforms: {
+              Sampler0: { type: "t", value: texture }
+            },   
+            vertexShader: await fetch("shader/vertex.glsl", {credentials: 'same-origin'}).then((response) => response.text()),
+            fragmentShader: await fetch("shader/fragment.glsl", {credentials: 'same-origin'}).then((response) => response.text())
+          } );
+          material.extensions.glslVersion = THREE.GLSL1;
+
+          child.material = material;
+          //child.material.map = texture;
+          //child.material.transparent = true;
+          //child.geometry.computeVertexNormals();  
+         }  
+      });    
+    
+      scene.add(root);
+      const box = new THREE.Box3().setFromObject(root);
+  
+      const boxSize = box.getSize(new THREE.Vector3()).length();
+      const boxCenter = box.getCenter(new THREE.Vector3());
+  
+      // set the camera to frame the box
+      frameArea(boxSize * 1.2, boxSize, boxCenter, camera);
+  
+      // update the Trackball controls to handle the new size
+      controls.maxDistance = boxSize * 10;
+      controls.target.copy(boxCenter);
+      controls.update();
+    });
+
+    /*
     objLoader.loadMtl('assets/steve.mtl', null, (materials) => {
       objLoader.setMaterials(materials);
       objLoader.load('assets/steve.obj', (event) => {
@@ -108,7 +161,7 @@ function main() {
         controls.target.copy(boxCenter);
         controls.update();
       });
-    });
+    }); */
   }
 
   function resizeRendererToDisplaySize(renderer) {
