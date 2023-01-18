@@ -89,12 +89,6 @@ async function main() {
     const textureLoader = new THREE.TextureLoader();
     const objLoader = new THREE.OBJLoader2();
 
-    const texture = textureLoader.load('assets/steve.png')
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.minFilter = THREE.NearestFilter;
-    texture.magFilter = THREE.NearestFilter;
-
     objLoader.load( 'assets/steve.obj', (event) => {
       const root = event.detail.loaderRootNode;
       scene.add(root);
