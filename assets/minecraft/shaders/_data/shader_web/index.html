@@ -1,15 +1,68 @@
-<!doctype html>
-<html>
 <head>
-  <title>Hello World program in GLSL</title>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <!--link href="hello-glsl.css" rel="stylesheet" type="text/css"/-->
-  <script src="index.js" type="text/javascript"> </script>
+    <title>Hello ThreeJS</title>
+    <style>
+        html, body {
+            margin: 0;
+            height: 100%;
+        }
+        #c {
+            width: 50%;
+            height: 100%;
+            display: block;
+            position: absolute;
+        }
+        #setting {
+            width: 50%;
+            height: 100%;
+            display: block;
+            position: absolute;
+            right: 0
+        }
+    </style>
 </head>
 <body>
-  <p>Hello World! Hello GLSL!</p>
-  <canvas>Your browser does not seem to support 
-    HTML5 canvas.</canvas>
+    <div>
+        <canvas id="c"></canvas>
+        <div id="setting">
+            <div id="toggle-displacement">  
+                <input type="checkbox" id="i-displacement-toggle">enable displacement modifer</input>
+                <br><br>
+                <div id="content-displacement" hidden>
+                    <form>
+                        <label>Displacement in quarter pixels (between -63 and 63):</label>
+                        <br>
+                        <input type="reset">
+                        <input id="i-displacement-offset-box" type="number" id="quantity" name="quantity" min="-63" max="63" value="0">
+                        <input id="i-displacement-offset-slider" type="range" id="vol" name="vol" min="-63" max="63" value="0">
+                    </form> 
+                    
+                    <label>Assymetric Direction:</label>
+                    <select id="i-displacement-asym-direction">
+                        <option value="top">Top</option>
+                        <option value="bottom">Botton</option>
+                        <option value="right">Right</option>
+                        <option value="left">Left</option>
+                    </select>
+                    <br>
+                    <label>Assymetric Mode:</label>
+                    <select id="i-displacement-asym-mode">
+                        <option value="direct">Direct</option>
+                        <option value="specialA">SpecialA</option>
+                    </select>
+                    <div id="content-asym-direct-offset">
+                        Asym <input type="reset">
+                        <input id="i-asym-displacement-offset-box" type="number" id="quantity" name="quantity" min="-63" max="63" value="0">
+                        <input id="i-asym-displacement-offset-slider" type="range" id="vol" name="vol" min="-63" max="63" value="0">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r127/three.min.js"></script>
+    <script src="https://r105.threejsfundamentals.org/threejs/resources/threejs/r105/js/controls/OrbitControls.js"></script>
+    <script src="https://r105.threejsfundamentals.org/threejs/resources/threejs/r105/js/loaders/LoaderSupport.js"></script>
+    <script src="https://r105.threejsfundamentals.org/threejs/resources/threejs/r105/js/loaders/OBJLoader2.js"></script>
+    <script src="https://r105.threejsfundamentals.org/threejs/resources/threejs/r105/js/loaders/MTLLoader.js"></script>
+    <script src="threejs.js"></script>
 </body>
-</html>
