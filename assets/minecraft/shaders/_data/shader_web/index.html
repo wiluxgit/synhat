@@ -18,6 +18,11 @@
             position: absolute;
             right: 0
         }
+        .PixelSettingsItem {
+            margin: 4px;
+            background-color:lightgreen;
+            padding: 5px;
+        }
     </style>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
@@ -48,59 +53,84 @@
     
             displacement_slider_max:63, 
             displacement_slider_min:-63,
+
+            default_transform_displacement: {offset:0, asym_offset:0, asym_direction:"Top", asym_mode:"Normal", snap:false},
         }
     }'>
         <canvas id="c"></canvas>
-        <div id="setting" class="PixelSettings" x-data='{
-            content:[
-                {id: 1, type:CONST.transformations.displacement, data:{offset:0, asym_offset:0, asym_direction:CONST.asym_directions.top, asym_mode:CONST.asym_modes.normal, snap:false}}
-            ]
-        }'>
-            <template x-for="item in content" :key="content.id">
-                <template x-if='item.type==CONST.transformations.displacement'>
-                    <div class="PixelSettingsItem">
-                        <div x-html='JSON.stringify(item.data)'></div><br>
-
-                        <label>Snap to opposing layer</label>
-                        <input type="checkbox" x-model="item.data.snap"><br><br>
-
-                        <label>Displacement in quarter pixels (between -63 and 63):</label>
-                        <div class="xslider">
-                            <input type="reset" x-on:click="item.data.offset=0">
-                            <input type="number" x-model="item.data.offset" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
-                            <input type="range" x-model="item.data.offset" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
-                        </div><br> 
-            
-                        <label>Assymetric Direction:</label>
-                        <select x-model="item.data.asym_direction">
-                            <template x-for="asym_dir in CONST.asym_directions">
-                                <option x-html="asym_dir"></option>
+        <div id="setting" class="PixelSettings" x-data='{content:[]}'>
+            <template x-for="(item, index) in content" :key="item.id">
+                <div class="PixelSettingsItem">
+                    <!--Transform Type / Delete DOM-->
+                    <div>
+                        <select x-model="item.type">
+                            <template x-for="transformation in CONST.transformations">
+                                <option x-html="transformation"></option>
                             </template>
-                        </select><br><br>
-
-                        <label>Assymetric Mode:</label>
-                        <select x-model="item.data.asym_mode">
-                            <template x-for="asym_mode in CONST.asym_modes">
-                                <option x-html="asym_mode"></option>
-                            </template>
-                        </select><br><br>
-
-                        <div x-show='item.data.asym_mode==CONST.asym_modes.normal'>
-                            <label>Assymetric Displacement in quarter pixels (between -63 and 63):</label>
-                            <div class="xslider">
-                                <input type="reset" x-on:click="item.data.asym_offset=0">
-                                <input type="number" x-model="item.data.asym_offset" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
-                                <input type="range" x-model="item.data.asym_offset" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
-                            </div>  
-                        </div>
+                        </select>
+                        <button type="button" x-on:click='content.splice(index, 1); console.log("Delete INDEX:" + index)'>Delete Transform</button> 
                     </div>
-                </template>
+                    
+                    <!--Displacement DOM-->
+                    <template x-if='item.type == CONST.transformations.displacement'>
+                        <div>
+                            <br>
+                            <div x-html='JSON.stringify(item.data)'></div><br>
+
+                            <label>Snap to opposing layer</label>
+                            <input type="checkbox" x-model="item.data.snap"><br><br>
+
+                            <label>Displacement in quarter pixels (between -63 and 63):</label>
+                            <div class="xslider">
+                                <input type="reset" x-on:click="item.data.offset=0">
+                                <input type="number" x-model="item.data.offset" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
+                                <input type="range" x-model="item.data.offset" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
+                            </div><br> 
+                
+                            <label>Assymetric Direction:</label>
+                            <select x-model="item.data.asym_direction">
+                                <template x-for="asym_dir in CONST.asym_directions">
+                                    <option x-html="asym_dir"></option>
+                                </template>
+                            </select><br><br>
+
+                            <label>Assymetric Mode:</label>
+                            <select x-model="item.data.asym_mode">
+                                <template x-for="asym_mode in CONST.asym_modes">
+                                    <option x-html="asym_mode"></option>
+                                </template>
+                            </select><br><br>
+
+                            <div x-show='item.data.asym_mode==CONST.asym_modes.normal'>
+                                <label>Assymetric Displacement in quarter pixels (between -63 and 63):</label>
+                                <div class="xslider">
+                                    <input type="reset" x-on:click="item.data.asym_offset=0">
+                                    <input type="number" x-model="item.data.asym_offset" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
+                                    <input type="range" x-model="item.data.asym_offset" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
+                                </div>  
+                            </div>
+                        </div>
+                    </template>
+
+                </div>
             </template>
+
+            <!--Add New Transform DOM-->
             <div class="PixelSettingsItem">
-                add
+                <button type="button" x-on:click='
+                ids = content.map((x) => x.id);
+                max = Math.max(0, ...ids);
+                console.log("MAX="+max+" IDS="+ids)
+                content.push({
+                    id:(max+1), 
+                    type:CONST.transformations.displacement, 
+                    data:JSON.parse(JSON.stringify(CONST.default_transform_displacement))
+                })'>Add New Transform</button> 
+                <button type="button" x-on:click="alert(JSON.stringify(content))">Debug Transform List</button> 
             </div>
         </div>
     </div>
+
     <script src="ui.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r127/three.min.js"></script>
     <script src="https://r105.threejsfundamentals.org/threejs/resources/threejs/r105/js/controls/OrbitControls.js"></script>
