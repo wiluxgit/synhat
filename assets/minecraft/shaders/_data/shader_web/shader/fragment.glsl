@@ -18,5 +18,5 @@ void main() {
             discard;
         }
         fragColor = color;
-    }
+    }   
 }
