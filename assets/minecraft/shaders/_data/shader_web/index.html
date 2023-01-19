@@ -23,6 +23,9 @@
             background-color:lightgreen;
             padding: 5px;
         }
+        .debug {
+            background-color:lightcoral;
+        }
     </style>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
@@ -30,11 +33,11 @@
     <div x-data='{
         CONST:{
             transformations:{
-                displacement: "Displacement",
-                uv_offset: "UVOffset",
-                uv_crop: "UVCrop",
-                post_flags: "PostFlags",
-                pre_flags: "PreFlags",
+                displacement: "displacement",
+                uv_offset: "uv_offset",
+                uv_crop: "uv_crop",
+                post_flags: "post_flags",
+                pre_flags: "pre_flags",
             },
     
             asym_directions:{
@@ -53,8 +56,18 @@
     
             displacement_slider_max:63, 
             displacement_slider_min:-63,
+            uv_offset_slider_max:63, 
+            uv_offset_slider_min:0,
+            uv_crop_slider_max:63, 
+            uv_crop_slider_min:0,
 
-            default_transform_displacement: {offset:0, asym_offset:0, asym_direction:"Top", asym_mode:"Normal", snap:false},
+            default_transform:{
+                displacement: {offset:0, asym_offset:0, asym_direction:"Top", asym_mode:"Normal", snap:false},
+                uv_offset: {x_min:8, x_max:8, y_min:16, y_max:16},
+                uv_crop: {top:0, bottom:0, left:0, right:0},
+                post_flags: {clip_top:true, clip_bottom:true, clip_right:false, clip_left:false},
+                pre_flags: {},
+            },
         }
     }'>
         <canvas id="c"></canvas>
@@ -63,28 +76,29 @@
                 <div class="PixelSettingsItem">
                     <!--Transform Type / Delete DOM-->
                     <div>
-                        <select x-model="item.type">
+                        <select x-model="item.type" x-on:change='
+                            item.data = JSON.parse(JSON.stringify(CONST.default_transform[item.type]));
+                        '>
                             <template x-for="transformation in CONST.transformations">
                                 <option x-html="transformation"></option>
                             </template>
                         </select>
-                        <button type="button" x-on:click='content.splice(index, 1); console.log("Delete INDEX:" + index)'>Delete Transform</button> 
+                        <button type="button" x-on:click='content.splice(index, 1)'>Delete Transform</button> 
                     </div>
+
+                    <br><div class="debug" x-html='JSON.stringify(item.data)'></div><br>
                     
                     <!--Displacement DOM-->
                     <template x-if='item.type == CONST.transformations.displacement'>
                         <div>
-                            <br>
-                            <div x-html='JSON.stringify(item.data)'></div><br>
-
                             <label>Snap to opposing layer</label>
                             <input type="checkbox" x-model="item.data.snap"><br><br>
 
                             <label>Displacement in quarter pixels (between -63 and 63):</label>
                             <div class="xslider">
                                 <input type="reset" x-on:click="item.data.offset=0">
-                                <input type="number" x-model="item.data.offset" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
-                                <input type="range" x-model="item.data.offset" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
+                                <input type="number" x-model.number="item.data.offset" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
+                                <input type="range" x-model.number="item.data.offset" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
                             </div><br> 
                 
                             <label>Assymetric Direction:</label>
@@ -105,28 +119,106 @@
                                 <label>Assymetric Displacement in quarter pixels (between -63 and 63):</label>
                                 <div class="xslider">
                                     <input type="reset" x-on:click="item.data.asym_offset=0">
-                                    <input type="number" x-model="item.data.asym_offset" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
-                                    <input type="range" x-model="item.data.asym_offset" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
+                                    <input type="number" x-model.number="item.data.asym_offset" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
+                                    <input type="range" x-model.number="item.data.asym_offset" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
                                 </div>  
                             </div>
                         </div>
                     </template>
 
+                    <!--PostFlags DOM-->
+                    <template x-if='item.type == CONST.transformations.post_flags'>
+                        <div>
+                            <label>UV Scale Fix</label><br>
+                            <label>Top</label>
+                            <input type="checkbox" x-model="item.data.clip_top"><br>
+                            <label>Bottom</label>
+                            <input type="checkbox" x-model="item.data.clip_bottom"><br>
+                            <label>Left</label>
+                            <input type="checkbox" x-model="item.data.clip_left"><br>
+                            <label>Right</label>
+                            <input type="checkbox" x-model="item.data.clip_right"><br>
+                        </div>
+                    </template>
+
+                    <!--UV Offset DOM-->
+                    <template x-if='item.type == CONST.transformations.uv_offset'>
+                        <div>
+                            <label>UV Crop</label><br>
+                            <div class="xslider">
+                                <label>X min</label>
+                                <input type="reset" x-on:click="item.data.x_min=0">
+                                <input type="number" x-model.number="item.data.x_min" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                                <input type="range" x-model.number="item.data.x_min" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                            </div>
+                            <div class="xslider">
+                                <label>X max</label>
+                                <input type="reset" x-on:click="item.data.x_max=0">
+                                <input type="number" x-model.number="item.data.x_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                                <input type="range" x-model.number="item.data.x_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                            </div>
+                            <div class="xslider">
+                                <label>Y min</label>
+                                <input type="reset" x-on:click="item.data.y_min=0">
+                                <input type="number" x-model.number="item.data.y_min" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                                <input type="range" x-model.number="item.data.y_min" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                            </div>
+                            <div class="xslider">
+                                <label>Y max</label>
+                                <input type="reset" x-on:click="item.data.y_max=0">
+                                <input type="number" x-model.number="item.data.y_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                                <input type="range" x-model.number="item.data.y_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                            </div>
+                        </div>
+                    </template>
+
+                    <!--UV Crop DOM-->
+                    <template x-if='item.type == CONST.transformations.uv_crop'>
+                        <div>
+                            <label>UV Offset</label><br>
+                            <div class="xslider">
+                                <label>Top</label>
+                                <input type="reset" x-on:click="item.data.top=0">
+                                <input type="number" x-model.number="item.data.top" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                                <input type="range" x-model.number="item.data.top" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                            </div>
+                            <div class="xslider">
+                                <label>Bottom</label>
+                                <input type="reset" x-on:click="item.data.bottom=0">
+                                <input type="number" x-model.number="item.data.bottom" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                                <input type="range" x-model.number="item.data.bottom" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                            </div>
+                            <div class="xslider">
+                                <label>Right</label>
+                                <input type="reset" x-on:click="item.data.right=0">
+                                <input type="number" x-model.number="item.data.right" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                                <input type="range" x-model.number="item.data.right" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                            </div>
+                            <div class="xslider">
+                                <label>Left</label>
+                                <input type="reset" x-on:click="item.data.left=0">
+                                <input type="number" x-model.number="item.data.left" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                                <input type="range" x-model.number="item.data.left" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                            </div>
+                        </div>
+                    </template>
+                    
                 </div>
             </template>
 
             <!--Add New Transform DOM-->
             <div class="PixelSettingsItem">
                 <button type="button" x-on:click='
-                ids = content.map((x) => x.id);
-                max = Math.max(0, ...ids);
-                console.log("MAX="+max+" IDS="+ids)
-                content.push({
-                    id:(max+1), 
-                    type:CONST.transformations.displacement, 
-                    data:JSON.parse(JSON.stringify(CONST.default_transform_displacement))
-                })'>Add New Transform</button> 
+                    ids = content.map((x) => x.id);
+                    max = Math.max(0, ...ids);
+                    content.push({
+                        id:(max+1), 
+                        type:CONST.transformations.displacement, 
+                        data:JSON.parse(JSON.stringify(CONST.default_transform.displacement))
+                    })
+                '>Add New Transform</button> 
                 <button type="button" x-on:click="alert(JSON.stringify(content))">Debug Transform List</button> 
+                <button type="button" x-on:click="content=[]">Delete All Transforms</button> 
             </div>
         </div>
     </div>
