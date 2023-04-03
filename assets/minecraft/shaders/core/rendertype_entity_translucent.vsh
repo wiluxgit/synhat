@@ -118,7 +118,7 @@ void main() {
             }
             //</debug>*/
 
-            if((data0 & F_ENABLED) != 0){
+            if(false/*(data0 & F_ENABLED) != 0*/){
                 wx_isEdited = 1; 
 
                 writeUVBounds(faceId, isAlex);
