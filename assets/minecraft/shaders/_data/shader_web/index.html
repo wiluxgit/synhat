@@ -86,7 +86,7 @@
                         <button type="button" x-on:click='content.splice(index, 1)'>Delete Transform</button> 
                     </div>
 
-                    <br><div class="debug" x-html='JSON.stringify(item.data)'></div><br>
+                    <br><div class="debug" x-html='JSON.stringify(item)'></div><br>
                     
                     <!--Displacement DOM-->
                     <template x-if='item.type == CONST.transformations.displacement'>
@@ -202,7 +202,6 @@
                             </div>
                         </div>
                     </template>
-                    
                 </div>
             </template>
 
