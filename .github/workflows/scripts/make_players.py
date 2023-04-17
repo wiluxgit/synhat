@@ -45,11 +45,11 @@ def makeSkin(uuid, procnum):
     except ValueError:
         print(f"[Error] user data can not be fetched for: {uuid}")
         return  ("error", "error")
-    else: 
+    else:
         print(f"{procnum} {uuid}: {userName} {skinType}")
 
     img = downloadTextureFromURL(skinUrl)
-    img = fixImage(img)  
+    img = fixImage(img)
     path = "synhat/player/player/"+uuid
     model = {"parent":f"synhat/player/{skinType}","textures":{"1":path}}
 
@@ -69,7 +69,7 @@ def safeDir(path):
 def downloadTextureFromURL(url):
     img_data = requests.get(url, stream=True).content
     with open("temp/temp.png", 'wb') as handler:
-        handler.write(img_data)    
+        handler.write(img_data)
     return Image.open("temp/temp.png")
 
 def getProfileData(uuid):
@@ -85,7 +85,7 @@ def getProfileData(uuid):
     skinData = json.loads(skinDataStr)
     skinUrl = skinData["textures"]["SKIN"]["url"]
     skinType = "classic"
-    try: 
+    try:
         skinType = skinData["textures"]["SKIN"]["metadata"]["model"]
     except Exception: ""
 
@@ -105,8 +105,8 @@ def downloadSite(url):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36"
     }
-    get = requests.get(url, 
-        allow_redirects=True, 
+    get = requests.get(url,
+        allow_redirects=True,
         headers=headers,
     )
     return get.content
@@ -146,7 +146,7 @@ if __name__ == '__main__':
     parseSuccess = False
     try:
         [minTxt,maxTxt] = sys.argv[1].split("-")
-        if len(maxTxt) == 0: 
+        if len(maxTxt) == 0:
             maxp = 65536
         else:
             maxp = int(maxTxt)
@@ -154,7 +154,7 @@ if __name__ == '__main__':
         parseSuccess = True
     except Exception:
         parseSuccess = False
-    
+
     if parseSuccess:
         print(f"\nDownloading player(s) {minp}-{maxp}\n")
         actuallyDoRealRequests = True

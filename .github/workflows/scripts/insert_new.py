@@ -13,19 +13,19 @@ def insertNew():
         fileData = json.load(open(hatDataPath, encoding='utf8'))
         hatData = fileData["models"]
 
-        alreadyRegistered = {} 
+        alreadyRegistered = {}
         for hd in hatData:
             mcItem = hd["item"]
             modelPath = hd["model"]
             if not mcItem in alreadyRegistered:
                 alreadyRegistered[mcItem] = []
             alreadyRegistered[mcItem].append(modelPath)
-        
+
         newData = json.load(f)["models"]
         for nd in newData:
             modelPath = nd["model"]
             mcItem = nd["item"]
-            try: 
+            try:
                 if modelPath in alreadyRegistered[mcItem]: #print(f"SKIP (already defined): {mcItem}:{modelPath}")
                     continue
             except Exception:""
