@@ -17,7 +17,7 @@ def make_mc_files():
         data = declr["data"]
         path = declr["model"]
 
-        if not item in item2Model: 
+        if not item in item2Model:
             try:
                 with open(getMcModelPath(item)) as f:
                     modelJson = json.load(f)
@@ -35,7 +35,7 @@ def make_mc_files():
         item2Model[item]["overrides"].append(
             {"predicate":{"custom_model_data":data},"model":path}
         )
-    
+
     for k,v in item2Model.items():
         v["overrides"].sort(
             key=lambda x: get_cmdata(x)
@@ -46,7 +46,7 @@ def make_mc_files():
         print(k)
 
     print("done", datetime.now().strftime("%H:%M:%S"))
-    
+
 
 def getMcModelPath(item):
     return f"../../../assets/minecraft/models/item/{item}.json"

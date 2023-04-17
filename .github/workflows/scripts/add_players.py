@@ -25,11 +25,11 @@ def run():
             if len(maybeOldData) == 0:
                 print(f"New    {newName} {newRank}")
                 newP = {
-                    "item": "minecraft:clock", 
-                    "data": nextAvailableData, 
-                    "model": f"synhat/player/player/{puuid}", 
-                    "displayName": f"{newName}", 
-                    "uuid": f"{puuid}", 
+                    "item": "minecraft:clock",
+                    "data": nextAvailableData,
+                    "model": f"synhat/player/player/{puuid}",
+                    "displayName": f"{newName}",
+                    "uuid": f"{puuid}",
                     "playerRank": f"{newRank}"
                 }
                 fileData["models"].append(newP)
@@ -54,12 +54,12 @@ def extractUUIDFromRankdump(str, rank):
     for x in mx:
         match = re.search(r"([0-9a-f\-]{36,}\/.*)", x)
         try:
-            mtch = match.group(0) 
+            mtch = match.group(0)
             [uuid, name] = mtch.split("/")
             uuids[uuid] = {"rank":rank, "name":name}
         except:""
     return uuids
-   
+
 if __name__ == '__main__':
     print("""
 Test
