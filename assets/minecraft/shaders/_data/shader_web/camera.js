@@ -1,9 +1,11 @@
 'use strict';
 
-/* global THREE */
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
 async function main() {
-  const canvas = document.querySelector('#c');
+  const canvas = document.querySelector('#camera');
   const renderer = new THREE.WebGLRenderer({canvas});
 
   const fov = 45;
@@ -13,7 +15,7 @@ async function main() {
   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
   camera.position.set(0, 10, 20);
 
-  const controls = new THREE.OrbitControls(camera, canvas);
+  const controls = new OrbitControls(camera, canvas);
   controls.target.set(0, 5, 0);
   controls.update();
 
@@ -24,7 +26,7 @@ async function main() {
     const planeSize = 4000;
 
     const loader = new THREE.TextureLoader();
-    const texture = loader.load('https://r105.threejsfundamentals.org/threejs/resources/images/checker.png');
+    const texture = loader.load('assets/checker.png');
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
     texture.minFilter = THREE.NearestFilter;
@@ -87,14 +89,14 @@ async function main() {
 
   {
     const textureLoader = new THREE.TextureLoader();
-    const objLoader = new THREE.OBJLoader2();
+    const objLoader = new OBJLoader();
 
-    objLoader.load( 'assets/steve.obj', (event) => {
-      const root = event.detail.loaderRootNode;
+    objLoader.load( 'assets/steve.obj', (obj) => {
+      const root = obj;
       scene.add(root);
-      
+
       root.traverse( async (child) => {
-        if ( child.isMesh ) { 
+        if ( child.isMesh ) {
 
           const texture = textureLoader.load('assets/steve.png')
           texture.wrapS = THREE.RepeatWrapping;
@@ -106,7 +108,7 @@ async function main() {
           const material = new THREE.ShaderMaterial( {
             uniforms: {
               Sampler0: { type: "t", value: texture }
-            },   
+            },
             vertexShader: await fetch("shader/vertex.glsl", {credentials: 'same-origin'}).then((response) => response.text()),
             fragmentShader: await fetch("shader/fragment.glsl", {credentials: 'same-origin'}).then((response) => response.text()),
             glslVersion: THREE.GLSL3,
@@ -116,19 +118,19 @@ async function main() {
           child.material = material;
           //child.material.map = texture;
           //child.material.transparent = true;
-          //child.geometry.computeVertexNormals();  
-         }  
-      });    
-    
+          //child.geometry.computeVertexNormals();
+         }
+      });
+
       scene.add(root);
       const box = new THREE.Box3().setFromObject(root);
-  
+
       const boxSize = box.getSize(new THREE.Vector3()).length();
       const boxCenter = box.getCenter(new THREE.Vector3());
-  
+
       // set the camera to frame the box
       frameArea(boxSize * 1.2, boxSize, boxCenter, camera);
-  
+
       // update the Trackball controls to handle the new size
       controls.maxDistance = boxSize * 10;
       controls.target.copy(boxCenter);
