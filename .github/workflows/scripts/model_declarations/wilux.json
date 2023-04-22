@@ -1,5 +1,4 @@
 {"models": [
-	{"item": "minecraft:clock", "model": "synhat/wilux/animal/fat_cat", "displayName": "Fat Cat", "lore": "Unhealthy"},
-	{"item": "minecraft:clock", "model": "synhat/wilux/animal/turkey_shit", "displayName": "\"Turkey\"", "lore": "Is it a turkey, or a piece of shit?, (it's both)"},
-	{"item": "minecraft:clock", "model": "synhat/wilux/hat/villager/nose", "displayName": "Villager Nose"}
+	{"item": "minecraft:clock", "model": "synhat/wilux/player/technoblade", "displayName": "Technoblade", "lore": "Technoblade"},
+	{"item": "minecraft:clock", "model": "synhat/wilux/phoenix_wright/objection", "displayName": "Objection!"}
 ]}

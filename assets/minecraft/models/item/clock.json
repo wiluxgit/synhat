@@ -1,4 +1,6 @@
 {"parent": "item/_clock_state/clock_00", "overrides": [
+	{"predicate": {"custom_model_data": -387}, "model": "synhat/wilux/phoenix_wright/objection"},
+	{"predicate": {"custom_model_data": -386}, "model": "synhat/wilux/player/technoblade"},
 	{"predicate": {"custom_model_data": -385}, "model": "synhat/wilux/hat/villager/nose"},
 	{"predicate": {"custom_model_data": -384}, "model": "synhat/wilux/animal/turkey_shit"},
 	{"predicate": {"custom_model_data": -383}, "model": "synhat/wilux/animal/fat_cat"},
