@@ -5,6 +5,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
 async function main() {
+  const Parser = BinaryParser.Parser;
+
   const canvas = document.querySelector('#camera');
   const renderer = new THREE.WebGLRenderer({canvas});
 
