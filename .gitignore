@@ -1,2 +1,3 @@
 *.zip
 **/__pycache__/*
+assets/minecraft/shaders/_data/shader_web/node_modules/*
