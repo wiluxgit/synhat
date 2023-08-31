@@ -1,9 +1,10 @@
 <head>
-    <title>Hello ThreeJS</title>
+    <title>Look at this  graph</title>
     <style>
         html, body {
             margin: 0;
             height: 100%;
+            font-family:Arial, Helvetica, sans-serif;
         }
         #camera {
             width: 100%;
@@ -27,31 +28,29 @@
             height: 100%;
 
             grid-template-columns: auto 256px 50%;
-            grid-template-rows: 256px auto;
+            grid-template-rows: 32px 256px auto;
+            grid-template-areas:
+                "header header header"
+                "globaltransform faceselect transform"
+                "camera camera json"
+            ;
+        }
+        #winHeader {
+            grid-area: header;
+            background-color:lightgreen;
+            padding: 5px;
         }
         #winGlobal {
-            grid-column-start: 1;
-            grid-column-end: 1;
-            grid-row-start: 1;
-            grid-row-end: 1;
+            grid-area: globaltransform;
         }
         #winFaceSelect {
-            grid-column-start: 2;
-            grid-column-end: 3;
-            grid-row-start: 1;
-            grid-row-end: 2;
+            grid-area: faceselect;
         }
-        #winFaceSettings {
-            grid-column-start: 3;
-            grid-column-end: 4;
-            grid-row-start: 1;
-            grid-row-end: 3;
+        #winFaceTransformSettings {
+            grid-area: transform;
         }
         #winCamera {
-            grid-column-start: 1;
-            grid-column-end: 3;
-            grid-row-start: 2;
-            grid-row-end: 3;
+            grid-area: camera;
         }
 
     </style>
@@ -100,19 +99,62 @@
     }'>
         <div id="winEditorGrid">
             <div id="winGlobal"></div>
+            <div id="winHeader">
+                Header
+            </div>
             <div id="winCamera">
                 <canvas id="camera"></canvas>
             </div>
             <div id="winFaceSelect">
-                <div id=>
-
+                <div style="
+                    position: relative;
+                    left: 0; top: 0;
+                    height: 100%;
+                    ">
+                    <canvas id="layer1" width="64" height="64" style="
+                        height: 100%;
+                        position: absolute;
+                        left: 0; top: 0;
+                        z-index: 0;
+                        background-color: #afafaf;
+                    ">
+                    </canvas>
+                    <!--canvas id="layer2" width="64" height="64" style="
+                        height: 100%;
+                        position: absolute;
+                        left: 0; top: 0;
+                        z-index: 1;
+                        background-image:
+                            linear-gradient(45deg, #808080 25%, transparent 25%),
+                            linear-gradient(-45deg, #808080 25%, transparent 25%),
+                            linear-gradient(45deg, transparent 75%, #808080 75%),
+                            linear-gradient(-45deg, transparent 75%, #808080 75%)
+                        ;">
+                    </canvas-->
                 </div>
             </div>
-            <div id="winFaceSettings">
+            <div id="winFaceTransformSettings">
                 <div id="setting" class="PixelSettings" x-data='{content:[]}'>
+                    <!--Add New Transform DOM-->
+                    <div class="PixelSettingsItem">
+                        <button type="button" x-on:click='
+                            ids = content.map((x) => x.id);
+                            max = Math.max(0, ...ids);
+                            content.push({
+                                id:(max+1),
+                                type:CONST.transformations.displacement,
+                                data:JSON.parse(JSON.stringify(CONST.default_transform.displacement))
+                            })
+                        '>Add</button>
+                        <button type="button" x-on:click="alert('copy all')">Copy All</button>
+                        <button type="button" x-on:click="alert('paste all')">Paste All</button>
+                        <button type="button" x-on:click="content=[]">Delete All</button>
+                        <button type="button" x-on:click="alert(JSON.stringify(content))">Debug</button>
+                    </div>
+
                     <template x-for="(item, index) in content" :key="item.id">
                         <div class="PixelSettingsItem">
-                            <!--Transform Type / Delete DOM-->
+                            <!-- Universal Transform Header (Type / Delete)-->
                             <div>
                                 <select x-model="item.type" x-on:change='
                                     item.data = JSON.parse(JSON.stringify(CONST.default_transform[item.type]));
@@ -121,7 +163,9 @@
                                         <option x-html="transformation"></option>
                                     </template>
                                 </select>
-                                <button type="button" x-on:click='content.splice(index, 1)'>Delete Transform</button>
+                                <button type="button" x-on:click="alert('copy')">Copy</button>
+                                <button type="button" x-on:click="alert('paste')">Paste</button>
+                                <button type="button" x-on:click='content.splice(index, 1)'>Delete</button>
                             </div>
 
                             <br><div class="debug" x-html='JSON.stringify(item)'></div><br>
@@ -242,21 +286,6 @@
                             </template>
                         </div>
                     </template>
-
-                    <!--Add New Transform DOM-->
-                    <div class="PixelSettingsItem">
-                        <button type="button" x-on:click='
-                            ids = content.map((x) => x.id);
-                            max = Math.max(0, ...ids);
-                            content.push({
-                                id:(max+1),
-                                type:CONST.transformations.displacement,
-                                data:JSON.parse(JSON.stringify(CONST.default_transform.displacement))
-                            })
-                        '>Add New Transform</button>
-                        <button type="button" x-on:click="alert(JSON.stringify(content))">Debug Transform List</button>
-                        <button type="button" x-on:click="content=[]">Delete All Transforms</button>
-                    </div>
                 </div>
             </div>
         </div>

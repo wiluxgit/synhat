@@ -93,8 +93,7 @@ async function main() {
     const textureLoader = new THREE.TextureLoader();
     const objLoader = new OBJLoader();
 
-    objLoader.load( 'assets/steve.obj', (obj) => {
-      const root = obj;
+    objLoader.load( 'assets/steve.obj', (root) => {
       scene.add(root);
 
       root.traverse( async (child) => {

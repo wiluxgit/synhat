@@ -1,5 +1,7 @@
 uniform sampler2D Sampler0;
 
+#define out out highp
+
 // how long to stretch along normal to simulate 90 deg face
 #define AS_OUTER (32.0)
 
@@ -47,6 +49,7 @@ vec3 pixelNormal();
 
 vec3 NewPosition;
 
+//
 mat4 ModelViewMat;
 mat4 ProjMat;
 vec3 Position;
@@ -54,12 +57,11 @@ vec3 Normal;
 vec2 UV0;
 
 // WX
-out highp vec2 texCoord0;
-out highp vec2 wx_maxUV;
-out highp vec2 wx_minUV;
-out highp vec4 wx_vertexColor;
-out highp float wx_isEdited;
-//
+out vec2 texCoord0;
+out vec2 wx_maxUV;
+out vec2 wx_minUV;
+out vec4 wx_vertexColor;
+out float wx_isEdited;
 
 void main() {
     ModelViewMat = viewMatrix;
@@ -70,9 +72,9 @@ void main() {
     texCoord0 = UV0;
 
     gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
-    
+
     int mcid = getMCVertID();
-    
+
     float mcidx = float(mcid)/400.0;
     float mcidy = float((mcid/4)%6)/6.0;
 	wx_vertexColor = vec4(mcidx,mcidy,0,1);
@@ -80,26 +82,26 @@ void main() {
 
     wx_isEdited = 0.0;
     NewPosition = Position;
-    
+
     if (true) { //(gl_VertexID >= 18*8){ //is second layer
         vec4 topRightPixel = texelFetch(Sampler0, ivec2(0, 0), 0)*256.0; //Macs can't texelfetch in vertex shader?
         int header0 = int(topRightPixel.r + 0.1);
         int header1 = int(topRightPixel.g + 0.1);
         int header2 = int(topRightPixel.b + 0.1);
 
-        if (header0 == 0xda && header1 == 0x67) { 
+        if (header0 == 0xda && header1 == 0x67) {
             bool isAlex = (header2 == 1);
 
             int faceId = getFaceId(mcid);
             int cornerId = getCornerId(mcid);
-			
+
 			int fileoffset = faceId + (4*6);
 			int dataC = fileoffset % 4;
 			int dataX = (fileoffset / 4) % 8;
 			int dataY = (fileoffset / (8*4));
-			
+
 			vec4 srcPixel = texelFetch(Sampler0, ivec2(dataX,dataY), 0)*256.0;
-			
+
 			//<DEBUG>
 			switch(faceId) {
 				case 38: // top hat
@@ -108,23 +110,23 @@ void main() {
 			}
 			//</DEBUG>
 
-			
+
 			int faceDataSourceId = int(srcPixel[dataC]+0.1);
-			
+
 			wx_vertexColor = colorFromInt(faceDataSourceId);
-			
+
 			while (faceDataSourceId != 0 && faceDataSourceId != 255) {
 				wx_isEdited = 1.0;
-			
+
 				vec4 transformData = getTfDataFromID(faceDataSourceId);
-			
+
             	int data0 = int(transformData.r+0.1);
         	    int data1 = int(transformData.g+0.1);
-    	        int data2 = int(transformData.b+0.1); 
-	            int data3 = int(transformData.a+0.1); 
-	            
+    	        int data2 = int(transformData.b+0.1);
+	            int data3 = int(transformData.a+0.1);
+
 	            int type = MASK_TRANSFROM_TYPE & data0;
-	            
+
 	            switch (type) {
 	            	case TRANSFROM_TYPE_DISPLACEMENT:
 	            		applyDisplacement(isAlex, mcid, data0, data1, data2);
@@ -139,21 +141,21 @@ void main() {
 	            		applyPostFlags(isAlex, mcid, data0, data1, data2);
 	            		break;
 	            }
-	            
+
 	            // read last 8 bits (alpha bits), if not UV_OFFSET (since that consuemes all bytes)
 	        	if (type != TRANSFROM_TYPE_UV_OFFSET) {
 	        		faceDataSourceId = data3;
 	        	} else {
 	        		faceDataSourceId = 0;
 	        	}
-                faceDataSourceId = 0;    
+                faceDataSourceId = 0;
 			}
-			
+
 			//if (wx_isEdited) {
 			//	writeDeaults()
 			//}
-        }        
-    }   
+        }
+    }
     gl_Position = ProjMat * ModelViewMat * vec4(NewPosition, 1.0);
     return;
     //normal = ProjMat * ModelViewMat * vec4(Normal, 0.0);
@@ -163,31 +165,31 @@ void applyDisplacement(bool isAlex, int vertId, int data0, int data1, int data2)
 	bool isNegativeOffset 			 = (data0 & FLAG_DISP_NEGATIVE) != 0;
 	bool opposingSnap				 = (data0 & FLAG_DISP_OPPOSING_SNAP) != 0;
 	bool asymmetric_isNegativeOffset = (data0 & FLAG_DISP_ASYM_NEGATIVE) != 0;
-		
+
 	float offset					 = float(data1 & MASK_DISP_OFFSET);
 	int assymetric_type 			 = data1 & MASK_DISP_ASYM_TYPE;
 	float assymetric_offset 		 = float(data2 & MASK_DISP_ASYM_OFFSET);
 	int assymetric_direction 		 = data2 & MASK_DISP_ASYM_DIRECTION;
-	
+
 	int faceId = getFaceId(vertId);
 	int cornerId = getCornerId(vertId);
 	int dirId = getDirId(vertId);
 	bool isSecondary = isSecondaryLayer(vertId);
 	int perpLenPixels = getPerpendicularLength(faceId, isAlex);
-	
+
 	float directionMod = 1.0;
 	if (isNegativeOffset) {
 		directionMod = -1.0;
-	}	
+	}
 	float asymmetric_directionMod = 1.0;
 	if (asymmetric_isNegativeOffset) {
 		asymmetric_directionMod = -1.0;
-	}	
+	}
 	float pixelSize = 1.0;
 	if (isSecondary != opposingSnap) { // isSecondary XOR snapToOpposing
 		pixelSize = OVERLAYSCALE;
 	}
-	
+
 	bool ignoreSnap = (assymetric_type == DISP_ASYM_TYPE_FLIP_IN); //hacky yes
 	if (opposingSnap && !ignoreSnap) {
 		float snapDirection = 1.0;
@@ -198,13 +200,13 @@ void applyDisplacement(bool isAlex, int vertId, int data0, int data1, int data2)
 		NewPosition += pixelNormal() * layerExtention;
 	}
 	NewPosition += pixelNormal() * offset * pixelSize * directionMod;
-	
+
 	const int[8] corners1 = int[8](0, 2, 0, 1, 2, 0, 3, 2);
 	const int[8] corners2 = int[8](1, 3, 3, 2, 3, 1, 1, 0);
-	int cornIndex = (assymetric_direction >> 6) | (dirId == 5 ? 1<<3 : 0);	
+	int cornIndex = (assymetric_direction >> 6) | (dirId == 5 ? 1<<3 : 0);
 	int corner1 = corners1[cornIndex];
 	int corner2 = corners2[cornIndex];
-	
+
 	if (cornerId == corner1 || cornerId == corner2) {
 		switch (assymetric_type) {
 			case DISP_ASYM_TYPE_SIMPLE:
@@ -217,7 +219,7 @@ void applyDisplacement(bool isAlex, int vertId, int data0, int data1, int data2)
 			case DISP_ASYM_TYPE_FLIP_IN:
 				// does not work for inner faces
 				float backheight = 19.125 * float(perpLenPixels);
-				NewPosition -= pixelNormal() * 1.0 * backheight; 
+				NewPosition -= pixelNormal() * 1.0 * backheight;
 				//TODO: uv stuff
 				break;
 		}
@@ -264,7 +266,7 @@ vec4 colorFromInt(int i) {
 	if (i<0) {
 		return vec4(0.2,0.2,0.2,1);
 	}
-	
+
 	switch (i%8) {
 		case 0: return vec4(1,0,0,1);
 		case 1: return vec4(0,1,0,1);
@@ -314,7 +316,7 @@ int faceIDLookup(int dirid, int uvu, int uvv);
 int getMCVertID() {
 	int dirid;
     int corner;
-    
+
     switch(gl_VertexID % 6){
 	case 0:
 	case 3:
@@ -743,10 +745,10 @@ void writeUVBounds(int faceId, bool isAlex){
     case 54: //Left L-Shirt
         if(isAlex){
             wx_minUV = vec2(8+48-1, 52)/64.0;
-            wx_maxUV = vec2(12+48-1, 64)/64.0;  
+            wx_maxUV = vec2(12+48-1, 64)/64.0;
         } else {
             wx_minUV = vec2(8+48, 52)/64.0;
-            wx_maxUV = vec2(12+48, 64)/64.0;  
+            wx_maxUV = vec2(12+48, 64)/64.0;
         }
         return;
     case 55: //Right L-Shirt
