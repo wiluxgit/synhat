@@ -84,28 +84,17 @@ MAIN.enums = {
     },
 }
 
-MAIN.default_transforms = {}
-MAIN.default_transforms[MAIN.enums.transform_type.displacement] = {
-    global_displacement: 0,
-    snap: MAIN.enums.snap.true,
-    sign: MAIN.enums.sign.positive,
-    asym_displacement: 0,
-    asym_sign: MAIN.enums.asym_sign.positive,
-    asym_spec: MAIN.enums.asym_spec.no,
-    asym_edge: MAIN.enums.asym_edge.top,
-}
+MAIN.faceOperationParser = (
+    new BinaryParser.Parser()
+        .endianess("little")
+        .encoderSetOptions({bitEndianess: true})
+        .bit2("transform_type")
+        .bit6("transform_argument_index")
+)
 
-MAIN.master_parsers = {
-    faceOperationParser: (
-        new BinaryParser.Parser()
-            .endianess("little")
-            .encoderSetOptions({bitEndianess: true})
-            .bit2("transform_type")
-            .bit6("transform_argument_index")
-    )
-}
-
+MAIN.default_transform = {}
 MAIN.transform_parsers = {}
+// ====================================================
 MAIN.transform_parsers[MAIN.enums.transform_type.displacement] = (
     new BinaryParser.Parser()
         .endianess("little")
@@ -120,18 +109,97 @@ MAIN.transform_parsers[MAIN.enums.transform_type.displacement] = (
         .bit6("__filler__")
         .bit8("next")
 )
+MAIN.default_transform[MAIN.enums.transform_type.displacement] = {
+    global_displacement: 0,
+    snap: MAIN.enums.snap.true,
+    sign: MAIN.enums.sign.positive,
+    asym_displacement: 0,
+    asym_sign: MAIN.enums.asym_sign.positive,
+    asym_spec: MAIN.enums.asym_spec.no,
+    asym_edge: MAIN.enums.asym_edge.top,
+}
+
+// ====================================================
+MAIN.transform_parsers[MAIN.enums.transform_type.uv_offset] = (
+    new BinaryParser.Parser()
+        .endianess("little")
+        .encoderSetOptions({bitEndianess: true})
+        .bit6("uv_x_max")
+        .bit2("uv_y_min_0")
+        .bit6("uv_x_min")
+        .bit2("uv_y_min_1")
+        .bit6("uv_y_max")
+        .bit2("uv_y_min_2")
+)
+MAIN.default_transform[MAIN.enums.transform_type.uv_offset] = {
+    uv_x_max: 0,
+    uv_x_min: 0,
+    uv_y_max: 0,
+    uv_y_min_0: 0,
+    uv_y_min_1: 0,
+    uv_y_min_2: 0,
+}
+
+// ====================================================
+MAIN.transform_parsers[MAIN.enums.transform_type.uv_crop] = (
+    new BinaryParser.Parser()
+        .endianess("little")
+        .encoderSetOptions({bitEndianess: true})
+        .bit6("crop_top")
+        .bit2("crop_bot")
+        .bit6("crop_right")
+        .bit2("crop_left_0")
+        .bit6("crop_left_1")
+        .bit2("crop_left_2")
+)
+MAIN.default_transform[MAIN.enums.transform_type.uv_crop] = {
+    crop_top: 0,
+    crop_bot: 0,
+    crop_right: 0,
+    crop_left_0: 0,
+    crop_left_1: 0,
+    crop_left_2: 0,
+}
+
+// ====================================================
+MAIN.transform_parsers[MAIN.enums.transform_type.special] = (
+    new BinaryParser.Parser()
+        .endianess("little")
+        .encoderSetOptions({bitEndianess: true})
+        .bit1("top_snap_clip_uv")
+        .bit1("bot_snap_clip_uv")
+        .bit1("right_snap_clip_uv")
+        .bit1("left_snap_clip_uv")
+        .bit4("__filler__")
+        .bit8("__filler2__")
+        .bit8("__filler3__")
+        .bit8("__filler4__")
+)
+MAIN.default_transform[MAIN.enums.transform_type.special] = {
+    top_snap_clip_uv: 0,
+    bot_snap_clip_uv: 0,
+    left_snap_clip_uv: 0,
+    right_snap_clip_uv: 0,
+}
 
 MAIN.MakeExprToCreateSignedTwoWayBinding = (signedDotPath, absDotPath, isNegativeDotPath) => {
     return `
     $watch(\"${signedDotPath}\", (value) => {
-        ${absDotPath} = Math.abs(${signedDotPath})
-        ${isNegativeDotPath} = ${signedDotPath} < 0
+        if (${signedDotPath}) {
+            console.log(\"signed -> abs,sign\")
+            ${absDotPath} = Math.abs(${signedDotPath})
+            ${isNegativeDotPath} = ${signedDotPath} < 0
+        }
     })
     $watch(\"${absDotPath}\", (value) => {
-        ${signedDotPath} = ${absDotPath} * (${isNegativeDotPath} ? -1 : 1)
+        if (${signedDotPath}) {
+            ${signedDotPath} = ${absDotPath} * (${isNegativeDotPath} ? -1 : 1)
+        }
     })
     $watch(\"${isNegativeDotPath}\", (value) => {
-        ${signedDotPath} = ${absDotPath} * (${isNegativeDotPath} ? -1 : 1)
+        if (${signedDotPath}) {
+            ${signedDotPath} = ${absDotPath} * (${isNegativeDotPath} ? -1 : 1)
+        }
     })
     ${signedDotPath} = ${absDotPath} * (${isNegativeDotPath} ? -1 : 1)
     `

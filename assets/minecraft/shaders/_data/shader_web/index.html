@@ -103,10 +103,9 @@
           x-on:change='MAIN.changedUploadImage'
           x-init='MAIN.resetSelectedSkin'>
         </input>
-        <br>
-        <button type="button" x-on:click='alert("TODO")'>Download Skin</button>
-        <br>
-        <button type="button" x-on:click='MAIN.resetSelectedSkin'>Reset</button>
+        <br><button type="button" x-on:click='MAIN.resetSelectedSkin'>Reset</button>
+        <br><button type="button" x-on:click='alert("TODO")'>Download Skin</button>
+        <br><button type="button" x-on:click='alert("TODO")'>Download Json</button>
       </div>
 
       <div id="winHeader">
@@ -141,7 +140,7 @@
                 id: (max+1),
                 type: MAIN.enums.transform_type.displacement,
                 data: JSON.parse(JSON.stringify(
-                  MAIN.default_transforms[MAIN.enums.transform_type.displacement]
+                  MAIN.default_transform[MAIN.enums.transform_type.displacement]
                 ))
               })
             '>Add</button>
@@ -155,7 +154,7 @@
             <div class="PixelSettingsItem">
               <!-- Universal Transform Header (Type / Delete)-->
               <div>
-                <select x-model="item.type" x-on:change='
+                <select x-model.number="item.type" x-on:change='
                   item.data = JSON.parse(JSON.stringify(MAIN.default_transform[item.type]));
                 '>
                   <template x-for="[k, v] in Object.entries(MAIN.enums.transform_type)">
@@ -169,7 +168,7 @@
 
               <br>
               <textarea class="debug" x-html='JSON.stringify(item, null, 2)'></textarea>
-              <br>
+              <br><br>
 
               <!--Displacement DOM-->
               <template x-if='item.type == MAIN.enums.transform_type.displacement'>
@@ -228,18 +227,18 @@
                 <div>
                   <label>UV Scale Fix</label><br>
                   <label>Top</label>
-                  <input type="checkbox" x-model="item.data.clip_top"><br>
+                  <input type="checkbox" x-model="item.data.top_snap_clip_uv"><br>
                   <label>Bottom</label>
-                  <input type="checkbox" x-model="item.data.clip_bottom"><br>
+                  <input type="checkbox" x-model="item.data.bot_snap_clip_uv"><br>
                   <label>Left</label>
-                  <input type="checkbox" x-model="item.data.clip_left"><br>
+                  <input type="checkbox" x-model="item.data.left_snap_clip_uv"><br>
                   <label>Right</label>
-                  <input type="checkbox" x-model="item.data.clip_right"><br>
+                  <input type="checkbox" x-model="item.data.right_snap_clip_uv"><br>
                 </div>
               </template>
 
               <!--UV Offset DOM-->
-              <template x-if='item.type == MAIN.enums.transform_type.special.uv_offset'>
+              <template x-if='item.type == MAIN.enums.transform_type.uv_offset'>
                 <div>
                   <label>UV Crop</label><br>
                   <div class="xslider">
@@ -270,7 +269,7 @@
               </template>
 
               <!--UV Crop DOM-->
-              <template x-if='item.type == MAIN.enums.transform_type.special.uv_crop'>
+              <template x-if='item.type == MAIN.enums.transform_type.uv_crop'>
                 <div>
                   <label>UV Offset</label><br>
                   <div class="xslider">
