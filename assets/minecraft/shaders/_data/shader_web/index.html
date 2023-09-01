@@ -1,14 +1,21 @@
 <head>
     <title>Look at this  graph</title>
     <style>
+        :root {
+            --face-select-scale: 4px
+        }
         html, body {
             margin: 0;
             height: 100%;
             font-family:Arial, Helvetica, sans-serif;
         }
+        canvas {
+            image-rendering: pixelated;
+        }
         #camera {
             width: 100%;
             height: 100%;
+            min-width: none;
         }
         #setting {
             width: 100%;
@@ -27,34 +34,53 @@
             width: 100%;
             height: 100%;
 
-            grid-template-columns: auto 256px 50%;
-            grid-template-rows: 32px 256px auto;
+            grid-template-columns: 260px auto 50%;
+            grid-template-rows: 32px 260px auto;
             grid-template-areas:
                 "header header header"
-                "globaltransform faceselect transform"
+                "faceselect globaltransform transform"
                 "camera camera json"
             ;
         }
         #winHeader {
             grid-area: header;
+            min-width: 0;
             background-color:lightgreen;
             padding: 5px;
         }
         #winGlobal {
             grid-area: globaltransform;
+            min-width: 0;
+            padding: 5px;
         }
         #winFaceSelect {
+            background-color:#666666;
             grid-area: faceselect;
+            min-width: 0;
+        }
+        #winFaceSelectFixedResolution {
+            position: relative;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            height: calc(64 * var(--face-select-scale));
+            width: calc(64 * var(--face-select-scale));
+            background-size: var(--face-select-scale) var(--face-select-scale);
+            background-color: #ffffff;
+            background-image:
+                linear-gradient(to right, #aaaaaa 1px, transparent 1px),
+                linear-gradient(to bottom, #aaaaaa 1px, transparent 1px);
         }
         #winFaceTransformSettings {
             grid-area: transform;
+            min-width: 0;
         }
         #winCamera {
             grid-area: camera;
+            min-width: 0;
         }
 
     </style>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
     <div x-data='{
@@ -98,7 +124,16 @@
         }
     }'>
         <div id="winEditorGrid">
-            <div id="winGlobal"></div>
+            <div id="winGlobal">
+                <input type="file" id="uploadInputImage" name="uploadInputImage" accept="image/*"
+                    x-on:change='main.changedUploadImage'
+                    x-init='main.resetSelectedSkin'>
+                </input>
+                <br>
+                <button type="button" x-on:click='alert("TODO")'>Download Skin</button>
+                <br>
+                <button type="button" x-on:click='main.resetSelectedSkin'>Reset</button>
+            </div>
             <div id="winHeader">
                 Header
             </div>
@@ -106,17 +141,12 @@
                 <canvas id="camera"></canvas>
             </div>
             <div id="winFaceSelect">
-                <div style="
-                    position: relative;
-                    left: 0; top: 0;
-                    height: 100%;
-                    ">
-                    <canvas id="layer1" width="64" height="64" style="
+                <div id="winFaceSelectFixedResolution">
+                    <canvas id="canvasSkinPreview" width="64" height="64" style="
                         height: 100%;
                         position: absolute;
                         left: 0; top: 0;
                         z-index: 0;
-                        background-color: #afafaf;
                     ">
                     </canvas>
                     <!--canvas id="layer2" width="64" height="64" style="
@@ -146,10 +176,10 @@
                                 data:JSON.parse(JSON.stringify(CONST.default_transform.displacement))
                             })
                         '>Add</button>
-                        <button type="button" x-on:click="alert('copy all')">Copy All</button>
-                        <button type="button" x-on:click="alert('paste all')">Paste All</button>
-                        <button type="button" x-on:click="content=[]">Delete All</button>
-                        <button type="button" x-on:click="alert(JSON.stringify(content))">Debug</button>
+                        <button type="button" x-on:click='alert("copy all")'>Copy All</button>
+                        <button type="button" x-on:click='alert("paste all")'>Paste All</button>
+                        <button type="button" x-on:click='content=[]'>Delete All</button>
+                        <button type="button" x-on:click='alert(JSON.stringify(content))'>Debug</button>
                     </div>
 
                     <template x-for="(item, index) in content" :key="item.id">
@@ -299,7 +329,7 @@
     <script src="https://r105.threejsfundamentals.org/threejs/resources/threejs/r105/js/loaders/MTLLoader.js"></script>
     <script src="threejs.js"></script>
     -->
-    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <!--script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script-->
 
     <script type="importmap">
         {
@@ -310,7 +340,11 @@
         }
     </script>
 
-    <script type="text/javascript" src="dependencies/binparser.js"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="dependencies/binparser.js"></script>
+
     <script type="module" src="camera.js"></script>
-    <script type="module" src="parser.js"></script>
+    <script src="main.js"></script>
+
+    <!--script type="module" src="parser.js"></script-->
 </body>
