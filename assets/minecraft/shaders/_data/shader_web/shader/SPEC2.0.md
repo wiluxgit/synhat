@@ -27,7 +27,7 @@ must be #DA67
 
 t = skin type
 Wide (Steve): 0x00
-Slim (Alex): 0x1
+Slim (Alex): 0x01
 
 enabled Steve: #DA670000
 enabled Alex: #DA670100
@@ -51,19 +51,19 @@ char getFaceOperationEntry(char faceid) {
 
 One f =
 | Bit 7 | Bit 6 | Bit 5 | Bit 4 | Bit 3 | Bit 2 | Bit 1 | Bit 0 |
-| tranform_type |            transform_arugment_index           |
+| transform_type |            transform_arugment_index           |
 ```
-### tranform_type
+### transform_type
 ```c
-switch(tranform_type) {
+switch(transform_type) {
     case 0:
-        return TRANSFROM_TYPE_DISPLACEMENT;
+        return TRANSFROM_TYPE_displacement;
     case 1:
-        return TRANSFROM_TYPE_UV_CROP;
+        return TRANSFROM_TYPE_uv_crop;
     case 2:
-        return TRANSFROM_TYPE_UV_OFFSET;
+        return TRANSFROM_TYPE_uv_offset;
     case 3:
-        return TRANSFROM_TYPE_SPECIAL;
+        return TRANSFROM_TYPE_special;
 }
 ```
 ### transform_arugment_index

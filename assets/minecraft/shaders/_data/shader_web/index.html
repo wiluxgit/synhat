@@ -12,6 +12,10 @@
     canvas {
       image-rendering: pixelated;
     }
+    textarea {
+      height: 300px;
+      width: 100%;
+    }
     #camera {
       width: 100%;
       height: 100%;
@@ -85,54 +89,24 @@
 <body>
   <div x-data='{
     CONST:{
-      transformations:{
-        displacement: "displacement",
-        uv_offset: "uv_offset",
-        uv_crop: "uv_crop",
-        post_flags: "post_flags",
-        pre_flags: "pre_flags",
-      },
-
-      asym_directions:{
-        top: "Top",
-        bottom: "Botton",
-        right: "Right",
-        left: "Left",
-      },
-
-      asym_modes:{
-        normal: "Normal",
-        specialA: "SpecialA",
-        specialB: "SpecialB",
-        specialC: "SpecialC",
-      },
-
       displacement_slider_max:63,
       displacement_slider_min:-63,
       uv_offset_slider_max:63,
       uv_offset_slider_min:0,
       uv_crop_slider_max:63,
       uv_crop_slider_min:0,
-
-      default_transform:{
-        displacement: {offset:0, asym_offset:0, asym_direction:"Top", asym_mode:"Normal", snap:false},
-        uv_offset: {x_min:8, x_max:8, y_min:16, y_max:16},
-        uv_crop: {top:0, bottom:0, left:0, right:0},
-        post_flags: {clip_top:true, clip_bottom:true, clip_right:false, clip_left:false},
-        pre_flags: {},
-      },
     }
   }'>
     <div id="winEditorGrid">
       <div id="winGlobal">
         <input type="file" id="uploadInputImage" name="uploadInputImage" accept="image/*"
-          x-on:change='main.changedUploadImage'
-          x-init='main.resetSelectedSkin'>
+          x-on:change='MAIN.changedUploadImage'
+          x-init='MAIN.resetSelectedSkin'>
         </input>
         <br>
         <button type="button" x-on:click='alert("TODO")'>Download Skin</button>
         <br>
-        <button type="button" x-on:click='main.resetSelectedSkin'>Reset</button>
+        <button type="button" x-on:click='MAIN.resetSelectedSkin'>Reset</button>
       </div>
       <div id="winHeader">
         Header
@@ -149,18 +123,6 @@
             z-index: 0;
           ">
           </canvas>
-          <!--canvas id="layer2" width="64" height="64" style="
-            height: 100%;
-            position: absolute;
-            left: 0; top: 0;
-            z-index: 1;
-            background-image:
-              linear-gradient(45deg, #808080 25%, transparent 25%),
-              linear-gradient(-45deg, #808080 25%, transparent 25%),
-              linear-gradient(45deg, transparent 75%, #808080 75%),
-              linear-gradient(-45deg, transparent 75%, #808080 75%)
-            ;">
-          </canvas-->
         </div>
       </div>
       <div id="winFaceTransformSettings">
@@ -172,15 +134,26 @@
               ids = content.map((x) => x.id);
               max = Math.max(0, ...ids);
               content.push({
-                id:(max+1),
-                type:CONST.transformations.displacement,
-                data:JSON.parse(JSON.stringify(CONST.default_transform.displacement))
+                id: (max+1),
+                type: MAIN.enums.transform_type.displacement,
+                data: JSON.parse(JSON.stringify(
+                  MAIN.default_transforms[MAIN.enums.transform_type.displacement]
+                ))
               })
             '>Add</button>
             <button type="button" x-on:click='alert("copy all")'>Copy All</button>
             <button type="button" x-on:click='alert("paste all")'>Paste All</button>
             <button type="button" x-on:click='content=[]'>Delete All</button>
-            <button type="button" x-on:click='alert(JSON.stringify(content))'>Debug</button>
+            <button type="button" x-on:click='
+              let faceOperations = new Uint32Array(72);
+              let transforms = new Uint32Array(44);
+              let header = MAIN.fromHexString("DA670000");
+
+              for (faceTransfrom of content) {
+                transformParser = MAIN.transform_parsers[faceTransfrom.type];
+                console.log(transformParser);
+              }
+            '>Debug</button>
           </div>
 
           <template x-for="(item, index) in content" :key="item.id">
@@ -188,10 +161,10 @@
               <!-- Universal Transform Header (Type / Delete)-->
               <div>
                 <select x-model="item.type" x-on:change='
-                  item.data = JSON.parse(JSON.stringify(CONST.default_transform[item.type]));
+                  item.data = JSON.parse(JSON.stringify(MAIN.default_transform[item.type]));
                 '>
-                  <template x-for="transformation in CONST.transformations">
-                    <option x-html="transformation"></option>
+                  <template x-for="[k, v] in Object.entries(MAIN.enums.transform_type)">
+                    <option x-html="k" x-bind:value="v"></option>
                   </template>
                 </select>
                 <button type="button" x-on:click="alert('copy')">Copy</button>
@@ -199,48 +172,64 @@
                 <button type="button" x-on:click='content.splice(index, 1)'>Delete</button>
               </div>
 
-              <br><div class="debug" x-html='JSON.stringify(item)'></div><br>
+              <br>
+              <textarea class="debug" x-html='JSON.stringify(item, null, 2)'></textarea>
+              <br>
 
               <!--Displacement DOM-->
-              <template x-if='item.type == CONST.transformations.displacement'>
+              <template x-if='item.type == MAIN.enums.transform_type.displacement'>
                 <div>
                   <label>Snap to opposing layer</label>
-                  <input type="checkbox" x-model="item.data.snap"><br><br>
+                  <input type="checkbox" x-model.number="item.data.snap"><br><br>
 
-                  <label>Displacement in quarter pixels (between -63 and 63):</label>
-                  <div class="xslider">
-                    <input type="reset" x-on:click="item.data.offset=0">
-                    <input type="number" x-model.number="item.data.offset" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
-                    <input type="range" x-model.number="item.data.offset" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
+                  <label>Displacement in quarter pixels (between 0 and 63):</label>
+                  <div class="xslider" x-data='{_asSigned: null}' x-init='
+                    eval(MAIN.MakeExprToCreateSignedTwoWayBinding(
+                      "_asSigned", "item.data.global_displacement", "item.data.sign"
+                    ))
+                  '>
+                    <input type="reset" x-on:click="_asSigned = 0">
+                    <input type="number" x-model.number="_asSigned" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
+                    <input type="range" x-model.number="_asSigned" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
                   </div><br>
 
                   <label>Assymetric Direction:</label>
-                  <select x-model="item.data.asym_direction">
-                    <template x-for="asym_dir in CONST.asym_directions">
-                      <option x-html="asym_dir"></option>
+                  <select x-model.number="item.data.asym_edge">
+                    <template x-for="[k, v] in Object.entries(MAIN.enums.asym_edge)">
+                      <option x-html="k" x-bind:value="v"></option>
                     </template>
                   </select><br><br>
 
-                  <label>Assymetric Mode:</label>
-                  <select x-model="item.data.asym_mode">
-                    <template x-for="asym_mode in CONST.asym_modes">
-                      <option x-html="asym_mode"></option>
-                    </template>
-                  </select><br><br>
+                  <label>Use Special Assymetric Displacement Transform </label>
+                  <input type="checkbox" x-model.number="item.data.asym_spec"><br><br>
 
-                  <div x-show='item.data.asym_mode==CONST.asym_modes.normal'>
+                  <div x-show='!item.data.asym_spec'>
                     <label>Assymetric Displacement in quarter pixels (between -63 and 63):</label>
-                    <div class="xslider">
-                      <input type="reset" x-on:click="item.data.asym_offset=0">
-                      <input type="number" x-model.number="item.data.asym_offset" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
-                      <input type="range" x-model.number="item.data.asym_offset" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
+
+                    <div class="xslider" x-data='{_asSigned: null}' x-init='
+                      eval(MAIN.MakeExprToCreateSignedTwoWayBinding(
+                        "_asSigned", "item.data.asym_displacement", "item.data.asym_sign"
+                      ))
+                    '>
+                      <input type="reset" x-on:click="_asSigned=0">
+                      <input type="number" x-model.number="_asSigned" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
+                      <input type="range" x-model.number="_asSigned" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
                     </div>
+                  </div>
+
+                  <div x-show='!!item.data.asym_spec'>
+                    <label>Assymetric Special Mode</label>
+                    <select x-model="item.data.asym_displacement">
+                      <template x-for="[k, v] in Object.entries(MAIN.enums.asym_special_mode)">
+                        <option x-html="k" x-bind:value="v"></option>
+                      </template>
+                    </select>
                   </div>
                 </div>
               </template>
 
-              <!--PostFlags DOM-->
-              <template x-if='item.type == CONST.transformations.post_flags'>
+              <!--Special DOM-->
+              <template x-if='item.type == MAIN.enums.transform_type.special'>
                 <div>
                   <label>UV Scale Fix</label><br>
                   <label>Top</label>
@@ -255,7 +244,7 @@
               </template>
 
               <!--UV Offset DOM-->
-              <template x-if='item.type == CONST.transformations.uv_offset'>
+              <template x-if='item.type == MAIN.enums.transform_type.special.uv_offset'>
                 <div>
                   <label>UV Crop</label><br>
                   <div class="xslider">
@@ -286,7 +275,7 @@
               </template>
 
               <!--UV Crop DOM-->
-              <template x-if='item.type == CONST.transformations.uv_crop'>
+              <template x-if='item.type == MAIN.enums.transform_type.special.uv_crop'>
                 <div>
                   <label>UV Offset</label><br>
                   <div class="xslider">
@@ -327,14 +316,14 @@
   <script type="importmap">
     {
       "imports": {
-      "three": "https://unpkg.com/three@0.127/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.127/examples/jsm/"
+        "three": "https://unpkg.com/three@0.127/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.127/examples/jsm/"
       }
     }
   </script>
 
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <script defer src="dependencies/binparser.js"></script>
+  <script src="dependencies/binparser.js"></script>
 
   <script type="module" src="camera.js"></script>
   <script src="main.js"></script>
