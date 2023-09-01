@@ -5,10 +5,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
 async function main() {
-  const Parser = BinaryParser.Parser;
+  const skinTexture = new THREE.CanvasTexture(document.getElementById("canvasSkinPreview").getContext('2d').canvas);
 
-  const canvas = document.querySelector('#camera');
-  const renderer = new THREE.WebGLRenderer({canvas});
+  const renderCanvas = document.querySelector('#camera');
+  const renderer = new THREE.WebGLRenderer({canvas: renderCanvas});
 
   const fov = 45;
   const aspect = 2;  // the canvas default
@@ -17,7 +17,7 @@ async function main() {
   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
   camera.position.set(0, 10, 20);
 
-  const controls = new OrbitControls(camera, canvas);
+  const controls = new OrbitControls(camera, renderCanvas);
   controls.target.set(0, 5, 0);
   controls.update();
 
@@ -90,7 +90,7 @@ async function main() {
   }
 
   {
-    const textureLoader = new THREE.TextureLoader();
+    //const textureLoader = new THREE.TextureLoader();
     const objLoader = new OBJLoader();
 
     objLoader.load( 'assets/steve.obj', (root) => {
@@ -98,29 +98,28 @@ async function main() {
 
       root.traverse( async (child) => {
         if ( child.isMesh ) {
+          skinTexture.wrapS = THREE.RepeatWrapping;
+          skinTexture.wrapT = THREE.RepeatWrapping;
+          skinTexture.minFilter = THREE.NearestFilter;
+          skinTexture.magFilter = THREE.NearestFilter;
+          skinTexture.flipY = false;
+          skinTexture.needsUpdate = true;
 
-          const texture = textureLoader.load('assets/steve.png')
-          texture.wrapS = THREE.RepeatWrapping;
-          texture.wrapT = THREE.RepeatWrapping;
-          texture.minFilter = THREE.NearestFilter;
-          texture.magFilter = THREE.NearestFilter;
-          texture.flipY = false;
-
-          const material = new THREE.ShaderMaterial( {
+          const material = new THREE.ShaderMaterial({
             uniforms: {
-              Sampler0: { type: "t", value: texture }
+              Sampler0: { type: "t", value: skinTexture }
             },
             vertexShader: await fetch("shader/vertex.glsl", {credentials: 'same-origin'}).then((response) => response.text()),
             fragmentShader: await fetch("shader/fragment.glsl", {credentials: 'same-origin'}).then((response) => response.text()),
             glslVersion: THREE.GLSL3,
             side: THREE.DoubleSide,
-          } );
+          });
 
           child.material = material;
           //child.material.map = texture;
           //child.material.transparent = true;
           //child.geometry.computeVertexNormals();
-         }
+        }
       });
 
       scene.add(root);
@@ -175,15 +174,13 @@ async function main() {
   }
 
   function render() {
-
     if (resizeRendererToDisplaySize(renderer)) {
       const canvas = renderer.domElement;
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
       camera.updateProjectionMatrix();
     }
-
+    skinTexture.needsUpdate = true;
     renderer.render(scene, camera);
-
     requestAnimationFrame(render);
   }
 
