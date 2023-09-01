@@ -71,7 +71,7 @@ switch(tranform_type) {
 `transform_arugment_index >= 44` ⇒ Invalid
 
 ## Transforms
-A Linked List of Transform Arugments
+A Linked List of `(Transform Type, Memory Index Of Transform Arguments)`
 ```c
 uint32[44]
 
@@ -79,7 +79,7 @@ T[0] =
 |  R  |  G  |  B  |  A   |
 |    arguments    | next |
 
-char getFaceOperation(char transform_arugment_index) {
+int getFaceOperation(char transform_arugment_index) {
     int temp = (8*2+4) + transform_arugment_index;
     int x = temp % 8;
     int y = temp / 8;

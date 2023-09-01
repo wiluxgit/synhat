@@ -5,55 +5,58 @@ uniform sampler2D Sampler0;
 // how long to stretch along normal to simulate 90 deg face
 #define AS_OUTER (32.0)
 
-#define MASK_TRANSFROM_TYPE (0x0f)
-#define TRANSFROM_TYPE_DISPLACEMENT (0)
-#define TRANSFROM_TYPE_UV_CROP (1)
-#define TRANSFROM_TYPE_UV_OFFSET (2)
-#define TRANSFROM_TYPE_POSTFLAG (3)
-
-#define FLAG_DISP_NEGATIVE (1<<4)
-#define FLAG_DISP_ASYM_NEGATIVE (1<<5)
-#define FLAG_DISP_OPPOSING_SNAP (1<<6)
-//#define FLAG_DISP_UNUSED (3<<6)
-#define MASK_DISP_OFFSET (0x3f)
-#define MASK_DISP_ASYM_OFFSET (0x3f)
-#define MASK_DISP_ASYM_TYPE (0xc0)
-#define MASK_DISP_ASYM_DIRECTION (0xc0)
-#define DISP_ASYM_DIRECTION_TOP (0<<6)
-#define DISP_ASYM_DIRECTION_BOT (1<<6)
-#define DISP_ASYM_DIRECTION_RIGHT (2<<6)
-#define DISP_ASYM_DIRECTION_LEFT (3<<6)
-#define DISP_ASYM_TYPE_SIMPLE (0<<6)
-#define DISP_ASYM_TYPE_FLIP_OUT (1<<6)
-#define DISP_ASYM_TYPE_FLIP_IN (2<<6)
-//#define DISP_ASYM_TYPE_UNUSED (3<<6)
-
-#define MASK_FACE_OPERATION_ENTRY_TRANFORM_TYPE (3<<6)
-#define MASK_FACE_OPERATION_ENTRY_TRANFORM_ARGUMENT_INDEX (~(3<<6))
-#define FACE_OPERATION_ENTRY_TRANFORM_TYPE_DISPLACEMENT (0<<6)
-#define FACE_OPERATION_ENTRY_TRANFORM_TYPE_UV_CROP (1<<6)
-#define FACE_OPERATION_ENTRY_TRANFORM_TYPE_UV_OFFSET (2<<6)
-#define FACE_OPERATION_ENTRY_TRANFORM_TYPE_SPECIAL (3<<6)
-
+// How much bigger the second layer is
 #define OVERLAYSCALE (1.125)
 
-int getPerpendicularLength(int faceId, bool isAlex);
-void writeUVBounds(int faceId, bool isAlex);
+// FACE_OPERATION_ENTRY
+#define MASK_FACE_OPERATION_ENTRY_TRANFORM_ARGUMENT_INDEX (63) // 0b00111111
+#define MASK_TRANFORM_TYPE (192) // 0b11000000
+#define TRANFORM_TYPE_DISPLACEMENT (0<<6)
+#define TRANFORM_TYPE_UV_CROP (1<<6)
+#define TRANFORM_TYPE_UV_OFFSET (2<<6)
+#define TRANFORM_TYPE_SPECIAL (3<<6)
+
+// TRANFORM_TYPE_DISPLACEMENT
+#define MASK_TTD_globalDisplacement (192) // 0b11000000
+#define FLAG_TTD_snap (64)  // 0b01000000
+#define FLAG_TTD_sign (128) // 0b10000000
+#define MASK_TTD_asymDisplacement (192) // 0b11000000
+#define MASK_TTD_asymSpecialMode (192) // 0b11000000
+#define FLAG_TTD_asymSpec (64)  // 0b01000000
+#define FLAG_TTD_asymSign (128) // 0b10000000
+#define MASK_TTD_asymEdge (3) // 0b00000011
+#define ASYM_EDGE_top (0)
+#define ASYM_EDGE_bot (1)
+#define ASYM_EDGE_left (2)
+#define ASYM_EDGE_right (3)
+#define ASYM_SPECIAL_MODE_flipOuter (0)
+#define ASYM_SPECIAL_MODE_flipInner (1)
+
+// Data Reading
 int getMCVertID();
-vec4 getTfDataFromID(int activeTransformIndex);
-vec4 colorFromInt(int i); //DEBUG
-
-void applyDisplacement(bool isAlex, int vertId, int data0, int data1, int data2);
-void applyUVCrop      (bool isAlex, int vertId, int data0, int data1, int data2);
-void applyUVOffset    (bool isAlex, int vertId, int data0, int data1, int data2);
-void applyPostFlags   (bool isAlex, int vertId, int data0, int data1, int data2);
-
-bool isSecondaryLayer(int vertId);
 int getFaceId(int vertId);
 int getCornerId(int vertId);
 int getDirId(int vertId);
-vec3 pixelNormal();
 int getFaceOperationEntry(int faceId);
+vec4 getTransformArguments(int activeTransformIndex);
+
+// hard coded face properties
+int getPerpendicularLength(int faceId, bool isAlex);
+bool isSecondaryLayer(int vertId);
+void defaultInitUVBounds(int faceId, bool isAlex);
+
+// bit data helpers
+int extractCombineBits6and7(int r, int g, int b);
+
+//DEBUG
+vec4 colorFromInt(int i);
+
+void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB);
+void applyUVCrop      (bool isAlex, int vertId, int dataR, int dataG, int dataB);
+void applyUVOffset    (bool isAlex, int vertId, int dataR, int dataG, int dataB);
+void applyPostFlags   (bool isAlex, int vertId, int dataR, int dataG, int dataB);
+
+vec3 pixelNormal();
 
 // minecraft in
 mat4 ModelViewMat;
@@ -73,27 +76,22 @@ out vec4 wx_vertexColor;
 out float wx_isEdited;
 
 void main() {
+
+    // ThreeJS fix to convert all names to the same as minecraft
     ModelViewMat = viewMatrix;
     ProjMat = projectionMatrix;
     Position = position;
     Normal = normal;
-
-    // THREE JS FIXX
     UV0 = vec2(uv.x, 1.0-uv.y); // ThreeJS reverses the UV coordinates AND the texture by default
 
     texCoord0 = UV0;
-
-
-    gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
-
     int mcid = getMCVertID();
 
-	//<DEBUG>
+    //<DEBUG>
     float mcidx = float(mcid)/400.0;
     float mcidy = float((mcid/4)%6)/6.0;
-	wx_vertexColor = vec4(mcidx,mcidy,0,1);
-	//</DEBUG>
-
+    wx_vertexColor = vec4(mcidx,mcidy,0,1);
+    //</DEBUG>
 
     wx_isEdited = 0.0;
     NewPosition = Position;
@@ -112,53 +110,53 @@ void main() {
             int faceId = getFaceId(mcid);
             int cornerId = getCornerId(mcid);
 
-            int activeFaceOperationEntry = getFaceOperationEntry(faceId);
+            int nextFaceOperationEntry = getFaceOperationEntry(faceId);
 
-			//<DEBUG>
-			switch(faceId) {
-				case 38: // top hat
-					activeFaceOperationEntry = 1; //use data block 1
-					break;
-			}
-			wx_vertexColor = colorFromInt(activeFaceOperationEntry & MASK_FACE_OPERATION_ENTRY_TRANFORM_ARGUMENT_INDEX);
-			//</DEBUG>
+            //<DEBUG>
+            switch(faceId) {
+                case 38: // top hat
+                    nextFaceOperationEntry = 1; //use data block 1
+                    break;
+            }
+            wx_vertexColor = colorFromInt(nextFaceOperationEntry & MASK_FACE_OPERATION_ENTRY_TRANFORM_ARGUMENT_INDEX);
+            //</DEBUG>
 
             while (1==1) {
-			    int activeTransformIndex = activeFaceOperationEntry & MASK_FACE_OPERATION_ENTRY_TRANFORM_ARGUMENT_INDEX;
-                int activeTransformType = activeFaceOperationEntry & MASK_FACE_OPERATION_ENTRY_TRANFORM_TYPE;
+                int activeTransformIndex = nextFaceOperationEntry & MASK_FACE_OPERATION_ENTRY_TRANFORM_ARGUMENT_INDEX;
+                int activeTransformType = nextFaceOperationEntry & MASK_TRANFORM_TYPE;
 
                 if (activeTransformIndex == 0 || activeTransformIndex >= 1) {
                     break;
                 }
 
-				wx_isEdited = 1.0;
+                wx_isEdited = 1.0;
 
-				vec4 transformData = getTfDataFromID(activeTransformIndex);
+                vec4 transformData = getTransformArguments(activeTransformIndex);
 
-            	int data0 = int(transformData.r+0.1);
-        	    int data1 = int(transformData.g+0.1);
-    	        int data2 = int(transformData.b+0.1);
-	            activeFaceOperationEntry = int(transformData.a+0.1);
+                int dataR = int(transformData.r+0.1);
+                int dataG = int(transformData.g+0.1);
+                int dataB = int(transformData.b+0.1);
+                nextFaceOperationEntry = int(transformData.a+0.1);
 
-	            switch (activeTransformType) {
-	            	case FACE_OPERATION_ENTRY_TRANFORM_TYPE_DISPLACEMENT:
-	            		applyDisplacement(isAlex, mcid, data0, data1, data2);
-	            		break;
-	            	case FACE_OPERATION_ENTRY_TRANFORM_TYPE_UV_CROP:
-	            		applyUVCrop(isAlex, mcid, data0, data1, data2);
-	            		break;
-	            	case FACE_OPERATION_ENTRY_TRANFORM_TYPE_UV_OFFSET:
-	            		applyUVOffset(isAlex, mcid, data0, data1, data2);
-	            		break;
-	            	case FACE_OPERATION_ENTRY_TRANFORM_TYPE_SPECIAL:
-	            		applyPostFlags(isAlex, mcid, data0, data1, data2);
-	            		break;
-	            }
-			}
+                switch (activeTransformType) {
+                    case TRANFORM_TYPE_DISPLACEMENT:
+                        applyDisplacement(isAlex, mcid, dataR, dataG, dataB);
+                        break;
+                    case TRANFORM_TYPE_UV_CROP:
+                        applyUVCrop(isAlex, mcid, dataR, dataG, dataB);
+                        break;
+                    case TRANFORM_TYPE_UV_OFFSET:
+                        applyUVOffset(isAlex, mcid, dataR, dataG, dataB);
+                        break;
+                    case TRANFORM_TYPE_SPECIAL:
+                        applyPostFlags(isAlex, mcid, dataR, dataG, dataB);
+                        break;
+                }
+            }
 
-			//if (wx_isEdited) {
-			//	writeDeaults()
-			//}
+            //if (wx_isEdited) {
+            //	writeDeaults()
+            //}
         }
     }
     gl_Position = ProjMat * ModelViewMat * vec4(NewPosition, 1.0);
@@ -166,95 +164,99 @@ void main() {
     //normal = ProjMat * ModelViewMat * vec4(Normal, 0.0);
 }
 
-void applyDisplacement(bool isAlex, int vertId, int data0, int data1, int data2) {
-	bool isNegativeOffset 			 = (data0 & FLAG_DISP_NEGATIVE) != 0;
-	bool opposingSnap				 = (data0 & FLAG_DISP_OPPOSING_SNAP) != 0;
-	bool asymmetric_isNegativeOffset = (data0 & FLAG_DISP_ASYM_NEGATIVE) != 0;
+void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
+    bool isNegativeOffset 			 = (dataR & FLAG_TTD_sign) != 0;
+    bool isSnap				         = (dataR & FLAG_TTD_snap) != 0;
+    bool isAsymNegativeOffset        = (dataG & FLAG_TTD_asymSign) != 0;
+    bool isAsymSpecial               = (dataG & FLAG_TTD_asymSpec) != 0;
 
-	float offset					 = float(data1 & MASK_DISP_OFFSET);
-	int assymetric_type 			 = data1 & MASK_DISP_ASYM_TYPE;
-	float assymetric_offset 		 = float(data2 & MASK_DISP_ASYM_OFFSET);
-	int assymetric_direction 		 = data2 & MASK_DISP_ASYM_DIRECTION;
+    float offset					 = float(dataR & MASK_TTD_globalDisplacement);
+    int asymEdge 		             = dataB & MASK_TTD_asymEdge;
 
-	int faceId = getFaceId(vertId);
-	int cornerId = getCornerId(vertId);
-	int dirId = getDirId(vertId);
-	bool isSecondary = isSecondaryLayer(vertId);
-	int perpLenPixels = getPerpendicularLength(faceId, isAlex);
+    int faceId = getFaceId(vertId);
+    int cornerId = getCornerId(vertId);
+    int dirId = getDirId(vertId);
+    bool isSecondary = isSecondaryLayer(vertId);
+    int perpLenPixels = getPerpendicularLength(faceId, isAlex);
 
-	float directionMod = 1.0;
-	if (isNegativeOffset) {
-		directionMod = -1.0;
-	}
-	float asymmetric_directionMod = 1.0;
-	if (asymmetric_isNegativeOffset) {
-		asymmetric_directionMod = -1.0;
-	}
-	float pixelSize = 1.0;
-	if (isSecondary != opposingSnap) { // isSecondary XOR snapToOpposing
-		pixelSize = OVERLAYSCALE;
-	}
+    float directionMod = 1.0;
+    if (isNegativeOffset) {
+        directionMod = -1.0;
+    }
+    float asymmetricDirectionMod = 1.0;
+    if (isAsymNegativeOffset) {
+        asymmetricDirectionMod = -1.0;
+    }
+    float pixelSize = 1.0;
+    if (isSecondary != isSnap) { // isSecondary XOR snapToOpposing
+        pixelSize = OVERLAYSCALE;
+    }
 
-	bool ignoreSnap = (assymetric_type == DISP_ASYM_TYPE_FLIP_IN); //hacky yes
-	if (opposingSnap && !ignoreSnap) {
-		float snapDirection = 1.0;
-		if (isSecondary) {
-			snapDirection = -1.0;
-		}
-		float layerExtention = snapDirection * (OVERLAYSCALE - 1.0) * float(perpLenPixels) / 2.0;
-		NewPosition += pixelNormal() * layerExtention;
-	}
-	NewPosition += pixelNormal() * offset * pixelSize * directionMod;
+    // No longer relevant?
+    // bool ignoreSnap = (assymetric_type == DISP_ASYM_TYPE_FLIP_IN);
+    if (isSnap) {
+        float snapDirection = 1.0;
+        if (isSecondary) {
+            snapDirection = -1.0;
+        }
+        float layerExtention = snapDirection * (OVERLAYSCALE - 1.0) * float(perpLenPixels) / 2.0;
+        NewPosition += pixelNormal() * layerExtention;
+    }
+    NewPosition += pixelNormal() * offset * pixelSize * directionMod;
 
-	const int[8] corners1 = int[8](0, 2, 0, 1, 2, 0, 3, 2);
-	const int[8] corners2 = int[8](1, 3, 3, 2, 3, 1, 1, 0);
-	int cornIndex = (assymetric_direction >> 6) | (dirId == 5 ? 1<<3 : 0);
-	int corner1 = corners1[cornIndex];
-	int corner2 = corners2[cornIndex];
+    const int[8] corners1 = int[8](0, 2, 0, 1, 2, 0, 3, 2);
+    const int[8] corners2 = int[8](1, 3, 3, 2, 3, 1, 1, 0);
+    // If bottom face the corner indexes needs twisting
+    int cornIndex = asymEdge | (dirId == 5 ? 4 : 0);
+    int corner1 = corners1[cornIndex];
+    int corner2 = corners2[cornIndex];
 
-	if (cornerId == corner1 || cornerId == corner2) {
-		switch (assymetric_type) {
-			case DISP_ASYM_TYPE_SIMPLE:
-				NewPosition += pixelNormal() * pixelSize * assymetric_offset * directionMod;
-				break;
-			case DISP_ASYM_TYPE_FLIP_OUT:
-				NewPosition += pixelNormal() * pixelSize * AS_OUTER * directionMod;
-				//TODO: uv stuff
-				break;
-			case DISP_ASYM_TYPE_FLIP_IN:
-				// does not work for inner faces
-				float backheight = 19.125 * float(perpLenPixels);
-				NewPosition -= pixelNormal() * 1.0 * backheight;
-				//TODO: uv stuff
-				break;
-		}
-	}
+    // check that at least one of the edge corners is the active vertex
+    // otherwise it should not be moved
+    if (cornerId == corner1 || cornerId == corner2) {
+        if (!isAsymSpecial) {
+            float asymDisplacement = float(dataG & MASK_TTD_asymDisplacement);
+            NewPosition += pixelNormal() * pixelSize * asymDisplacement * directionMod;
+
+        } else {
+            int asymSpecialMode = dataG & MASK_TTD_asymSpecialMode;
+            switch(asymSpecialMode) {
+                case ASYM_SPECIAL_MODE_flipOuter:
+                    NewPosition += pixelNormal() * pixelSize * AS_OUTER * directionMod;
+                    break;
+                case ASYM_SPECIAL_MODE_flipInner:
+                    float backheight = 19.125 * float(perpLenPixels);
+                    NewPosition -= pixelNormal() * 1.0 * backheight;
+                    break;
+            }
+        }
+    }
 }
-void applyUVCrop(bool isAlex, int vertId, int data0, int data1, int data2) {
-	return;
+void applyUVCrop(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
+    return;
 }
-void applyUVOffset(bool isAlex, int vertId, int data0, int data1, int data2) {
-	return;
+void applyUVOffset(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
+    return;
 }
-void applyPostFlags(bool isAlex, int vertId, int data0, int data1, int data2) {
-	return;
+void applyPostFlags(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
+    return;
 }
 vec3 pixelNormal() {
-	return Normal * (1.125/16.0);
+    return Normal * (1.125/16.0);
 }
 
 
 bool isSecondaryLayer(int vertId) {
-	return vertId >= 36*4;
+    return vertId >= 36*4;
 }
 int getFaceId(int vertId) {
-	return (vertId / 4);
+    return (vertId / 4);
 }
 int getDirId(int vertId) {
-	return (vertId / 4) % 6;
+    return (vertId / 4) % 6;
 }
 int getCornerId(int vertId) {
-	return vertId % 4;
+    return vertId % 4;
 }
 int getFaceOperationEntry(int faceId) {
     int rgba_index = faceId % 4;
@@ -271,31 +273,35 @@ int getFaceOperationEntry(int faceId) {
         case 3: return int(rgba.a+0.1);
     }
 }
-
-vec4 getTfDataFromID(int activeTransformIndex) {
-	int faceDataX = activeTransformIndex % 8;
-	int faceDataY = activeTransformIndex / 8 + 3;
-	if (faceDataY >= 8) {
-		faceDataX += 24;
-		faceDataY -= 4;
-	}
-	return texelFetch(Sampler0, ivec2(faceDataX,faceDataY), 0)*256.0;
+vec4 getTransformArguments(int activeTransformIndex) {
+    int temp = (8*2+4) + activeTransformIndex;
+    int x = temp % 8;
+    int y = temp / 8;
+    return texelFetch(Sampler0, ivec2(x, y), 0)*256.0;
 }
-vec4 colorFromInt(int i) {
-	if (i<0) {
-		return vec4(0.2,0.2,0.2,1);
-	}
 
-	switch (i%8) {
-		case 0: return vec4(1,0,0,1);
-		case 1: return vec4(0,1,0,1);
-		case 2: return vec4(0,0,1,1);
-		case 3: return vec4(1,1,0,1);
-		case 4: return vec4(0,1,1,1);
-		case 5: return vec4(1,0,1,1);
-		case 6: return vec4(1,1,1,1);
-		case 7: return vec4(0,0,0,1);
-	}
+// bit data helpers
+int extractCombineBits6and7(int r, int g, int b) {
+    int mask = 192; // 0b11000000;
+    return ((r & mask) >> 6) | ((g & mask) >> 4) | ((b & mask) >> 2);
+}
+
+// Debug
+vec4 colorFromInt(int i) {
+    if (i<0) {
+        return vec4(0.2,0.2,0.2,1);
+    }
+
+    switch (i%8) {
+        case 0: return vec4(1,0,0,1);
+        case 1: return vec4(0,1,0,1);
+        case 2: return vec4(0,0,1,1);
+        case 3: return vec4(1,1,0,1);
+        case 4: return vec4(0,1,1,1);
+        case 5: return vec4(1,0,1,1);
+        case 6: return vec4(1,1,1,1);
+        case 7: return vec4(0,0,0,1);
+    }
 }
 
 // retuns the length (in pixels) to the back face for a given face
@@ -333,24 +339,24 @@ int getPerpendicularLength(int faceId, bool isAlex) {
 
 int faceIDLookup(int dirid, int uvu, int uvv);
 int getMCVertID() {
-	int dirid;
+    int dirid;
     int corner;
 
     switch(gl_VertexID % 6){
-	case 0:
-	case 3:
-		corner = 0;
-		break;
-	case 2:
-	case 4:
-		corner = 2;
-		break;
-	case 1:
-		corner = 1;
-		break;
-	case 5:
-		corner = 3;
-		break;
+    case 0:
+    case 3:
+        corner = 0;
+        break;
+    case 2:
+    case 4:
+        corner = 2;
+        break;
+    case 1:
+        corner = 1;
+        break;
+    case 5:
+        corner = 3;
+        break;
     }
 
     if (Normal.x > 0.1 && Normal.y == 0.0 && Normal.z == 0.0) {
@@ -370,7 +376,7 @@ int getMCVertID() {
     int uvu = int(UV0.x*64.0 + 0.1);
     int uvv = int(UV0.y*64.0 + 0.1);
     int faceid = faceIDLookup(dirid, uvu, uvv);
-	return faceid*4 + corner;
+    return faceid*4 + corner;
 }
 
 int faceIDLookup(int dirid, int uvu, int uvv) {
@@ -675,12 +681,12 @@ int faceIDLookup(int dirid, int uvu, int uvv) {
         if ((uvu == 32) && (uvv == 48)) return 71;
         if ((uvu == 40) && (uvv == 48)) return 71;
         return -1;
-	}
-	return -1;
+    }
+    return -1;
 }
 
 // Can be optimized
-void writeUVBounds(int faceId, bool isAlex){
+void defaultInitUVBounds(int faceId, bool isAlex){
     switch(faceId){
     // ======== Hat ========
     case 36: //Left Hat

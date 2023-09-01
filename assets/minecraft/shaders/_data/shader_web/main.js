@@ -29,5 +29,9 @@
         canvasSkinPreviewCtx.drawImage(img, 0, 0)
       }
     },
+
+    applyJsonToTexture() {
+
+    },
   }
 })()
