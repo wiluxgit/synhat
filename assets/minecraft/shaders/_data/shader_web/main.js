@@ -29,9 +29,18 @@ MAIN.resetSelectedSkin = () => {
     }
 }
 
-    // TODO: move most to parser when i figure out how
-MAIN.fromHexString = (hexString) => {
-    return Uint8Array.from(hexString.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
+MAIN.debugAllTransforms = (content) => {
+    for (faceTransfrom of content){
+        let parser = MAIN.transform_parsers[faceTransfrom.type];
+        let buf = parser.encode(faceTransfrom.data);
+
+        binStr = [...buf].map((b) => b.toString(2).padStart(8, "0")).join(" ");
+        hexStr = buf.toString("hex")
+        console.log(`0b${binStr} | 0x${hexStr}`);
+
+        let parsres = parser.parse(buf)
+        console.log(parsres)
+    }
 }
 
 MAIN.enums = {
