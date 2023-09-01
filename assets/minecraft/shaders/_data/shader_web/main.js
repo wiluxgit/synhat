@@ -186,7 +186,6 @@ MAIN.MakeExprToCreateSignedTwoWayBinding = (signedDotPath, absDotPath, isNegativ
     return `
     $watch(\"${signedDotPath}\", (value) => {
         if (${signedDotPath}) {
-            console.log(\"signed -> abs,sign\")
             ${absDotPath} = Math.abs(${signedDotPath})
             ${isNegativeDotPath} = ${signedDotPath} < 0
         }
