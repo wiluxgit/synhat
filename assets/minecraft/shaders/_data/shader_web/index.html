@@ -150,8 +150,15 @@
               let header = MAIN.fromHexString("DA670000");
 
               for (faceTransfrom of content) {
-                transformParser = MAIN.transform_parsers[faceTransfrom.type];
-                console.log(transformParser);
+                let parser = MAIN.transform_parsers[faceTransfrom.type];
+                let buf = parser.encode(faceTransfrom.data);
+
+                binStr = [...buf].map((b) => b.toString(2).padStart(8, "0")).join(" ");
+                hexStr = buf.toString("hex")
+                console.log(`0b${binStr} | 0x${hexStr}`);
+
+                let parsres = parser.parse(buf)
+                console.log(parsres)
               }
             '>Debug</button>
           </div>

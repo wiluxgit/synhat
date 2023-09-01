@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "binary-parser": "^2.2.1",
+    "binary-parser-encoder": "^1.5.3",
     "browserify": "^17.0.0"
   }
 }
