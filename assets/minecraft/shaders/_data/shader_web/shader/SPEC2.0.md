@@ -40,7 +40,7 @@ F =
 |  R  |  G  |  B  |  A  |  R  |  G  |  B  |  A  | ....
 | f_0 | f_1 | f_2 | f_3 | f_4 | f_5 | f_6 | f_7 | ....
 
-char getFaceOperation(char faceid) {
+char getFaceOperationEntry(char faceid) {
     int rgba_index = faceId % 4;
     int F_index = faceId / 4;
     int temp = 2 + F_index
@@ -51,7 +51,7 @@ char getFaceOperation(char faceid) {
 
 One f =
 | Bit 7 | Bit 6 | Bit 5 | Bit 4 | Bit 3 | Bit 2 | Bit 1 | Bit 0 |
-| tranform type |            transform arugment index           |
+| tranform_type |            transform_arugment_index           |
 ```
 ### tranform_type
 ```c
@@ -185,6 +185,7 @@ case TRANSFROM_TYPE_SPECIAL
 | R1 | bot scale & clip uv to other layer
 | R2 | right scale & clip uv to other layer
 | R3 | left scale & clip uv to other layer
+| R4 | rainbow
 
 other fields are unused
 ```

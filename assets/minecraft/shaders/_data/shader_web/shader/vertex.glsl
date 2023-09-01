@@ -28,12 +28,19 @@ uniform sampler2D Sampler0;
 #define DISP_ASYM_TYPE_FLIP_IN (2<<6)
 //#define DISP_ASYM_TYPE_UNUSED (3<<6)
 
+#define MASK_FACE_OPERATION_ENTRY_TRANFORM_TYPE (3<<6)
+#define MASK_FACE_OPERATION_ENTRY_TRANFORM_ARGUMENT_INDEX (~(3<<6))
+#define FACE_OPERATION_ENTRY_TRANFORM_TYPE_DISPLACEMENT (0<<6)
+#define FACE_OPERATION_ENTRY_TRANFORM_TYPE_UV_CROP (1<<6)
+#define FACE_OPERATION_ENTRY_TRANFORM_TYPE_UV_OFFSET (2<<6)
+#define FACE_OPERATION_ENTRY_TRANFORM_TYPE_SPECIAL (3<<6)
+
 #define OVERLAYSCALE (1.125)
 
 int getPerpendicularLength(int faceId, bool isAlex);
 void writeUVBounds(int faceId, bool isAlex);
 int getMCVertID();
-vec4 getTfDataFromID(int faceDataSourceId);
+vec4 getTfDataFromID(int activeTransformIndex);
 vec4 colorFromInt(int i); //DEBUG
 
 void applyDisplacement(bool isAlex, int vertId, int data0, int data1, int data2);
@@ -46,17 +53,19 @@ int getFaceId(int vertId);
 int getCornerId(int vertId);
 int getDirId(int vertId);
 vec3 pixelNormal();
+int getFaceOperationEntry(int faceId);
 
-vec3 NewPosition;
-
-//
+// minecraft in
 mat4 ModelViewMat;
 mat4 ProjMat;
 vec3 Position;
 vec3 Normal;
 vec2 UV0;
 
-// WX
+// global temp
+vec3 NewPosition;
+
+// Custom out variables
 out vec2 texCoord0;
 out vec2 wx_maxUV;
 out vec2 wx_minUV;
@@ -68,87 +77,83 @@ void main() {
     ProjMat = projectionMatrix;
     Position = position;
     Normal = normal;
-    UV0 = vec2(uv.x, 1.0-uv.y); //ThreeJS reverses the UV coordinates AND the texture by default
+
+    // THREE JS FIXX
+    UV0 = vec2(uv.x, 1.0-uv.y); // ThreeJS reverses the UV coordinates AND the texture by default
+
     texCoord0 = UV0;
+
 
     gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
 
     int mcid = getMCVertID();
 
+	//<DEBUG>
     float mcidx = float(mcid)/400.0;
     float mcidy = float((mcid/4)%6)/6.0;
 	wx_vertexColor = vec4(mcidx,mcidy,0,1);
+	//</DEBUG>
 
 
     wx_isEdited = 0.0;
     NewPosition = Position;
 
     if (true) { //(gl_VertexID >= 18*8){ //is second layer
-        vec4 topRightPixel = texelFetch(Sampler0, ivec2(0, 0), 0)*256.0; //Macs can't texelfetch in vertex shader?
-        int header0 = int(topRightPixel.r + 0.1);
-        int header1 = int(topRightPixel.g + 0.1);
-        int header2 = int(topRightPixel.b + 0.1);
 
-        if (header0 == 0xda && header1 == 0x67) {
-            bool isAlex = (header2 == 1);
+        // Get header pixel
+        vec4 topRightPixel = texelFetch(Sampler0, ivec2(0, 0), 0)*256.0;
+        int headerR = int(topRightPixel.r + 0.1);
+        int headerG = int(topRightPixel.g + 0.1);
+        int headerB = int(topRightPixel.b + 0.1);
+
+        if (headerR == 0xda && headerG == 0x67) {
+            bool isAlex = (headerB == 1);
 
             int faceId = getFaceId(mcid);
             int cornerId = getCornerId(mcid);
 
-			int fileoffset = faceId + (4*6);
-			int dataC = fileoffset % 4;
-			int dataX = (fileoffset / 4) % 8;
-			int dataY = (fileoffset / (8*4));
-
-			vec4 srcPixel = texelFetch(Sampler0, ivec2(dataX,dataY), 0)*256.0;
+            int activeFaceOperationEntry = getFaceOperationEntry(faceId);
 
 			//<DEBUG>
 			switch(faceId) {
 				case 38: // top hat
-					srcPixel = vec4(1,1,1,1); //use data block 1
+					activeFaceOperationEntry = 1; //use data block 1
 					break;
 			}
+			wx_vertexColor = colorFromInt(activeFaceOperationEntry & MASK_FACE_OPERATION_ENTRY_TRANFORM_ARGUMENT_INDEX);
 			//</DEBUG>
 
+            while (1==1) {
+			    int activeTransformIndex = activeFaceOperationEntry & MASK_FACE_OPERATION_ENTRY_TRANFORM_ARGUMENT_INDEX;
+                int activeTransformType = activeFaceOperationEntry & MASK_FACE_OPERATION_ENTRY_TRANFORM_TYPE;
 
-			int faceDataSourceId = int(srcPixel[dataC]+0.1);
+                if (activeTransformIndex == 0 || activeTransformIndex >= 1) {
+                    break;
+                }
 
-			wx_vertexColor = colorFromInt(faceDataSourceId);
-
-			while (faceDataSourceId != 0 && faceDataSourceId != 255) {
 				wx_isEdited = 1.0;
 
-				vec4 transformData = getTfDataFromID(faceDataSourceId);
+				vec4 transformData = getTfDataFromID(activeTransformIndex);
 
             	int data0 = int(transformData.r+0.1);
         	    int data1 = int(transformData.g+0.1);
     	        int data2 = int(transformData.b+0.1);
-	            int data3 = int(transformData.a+0.1);
+	            activeFaceOperationEntry = int(transformData.a+0.1);
 
-	            int type = MASK_TRANSFROM_TYPE & data0;
-
-	            switch (type) {
-	            	case TRANSFROM_TYPE_DISPLACEMENT:
+	            switch (activeTransformType) {
+	            	case FACE_OPERATION_ENTRY_TRANFORM_TYPE_DISPLACEMENT:
 	            		applyDisplacement(isAlex, mcid, data0, data1, data2);
 	            		break;
-	            	case TRANSFROM_TYPE_UV_CROP:
+	            	case FACE_OPERATION_ENTRY_TRANFORM_TYPE_UV_CROP:
 	            		applyUVCrop(isAlex, mcid, data0, data1, data2);
 	            		break;
-	            	case TRANSFROM_TYPE_UV_OFFSET:
+	            	case FACE_OPERATION_ENTRY_TRANFORM_TYPE_UV_OFFSET:
 	            		applyUVOffset(isAlex, mcid, data0, data1, data2);
 	            		break;
-	            	case TRANSFROM_TYPE_POSTFLAG:
+	            	case FACE_OPERATION_ENTRY_TRANFORM_TYPE_SPECIAL:
 	            		applyPostFlags(isAlex, mcid, data0, data1, data2);
 	            		break;
 	            }
-
-	            // read last 8 bits (alpha bits), if not UV_OFFSET (since that consuemes all bytes)
-	        	if (type != TRANSFROM_TYPE_UV_OFFSET) {
-	        		faceDataSourceId = data3;
-	        	} else {
-	        		faceDataSourceId = 0;
-	        	}
-                faceDataSourceId = 0;
 			}
 
 			//if (wx_isEdited) {
@@ -251,11 +256,25 @@ int getDirId(int vertId) {
 int getCornerId(int vertId) {
 	return vertId % 4;
 }
+int getFaceOperationEntry(int faceId) {
+    int rgba_index = faceId % 4;
+    int F_index = faceId / 4;
+    int temp = 2 + F_index;
+    int x = temp % 8;
+    int y = temp / 8;
 
+    vec4 rgba = texelFetch(Sampler0, ivec2(x, y), 0)*256.0;
+    switch (rgba_index) {
+        case 0: return int(rgba.r+0.1);
+        case 1: return int(rgba.g+0.1);
+        case 2: return int(rgba.b+0.1);
+        case 3: return int(rgba.a+0.1);
+    }
+}
 
-vec4 getTfDataFromID(int faceDataSourceId) {
-	int faceDataX = faceDataSourceId % 8;
-	int faceDataY = faceDataSourceId / 8 + 3;
+vec4 getTfDataFromID(int activeTransformIndex) {
+	int faceDataX = activeTransformIndex % 8;
+	int faceDataY = activeTransformIndex / 8 + 3;
 	if (faceDataY >= 8) {
 		faceDataX += 24;
 		faceDataY -= 4;
