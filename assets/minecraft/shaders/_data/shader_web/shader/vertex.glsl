@@ -17,11 +17,11 @@ uniform sampler2D Sampler0;
 #define TRANFORM_TYPE_SPECIAL (3<<6)
 
 // TRANFORM_TYPE_DISPLACEMENT
-#define MASK_TTD_globalDisplacement (192) // 0b11000000
+#define MASK_TTD_globalDisplacement (63) // 0b00111111
 #define FLAG_TTD_snap (64)  // 0b01000000
 #define FLAG_TTD_sign (128) // 0b10000000
-#define MASK_TTD_asymDisplacement (192) // 0b11000000
-#define MASK_TTD_asymSpecialMode (192) // 0b11000000
+#define MASK_TTD_asymDisplacement (63) // 0b00111111
+#define MASK_TTD_asymSpecialMode (63) // 0b00111111
 #define FLAG_TTD_asymSpec (64)  // 0b01000000
 #define FLAG_TTD_asymSign (128) // 0b10000000
 #define MASK_TTD_asymEdge (3) // 0b00000011
@@ -38,6 +38,7 @@ int getFaceId(int vertId);
 int getCornerId(int vertId);
 int getDirId(int vertId);
 int getFaceOperationEntry(int faceId);
+vec4 getFaceOperationPixel(int faceId);
 vec4 getTransformArguments(int activeTransformIndex);
 
 // hard coded face properties
@@ -113,25 +114,28 @@ void main() {
             int nextFaceOperationEntry = getFaceOperationEntry(faceId);
 
             //<DEBUG>
+            /*
             switch(faceId) {
                 case 38: // top hat
                     nextFaceOperationEntry = 1; //use data block 1
                     break;
-            }
-            wx_vertexColor = colorFromInt(nextFaceOperationEntry & MASK_FACE_OPERATION_ENTRY_TRANFORM_ARGUMENT_INDEX);
+            }*/
+            //wx_isEdited = 1.0;
+            wx_vertexColor = getFaceOperationPixel(faceId)/256.0;
             //</DEBUG>
 
             while (1==1) {
                 int activeTransformIndex = nextFaceOperationEntry & MASK_FACE_OPERATION_ENTRY_TRANFORM_ARGUMENT_INDEX;
                 int activeTransformType = nextFaceOperationEntry & MASK_TRANFORM_TYPE;
 
-                if (activeTransformIndex == 0 || activeTransformIndex >= 1) {
+                if (activeTransformIndex == 0 || activeTransformIndex > 44) {
                     break;
                 }
 
                 wx_isEdited = 1.0;
 
                 vec4 transformData = getTransformArguments(activeTransformIndex);
+                wx_vertexColor = transformData / 256.0;
 
                 int dataR = int(transformData.r+0.1);
                 int dataG = int(transformData.g+0.1);
@@ -192,8 +196,6 @@ void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB)
         pixelSize = OVERLAYSCALE;
     }
 
-    // No longer relevant?
-    // bool ignoreSnap = (assymetric_type == DISP_ASYM_TYPE_FLIP_IN);
     if (isSnap) {
         float snapDirection = 1.0;
         if (isSecondary) {
@@ -258,14 +260,17 @@ int getDirId(int vertId) {
 int getCornerId(int vertId) {
     return vertId % 4;
 }
-int getFaceOperationEntry(int faceId) {
-    int rgba_index = faceId % 4;
+vec4 getFaceOperationPixel(int faceId) {
     int F_index = faceId / 4;
     int temp = 2 + F_index;
     int x = temp % 8;
     int y = temp / 8;
+    return texelFetch(Sampler0, ivec2(x, y), 0)*256.0;
+}
+int getFaceOperationEntry(int faceId) {
+    int rgba_index = faceId % 4;
 
-    vec4 rgba = texelFetch(Sampler0, ivec2(x, y), 0)*256.0;
+    vec4 rgba = getFaceOperationPixel(faceId);
     switch (rgba_index) {
         case 0: return int(rgba.r+0.1);
         case 1: return int(rgba.g+0.1);
@@ -310,8 +315,11 @@ int getPerpendicularLength(int faceId, bool isAlex) {
     int faceAxis = faceId%6;
     int perpendicularLength;
     switch(facetype) {
+        case 0:
         case 6: //Head
             return 8;
+        case 1:
+        case 2:
         case 7: // L-Pant
         case 8: // R-Pant
             if(faceAxis == 2 || faceAxis == 3){ // Top/Bot
@@ -319,6 +327,8 @@ int getPerpendicularLength(int faceId, bool isAlex) {
             } else {
                 return 4;
             }
+        case 3:
+        case 4:
         case 9: // R-Arm
         case 10: // L-Arm
             if(faceAxis == 2 || faceAxis == 3){ // Top/Bot
@@ -326,6 +336,7 @@ int getPerpendicularLength(int faceId, bool isAlex) {
             } else {
                 return isAlex ? 3 : 4; // Account for Alex models
             }
+        case 5:
         case 11:
             if(faceAxis == 0 || faceAxis == 1) { // Left/Right
                 return 8;

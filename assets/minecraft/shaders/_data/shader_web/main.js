@@ -35,17 +35,31 @@ MAIN.newDefaultTransformDictionary = () => {
     return d
 }
 
-function logHexAndBin(buf) {
+function logHexAndBin(buf, extra="") {
     binStr = [...buf].map((b) => b.toString(2).padStart(8, "0")).join("_");
     hexStr = buf.toString("hex")
-    console.log(`0b${binStr} | 0x${hexStr} (len=${buf.length})`);
+    console.log(`0b${binStr} | 0x${hexStr} (len=${buf.length}) ${extra}`);
 }
 function getFaceOperationEntryPos(faceId) {
-    c = faceId % 4;
-    temp = 2 + (faceId/4)
-    x = temp % 8
-    y = (temp / 8) >> 0
+    let c = faceId % 4;
+    let temp = 2 + ((faceId / 4) >> 0)
+    let x = temp % 8
+    let y = (temp / 8) >> 0
     return [x,y,c]
+}
+function getTransformPosition(transform_arugment_index) {
+    let temp = (8*2+4) + transform_arugment_index;
+    let x = temp % 8;
+    let y = (temp / 8) >> 0;
+    return [x, y]
+}
+
+MAIN.debounce = (func, timeout = 2000) => {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => { func.apply(this, args); }, timeout);
+    };
 }
 
 MAIN.writeTransformsToCanvas = (id2transform) => {
@@ -68,14 +82,14 @@ MAIN.writeTransformsToCanvas = (id2transform) => {
                 "transform_argument_index": transformIndex,
             }
             let feBuf = faceOperationEntryParser.encode(faceOperation)
-            logHexAndBin(feBuf);
+            logHexAndBin(feBuf, `(face=${faceId})`);
             serializedFaceEntries[faceId] = feBuf[0]
 
             // Create Transforms
             // TODO: ADD CONTINUES
             let transformParser = MAIN.transform_parsers[type];
             let tfBuf = transformParser.encode(faceTransfrom.data);
-            logHexAndBin(tfBuf);
+            logHexAndBin(tfBuf, `(tfindex=${transformIndex})`);
             serializedTransforms[transformIndex] = tfBuf.readInt32LE(0)
 
             // <debug>
@@ -93,15 +107,34 @@ MAIN.writeTransformsToCanvas = (id2transform) => {
 
     imageData = canvasSkinPreviewCtx.getImageData(0, 0, width, height),
     data = imageData.data;
+
     for ([pos, int] of serializedFaceEntries.entries()) {
         [x,y,c] = getFaceOperationEntryPos(pos)
-        if (int == 0) {
-            continue
-        }
 
         var offset = 4 * (y * width + x) + c;
-        console.log(`offset=${offset}, x=${x}, y=${y}, c=${c}`)
-        data[offset] = 0xff
+        data[offset] = int
+
+        // Temp, makes debugging easier
+        if (c == 3){
+            data[offset] = 0xff
+        }
+
+        //console.log(`F pos=${pos} offset=${offset}, x=${x}, y=${y}, c=${c} value=${int}`)
+    }
+
+    for ([pos, int] of serializedTransforms.entries()) {
+        [x, y] = getTransformPosition(pos)
+
+        // Temp, makes debugging easier
+        int |= 0x000000ff
+
+        var offset = 4 * (y * width + x);
+        data[offset+0] = (int >> 24) & 0xff;
+        data[offset+1] = (int >> 16) & 0xff;
+        data[offset+2] = (int >> 8) & 0xff;
+        data[offset+3] = (int >> 0) & 0xff;
+
+        //console.log(`T pos=${pos} offset=${offset}, x=${x}, y=${y} value=${int}`)
     }
 
     //data[11] = 0xff
@@ -196,6 +229,7 @@ MAIN.transform_parsers[MAIN.enums.transform_type.uv_offset] = (
         .bit2("uv_y_min_1")
         .bit6("uv_y_max")
         .bit2("uv_y_min_2")
+        .bit8("next")
 )
 MAIN.default_transform[MAIN.enums.transform_type.uv_offset] = {
     uv_x_max: 0,
@@ -217,6 +251,7 @@ MAIN.transform_parsers[MAIN.enums.transform_type.uv_crop] = (
         .bit2("crop_left_0")
         .bit6("crop_left_1")
         .bit2("crop_left_2")
+        .bit8("next")
 )
 MAIN.default_transform[MAIN.enums.transform_type.uv_crop] = {
     crop_top: 0,
@@ -240,6 +275,7 @@ MAIN.transform_parsers[MAIN.enums.transform_type.special] = (
         .bit8("__filler2__")
         .bit8("__filler3__")
         .bit8("__filler4__")
+        .bit8("next")
 )
 MAIN.default_transform[MAIN.enums.transform_type.special] = {
     top_snap_clip_uv: 0,
@@ -251,18 +287,18 @@ MAIN.default_transform[MAIN.enums.transform_type.special] = {
 MAIN.MakeExprToCreateSignedTwoWayBinding = (signedDotPath, absDotPath, isNegativeDotPath) => {
     return `
     $watch(\"${signedDotPath}\", (value) => {
-        if (${signedDotPath}) {
+        if (typeof ${signedDotPath} !== 'undefined') {
             ${absDotPath} = Math.abs(${signedDotPath})
             ${isNegativeDotPath} = ${signedDotPath} < 0
         }
     })
     $watch(\"${absDotPath}\", (value) => {
-        if (${signedDotPath}) {
+        if (typeof ${signedDotPath} !== 'undefined') {
             ${signedDotPath} = ${absDotPath} * (${isNegativeDotPath} ? -1 : 1)
         }
     })
     $watch(\"${isNegativeDotPath}\", (value) => {
-        if (${signedDotPath}) {
+        if (typeof ${signedDotPath} !== 'undefined') {
             ${signedDotPath} = ${absDotPath} * (${isNegativeDotPath} ? -1 : 1)
         }
     })

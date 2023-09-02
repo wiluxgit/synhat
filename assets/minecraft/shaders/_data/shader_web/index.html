@@ -16,7 +16,9 @@
     id2transform: MAIN.newDefaultTransformDictionary()
   }'
   x-init='
-    $watch("id2transform", MAIN.writeTransformsToCanvas)
+    $watch("id2transform",
+      MAIN.debounce(() => MAIN.writeTransformsToCanvas(id2transform))
+    )
   '>
     <div id="winEditorGrid">
       <div id="winGlobal">
@@ -121,7 +123,7 @@
                       "_asSigned", "item.data.global_displacement", "item.data.sign"
                     ))
                   '>
-                    <input type="reset" x-on:click="_asSigned = 0">
+                    <input type="reset" x-on:click="_asSigned=0">
                     <input type="number" x-model.number="_asSigned" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
                     <input type="range" x-model.number="_asSigned" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
                   </div><br>
