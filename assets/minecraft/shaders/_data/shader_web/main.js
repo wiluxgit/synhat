@@ -19,7 +19,7 @@ MAIN.changedUploadImage = (inputEvent) => {
     reader.readAsDataURL(inputEvent.target.files[0]);
 }
 
-MAIN.resetSelectedSkin = () => {
+MAIN.resetSkinCanvas = () => {
     var img = new Image()
     img.src = "assets/steve.png"
     uploadInputImage.value = ""
@@ -27,6 +27,12 @@ MAIN.resetSelectedSkin = () => {
         canvasSkinPreviewCtx.clearRect(0, 0, canvasSkinPreview.width, canvasSkinPreview.height);
         canvasSkinPreviewCtx.drawImage(img, 0, 0)
     }
+}
+
+MAIN.newDefaultTransformDictionary = () => {
+    d = {}
+    list = [...Array(72).keys()].map((i) => d[i] = [])
+    return d
 }
 
 MAIN.debugAllTransforms = (content) => {

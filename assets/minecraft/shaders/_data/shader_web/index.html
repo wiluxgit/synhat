@@ -5,27 +5,32 @@
 <body>
   <div x-data='{
     CONST:{
-      displacement_slider_max:63,
-      displacement_slider_min:-63,
-      uv_offset_slider_max:63,
-      uv_offset_slider_min:0,
-      uv_crop_slider_max:63,
-      uv_crop_slider_min:0,
+      displacement_slider_max: 63,
+      displacement_slider_min: -63,
+      uv_offset_slider_max: 63,
+      uv_offset_slider_min: 0,
+      uv_crop_slider_max: 63,
+      uv_crop_slider_min: 0,
     },
-    selectedFace:0,
+    selectedId: 0,
+    id2transform: MAIN.newDefaultTransformDictionary()
   }'>
     <div id="winEditorGrid">
       <div id="winGlobal">
         <input type="file" id="uploadInputImage" name="uploadInputImage" accept="image/*"
           x-on:change='MAIN.changedUploadImage'
-          x-init='MAIN.resetSelectedSkin'>
+          x-init='MAIN.resetSkinCanvas'>
         </input>
         <br><button type="button" x-on:click='alert("TODO")'>Download Skin</button>
         <br>
         <br><button type="button" x-on:click='alert("TODO")'>Upload Model Json</button>
         <br><button type="button" x-on:click='alert("TODO")'>Download Model Json</button>
         <br>
-        <br><button type="button" x-on:click='MAIN.resetSelectedSkin'>Reset</button>
+        <br><button type="button" x-on:click='
+          MAIN.resetSkinCanvas()
+          selectedId = 0
+          id2transform = MAIN.newDefaultTransformDictionary()
+        '>Reset</button>
       </div>
 
       <div id="winHeader">
@@ -45,7 +50,7 @@
               <label class="SkinPreviewOverlayItemWrapper" x-bind:style='`grid-area: fi${String(faceid).padStart(2,"0")};`'>
                 <input type="radio"
                   x-bind:value='faceid'
-                  x-model="selectedFace"
+                  x-model="selectedId"
                 ></input>
                 <span class="SkinPreviewOverlayItemVisual"></span>
               </label>
@@ -55,15 +60,17 @@
       </div>
 
       <div id="winFaceTransformSettings">
-        <div id="setting" class="PixelSettings" x-data='{content:[]}'>
+        <div id="setting" class="PixelSettings" x-data='{content: id2transform[selectedId]}'>
+
+          <textarea class="debug" x-html='JSON.stringify(id2transform, null, 2)'></textarea>
 
           <!--Add New Transform DOM-->
           <div class="PixelSettingsItem">
-            <div>Face Transforms</div>
+            <div x-html='`Face[${[selectedId]}] Transforms`'></div>
             <button type="button" x-on:click='
-              ids = content.map((x) => x.id);
+              ids = id2transform[selectedId].map((x) => x.id);
               max = Math.max(0, ...ids);
-              content.push({
+              id2transform[selectedId].push({
                 id: (max+1),
                 type: MAIN.enums.transform_type.displacement,
                 data: JSON.parse(JSON.stringify(
@@ -73,12 +80,13 @@
             '>Add</button>
             <button type="button" x-on:click='alert("copy all")'>Copy All</button>
             <button type="button" x-on:click='alert("paste all")'>Paste All</button>
-            <button type="button" x-on:click='content=[]'>Delete All</button>
-            <button type="button" x-on:click='MAIN.debugAllTransforms(content)'>Debug</button>
+            <button type="button" x-on:click='id2transform[selectedId]=[]'>Delete All</button>
+            <button type="button" x-on:click='MAIN.debugAllTransforms(id2transform[selectedId])'>Debug</button>
           </div>
 
-          <template x-for="(item, index) in content" :key="item.id">
+          <template x-for="(item, index) in id2transform[selectedId]" :key="item.id">
             <div class="PixelSettingsItem">
+
               <!-- Universal Transform Header (Type / Delete)-->
               <div>
                 <select x-model.number="item.type" x-on:change='
@@ -90,7 +98,7 @@
                 </select>
                 <button type="button" x-on:click="alert('copy')">Copy</button>
                 <button type="button" x-on:click="alert('paste')">Paste</button>
-                <button type="button" x-on:click='content.splice(index, 1)'>Delete</button>
+                <button type="button" x-on:click='id2transform[selectedId].splice(index, 1)'>Delete</button>
               </div>
 
               <br>
@@ -126,7 +134,6 @@
 
                   <div x-show='!item.data.asym_spec'>
                     <label>Assymetric Displacement in half pixels (between -63 and 63):</label>
-
                     <div class="xslider" x-data='{_asSigned: null}' x-init='
                       eval(MAIN.MakeExprToCreateSignedTwoWayBinding(
                         "_asSigned", "item.data.asym_displacement", "item.data.asym_sign"
