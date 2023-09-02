@@ -221,7 +221,7 @@ void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB)
     if (cornerId == corner1 || cornerId == corner2) {
         if (!isAsymSpecial) {
             float asymDisplacement = float(dataG & MASK_TTD_asymDisplacement);
-            NewPosition += pixelNormal() * pixelSize * asymDisplacement * directionMod;
+            NewPosition += pixelNormal() * pixelSize * asymDisplacement * asymmetricDirectionMod;
 
         } else {
             int asymSpecialMode = dataG & MASK_TTD_asymSpecialMode;
