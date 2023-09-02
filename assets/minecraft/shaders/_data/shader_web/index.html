@@ -61,9 +61,6 @@
 
       <div id="winFaceTransformSettings">
         <div id="setting" class="PixelSettings" x-data='{content: id2transform[selectedId]}'>
-
-          <textarea class="debug" x-html='JSON.stringify(id2transform, null, 2)'></textarea>
-
           <!--Add New Transform DOM-->
           <div class="PixelSettingsItem">
             <div x-html='`Face[${[selectedId]}] Transforms`'></div>
@@ -234,6 +231,8 @@
               </template>
             </div>
           </template>
+
+          <textarea class="debug" x-html='JSON.stringify(id2transform, null, 2)'></textarea>
         </div>
       </div>
     </div>

@@ -117,7 +117,7 @@ MAIN.transform_parsers[MAIN.enums.transform_type.displacement] = (
 )
 MAIN.default_transform[MAIN.enums.transform_type.displacement] = {
     global_displacement: 0,
-    snap: MAIN.enums.snap.true,
+    snap: MAIN.enums.snap.false,
     sign: MAIN.enums.sign.positive,
     asym_displacement: 0,
     asym_sign: MAIN.enums.asym_sign.positive,
