@@ -26,7 +26,7 @@
           x-on:change='MAIN.changedUploadImage'
           x-init='MAIN.resetSkinCanvas'>
         </input>
-        <br><button type="button" x-on:click='alert("TODO")'>Download Skin</button>
+        <br><button type="button" x-on:click='MAIN.downloadCanvas()'>Download Skin</button>
         <br>
         <br><button type="button" x-on:click='alert("TODO")'>Upload Model Json</button>
         <br><button type="button" x-on:click='alert("TODO")'>Download Model Json</button>
@@ -65,7 +65,7 @@
       </div>
 
       <div id="winFaceTransformSettings">
-        <div id="setting" class="PixelSettings" x-data='{content: id2transform[selectedId]}'>
+        <div id="setting" class="PixelSettings">
           <!--Add New Transform DOM-->
           <div class="PixelSettingsItem">
             <div x-html='`Face[${[selectedId]}] Transforms`'></div>
@@ -73,7 +73,8 @@
               ids = id2transform[selectedId].map((x) => x.id);
               max = Math.max(0, ...ids);
               id2transform[selectedId].push({
-                id: (max+1),
+                face: selectedId,
+                id: max+1,
                 type: MAIN.enums.transform_type.displacement,
                 data: JSON.parse(JSON.stringify(
                   MAIN.default_transform[MAIN.enums.transform_type.displacement]
@@ -241,7 +242,7 @@
             </div>
           </template>
 
-          <!--textarea class="debug" x-html='JSON.stringify(id2transform, null, 2)'></textarea-->
+          <textarea class="debug" x-html='JSON.stringify(id2transform, null, 2)'></textarea>
         </div>
       </div>
     </div>

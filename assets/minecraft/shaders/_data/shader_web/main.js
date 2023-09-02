@@ -45,7 +45,7 @@ function getFaceOperationEntryPos(faceId) {
     let temp = 2 + ((faceId / 4) >> 0)
     let x = temp % 8
     let y = (temp / 8) >> 0
-    return [x,y,c]
+    return [x, y, c]
 }
 function getTransformPosition(transform_arugment_index) {
     let temp = (8*2+4) + transform_arugment_index;
@@ -54,12 +54,18 @@ function getTransformPosition(transform_arugment_index) {
     return [x, y]
 }
 
-MAIN.debounce = (func, timeout = 2000) => {
+MAIN.debounce = (func, timeout = 500) => {
     let timer;
     return (...args) => {
       clearTimeout(timer);
       timer = setTimeout(() => { func.apply(this, args); }, timeout);
     };
+}
+
+MAIN.downloadCanvas = () => {
+    var dataURL = canvasSkinPreview.toDataURL("image/png");
+    var newTab = window.open('about:blank','image from canvas');
+    newTab.document.write("<img src='" + dataURL + "' alt='from canvas'/>");
 }
 
 MAIN.writeTransformsToCanvas = (id2transform) => {
@@ -100,7 +106,6 @@ MAIN.writeTransformsToCanvas = (id2transform) => {
             transformIndex++;
         }
     }
-    //console.log(serializedFaceEntries, serializedTransforms)
 
     let width = canvasSkinPreview.width
     let height = canvasSkinPreview.height
@@ -108,38 +113,47 @@ MAIN.writeTransformsToCanvas = (id2transform) => {
     imageData = canvasSkinPreviewCtx.getImageData(0, 0, width, height),
     data = imageData.data;
 
-    for ([pos, int] of serializedFaceEntries.entries()) {
-        [x,y,c] = getFaceOperationEntryPos(pos)
+    for (let [pos, int] of serializedFaceEntries.entries()) {
+        let [x,y,c] = getFaceOperationEntryPos(pos)
 
-        var offset = 4 * (y * width + x) + c;
+        let offset = 4 * (y * width + x) + c;
         data[offset] = int
 
         // Temp, makes debugging easier
-        if (c == 3){
-            data[offset] = 0xff
+        if (int == 0 && c == 3){
+            // data is lost with transparent data... need to find fix for this
+            data[offset] |= 0xff
         }
 
-        //console.log(`F pos=${pos} offset=${offset}, x=${x}, y=${y}, c=${c} value=${int}`)
+        if(int != 0) {
+            console.log(`F pos=${pos} offset=${offset}, x=${x}, y=${y}, c=${c} value=0x${int.toString(16)}`)
+        }
     }
 
-    for ([pos, int] of serializedTransforms.entries()) {
-        [x, y] = getTransformPosition(pos)
+    for (let [pos, int] of serializedTransforms.entries()) {
+        let [x, y] = getTransformPosition(pos)
 
         // Temp, makes debugging easier
         int |= 0x000000ff
 
-        var offset = 4 * (y * width + x);
+        let offset = 4 * (y * width + x);
         data[offset+0] = (int >> 24) & 0xff;
         data[offset+1] = (int >> 16) & 0xff;
         data[offset+2] = (int >> 8) & 0xff;
         data[offset+3] = (int >> 0) & 0xff;
 
-        //console.log(`T pos=${pos} offset=${offset}, x=${x}, y=${y} value=${int}`)
+        if((int & 0xffffff00) != 0) {
+            hexstr = [...Array(4).keys()].map(
+                (x) => data[offset+x].toString(16).padStart(2, "0")
+            ).join("|")
+            console.log(`T pos=${pos} offset=${offset}, x=${x}, y=${y} value=${hexstr}`)
+        }
     }
 
-    //data[11] = 0xff
-    //data[15] = 0xff
+    console.log(data)
     canvasSkinPreviewCtx.putImageData(imageData, 0, 0);
+    const imageData2 = canvasSkinPreviewCtx.getImageData(0, 0, width, height);
+    console.log(imageData2.data)
 }
 
 MAIN.enums = {

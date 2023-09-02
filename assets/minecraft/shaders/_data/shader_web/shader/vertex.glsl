@@ -113,6 +113,8 @@ void main() {
 
             int nextFaceOperationEntry = getFaceOperationEntry(faceId);
 
+            wx_vertexColor = colorFromInt(nextFaceOperationEntry);
+
             //<DEBUG>
             /*
             switch(faceId) {
@@ -121,7 +123,8 @@ void main() {
                     break;
             }*/
             //wx_isEdited = 1.0;
-            wx_vertexColor = getFaceOperationPixel(faceId)/256.0;
+            //wx_vertexColor = getFaceOperationPixel(faceId)/256.0;
+            //wx_vertexColor = colorFromInt(faceId % 4);
             //</DEBUG>
 
             while (1==1) {
@@ -135,12 +138,12 @@ void main() {
                 wx_isEdited = 1.0;
 
                 vec4 transformData = getTransformArguments(activeTransformIndex);
-                wx_vertexColor = transformData / 256.0;
+                //wx_vertexColor = transformData / 256.0;
 
                 int dataR = int(transformData.r+0.1);
                 int dataG = int(transformData.g+0.1);
                 int dataB = int(transformData.b+0.1);
-                nextFaceOperationEntry = int(transformData.a+0.1);
+                nextFaceOperationEntry = 0; //int(transformData.a+0.1);
 
                 switch (activeTransformType) {
                     case TRANFORM_TYPE_DISPLACEMENT:
@@ -265,13 +268,13 @@ vec4 getFaceOperationPixel(int faceId) {
     int temp = 2 + F_index;
     int x = temp % 8;
     int y = temp / 8;
+
     return texelFetch(Sampler0, ivec2(x, y), 0)*256.0;
 }
 int getFaceOperationEntry(int faceId) {
-    int rgba_index = faceId % 4;
-
     vec4 rgba = getFaceOperationPixel(faceId);
-    switch (rgba_index) {
+
+    switch (faceId % 4) {
         case 0: return int(rgba.r+0.1);
         case 1: return int(rgba.g+0.1);
         case 2: return int(rgba.b+0.1);
