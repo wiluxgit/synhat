@@ -16,7 +16,7 @@ partname_obody = "oBody"
 def run():
 #===================================
 #     ^ Up (+Y)    Towards Face (+Z)
-#                 /            
+#                 /
 #     5------4
 #    /|     /|
 #   1------0 |    -> Right (+X)
@@ -34,7 +34,7 @@ def run():
 #   | 1 | 4 | 0 | 5 |
 #   8---9---10--11--12
 #===================================
-#    0: left 
+#    0: left
 #    1: right
 #    2: top
 #    3: bottom
@@ -45,10 +45,10 @@ def run():
 # order: [head, body, rarm, larm, rleg, lleg, ohead, olleg, orleg, orarm, olarm, obody]
 #
     ordfaces = [
-        (4,0,3,7), 
-        (1,5,6,2), 
-        (4,5,1,0), 
-        (3,2,6,7), 
+        (4,0,3,7),
+        (1,5,6,2),
+        (4,5,1,0),
+        (3,2,6,7),
         (0,1,2,3),
         (5,4,7,6),
     ]
@@ -115,6 +115,7 @@ def run():
         (partname_obody, obody, origin_obody),
     ]
     generateUV2FaceidCode(parts)
+    generateAreaToFaceCode(parts)
 
     with open("steve.obj", "w+") as f:
         f.write("# Made by Wilux\n")
@@ -124,7 +125,7 @@ def run():
 
         for (name, cube, texorigin) in parts:
             f.write(f"o {name}\n")
-            _vid, _vtid, _vnid, _fid = writeCube(f, ordfaces, 
+            _vid, _vtid, _vnid, _fid = writeCube(f, ordfaces,
                 cube=cube, texOrg=texorigin, partName=name,
                 vid=_vid, vtid=_vtid, vnid=_vnid, fid=_fid
             )
@@ -145,7 +146,7 @@ def writeCube(f, ordfaces, cube, texOrg, partName, vid, vtid, vnid, fid):
         for vidx in ordface: #vertex id
             vcoord = cube[vidx]/32
             file_v.append(f"v {vcoord[0]} {vcoord[1]} {vcoord[2]}\n")
-            
+
             vid += 1
 
         fnorm = faceNormal(dirid)
@@ -166,20 +167,20 @@ def writeCube(f, ordfaces, cube, texOrg, partName, vid, vtid, vnid, fid):
         file_f.append(
             f"f {xv}/{c0}/{xn} {xv+2}/{c2}/{xn} {xv+3}/{c3}/{xn}\n"
         )
-        fid += 1        
+        fid += 1
 
     f.writelines(file_v)
     f.writelines(file_vt)
     f.writelines(file_vn)
     f.write("usemtl m_32a6897e-4c41-36a4-cc6b-d8aec3b361de\n")
     f.writelines(file_f)
-    
+
     return vid, vtid, vnid, fid
-            
+
         #f.write(f"fv {vcoord[0]} {vcoord[1]} {vcoord[2]}\n")
         #f.write(f"fv {vcoord[0]} {vcoord[2]} {vcoord[3]}\n")
 
-def counterClockwiseCornerUVIds(faceid, offset): 
+def counterClockwiseCornerUVIds(faceid, offset):
     i = faceid
     if i == 0:
         return (offset + i for i in (6,5,10,11))
@@ -228,9 +229,9 @@ def cubeSizeInPixels(partname):
         ]:
         return np.array([4,12,4])
     raise ValueError(f"{partname} is not a known part")
-    
+
 def faceNormal(faceid):
-    
+
     match faceid:
         case 0:
             ret = np.array([1,0,0])
@@ -266,8 +267,30 @@ def generateUV2FaceidCode(cubeAndOriginPairs):
                 uvv = int((1-uvCoord[1])*64)
                 dump += f"        if ((uvu == {uvu}) && (uvv == {uvv})) return {faceId};\n"
         dump += "        return -1;\n"
-    with open("codedump.txt", "w+") as f:
+    with open("shadercode.txt", "w+") as f:
         f.write(dump)
+
+def generateAreaToFaceCode(cubeAndOriginPairs):
+    with open("rectcode.txt", "w+") as f:
+        f.write("{\n")
+        for dirid in range(6):
+            for cubeId, (partname, cube, origin) in enumerate(cubeAndOriginPairs):
+                uvids = counterClockwiseCornerUVIds(dirid, 0)
+                uvId2Coord = corverUvs(origin, partname)
+                a = [uvId2Coord[uvid] for uvid in uvids]
+                us, vs = zip(*a)
+                us = [int(u*64) for u in us]
+                vs = [int((1-v)*64) for v in vs]
+
+                mincorner = (min(us), min(vs))
+                maxcorner = (max(us), max(vs))
+
+                faceId = cubeId*6 + dirid
+
+                f.write(f"    {faceId}: [{list(mincorner)}, {list(maxcorner)}]")
+                f.write(",\n")
+        f.write("}")
+
 # case 4
 #   if (uvx == {uv.x} && uvy == {uv.x}) return {faceid}
 

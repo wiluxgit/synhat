@@ -13,7 +13,7 @@
       image-rendering: pixelated;
     }
     textarea {
-      height: 300px;
+      height: 200px;
       width: 100%;
     }
     #camera {
@@ -103,9 +103,12 @@
           x-on:change='MAIN.changedUploadImage'
           x-init='MAIN.resetSelectedSkin'>
         </input>
-        <br><button type="button" x-on:click='MAIN.resetSelectedSkin'>Reset</button>
         <br><button type="button" x-on:click='alert("TODO")'>Download Skin</button>
-        <br><button type="button" x-on:click='alert("TODO")'>Download Json</button>
+        <br>
+        <br><button type="button" x-on:click='alert("TODO")'>Upload Model Json</button>
+        <br><button type="button" x-on:click='alert("TODO")'>Download Model Json</button>
+        <br>
+        <br><button type="button" x-on:click='MAIN.resetSelectedSkin'>Reset</button>
       </div>
 
       <div id="winHeader">
@@ -176,7 +179,7 @@
                   <label>Snap to opposing layer</label>
                   <input type="checkbox" x-model.number="item.data.snap"><br><br>
 
-                  <label>Displacement in quarter pixels (between 0 and 63):</label>
+                  <label>Displacement in half pixels (between 0 and 63):</label>
                   <div class="xslider" x-data='{_asSigned: null}' x-init='
                     eval(MAIN.MakeExprToCreateSignedTwoWayBinding(
                       "_asSigned", "item.data.global_displacement", "item.data.sign"
@@ -198,7 +201,7 @@
                   <input type="checkbox" x-model.number="item.data.asym_spec"><br><br>
 
                   <div x-show='!item.data.asym_spec'>
-                    <label>Assymetric Displacement in quarter pixels (between -63 and 63):</label>
+                    <label>Assymetric Displacement in half pixels (between -63 and 63):</label>
 
                     <div class="xslider" x-data='{_asSigned: null}' x-init='
                       eval(MAIN.MakeExprToCreateSignedTwoWayBinding(
