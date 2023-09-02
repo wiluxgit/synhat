@@ -14,7 +14,10 @@
     },
     selectedId: 0,
     id2transform: MAIN.newDefaultTransformDictionary()
-  }'>
+  }'
+  x-init='
+    $watch("id2transform", MAIN.writeTransformsToCanvas)
+  '>
     <div id="winEditorGrid">
       <div id="winGlobal">
         <input type="file" id="uploadInputImage" name="uploadInputImage" accept="image/*"
@@ -78,8 +81,12 @@
             <button type="button" x-on:click='alert("copy all")'>Copy All</button>
             <button type="button" x-on:click='alert("paste all")'>Paste All</button>
             <button type="button" x-on:click='id2transform[selectedId]=[]'>Delete All</button>
-            <button type="button" x-on:click='MAIN.debugAllTransforms(id2transform[selectedId])'>Debug</button>
+            <button type="button" x-on:click='MAIN.writeTransformsToCanvas(id2transform[selectedId])'>Debug</button>
           </div>
+
+          <template x-if="id2transform[selectedId].length == 0">
+            <div class="PixelSettingsItem" style="background-color: lightgray;" x-html="`<i>Face #${selectedId} has no transforms</i>`"></div>
+          </template>
 
           <template x-for="(item, index) in id2transform[selectedId]" :key="item.id">
             <div class="PixelSettingsItem">
@@ -232,7 +239,7 @@
             </div>
           </template>
 
-          <textarea class="debug" x-html='JSON.stringify(id2transform, null, 2)'></textarea>
+          <!--textarea class="debug" x-html='JSON.stringify(id2transform, null, 2)'></textarea-->
         </div>
       </div>
     </div>

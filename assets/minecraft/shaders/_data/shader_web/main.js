@@ -35,18 +35,78 @@ MAIN.newDefaultTransformDictionary = () => {
     return d
 }
 
-MAIN.debugAllTransforms = (content) => {
-    for (faceTransfrom of content){
-        let parser = MAIN.transform_parsers[faceTransfrom.type];
-        let buf = parser.encode(faceTransfrom.data);
+function logHexAndBin(buf) {
+    binStr = [...buf].map((b) => b.toString(2).padStart(8, "0")).join("_");
+    hexStr = buf.toString("hex")
+    console.log(`0b${binStr} | 0x${hexStr} (len=${buf.length})`);
+}
+function getFaceOperationEntryPos(faceId) {
+    c = faceId % 4;
+    temp = 2 + (faceId/4)
+    x = temp % 8
+    y = (temp / 8) >> 0
+    return [x,y,c]
+}
 
-        binStr = [...buf].map((b) => b.toString(2).padStart(8, "0")).join(" ");
-        hexStr = buf.toString("hex")
-        console.log(`0b${binStr} | 0x${hexStr}`);
+MAIN.writeTransformsToCanvas = (id2transform) => {
+    console.log("MAIN.debugAllTransforms")
 
-        let parsres = parser.parse(buf)
-        console.log(parsres)
+    serializedFaceEntries = new Uint8Array(72)
+    serializedTransforms = new Uint32Array(44)
+
+    transformIndex = 1
+
+    faceOperationEntryParser = MAIN.faceOperationParser
+
+    for ([faceId, faceTransfroms] of Object.entries(id2transform)){
+        for (faceTransfrom of faceTransfroms) {
+            let type = faceTransfrom.type
+
+            // Create FaceEntries
+            faceOperation = {
+                "transform_type": type,
+                "transform_argument_index": transformIndex,
+            }
+            let feBuf = faceOperationEntryParser.encode(faceOperation)
+            logHexAndBin(feBuf);
+            serializedFaceEntries[faceId] = feBuf[0]
+
+            // Create Transforms
+            // TODO: ADD CONTINUES
+            let transformParser = MAIN.transform_parsers[type];
+            let tfBuf = transformParser.encode(faceTransfrom.data);
+            logHexAndBin(tfBuf);
+            serializedTransforms[transformIndex] = tfBuf.readInt32LE(0)
+
+            // <debug>
+            // let parsres = parser.parse(tfBuf)
+            // console.log(parsres)
+            // </debug>
+
+            transformIndex++;
+        }
     }
+    //console.log(serializedFaceEntries, serializedTransforms)
+
+    let width = canvasSkinPreview.width
+    let height = canvasSkinPreview.height
+
+    imageData = canvasSkinPreviewCtx.getImageData(0, 0, width, height),
+    data = imageData.data;
+    for ([pos, int] of serializedFaceEntries.entries()) {
+        [x,y,c] = getFaceOperationEntryPos(pos)
+        if (int == 0) {
+            continue
+        }
+
+        var offset = 4 * (y * width + x) + c;
+        console.log(`offset=${offset}, x=${x}, y=${y}, c=${c}`)
+        data[offset] = 0xff
+    }
+
+    //data[11] = 0xff
+    //data[15] = 0xff
+    canvasSkinPreviewCtx.putImageData(imageData, 0, 0);
 }
 
 MAIN.enums = {
@@ -94,8 +154,8 @@ MAIN.faceOperationParser = (
     new BinaryParser.Parser()
         .endianess("little")
         .encoderSetOptions({bitEndianess: true})
-        .bit2("transform_type")
         .bit6("transform_argument_index")
+        .bit2("transform_type")
 )
 
 MAIN.default_transform = {}
