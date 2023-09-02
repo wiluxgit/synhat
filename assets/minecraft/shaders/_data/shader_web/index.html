@@ -33,6 +33,119 @@
     .debug {
       background-color:lightcoral;
     }
+
+    #winSkinPreviewOverlayContainer {
+      height: 100%;
+      width: 100%;
+      position: absolute;
+      left: 0; top: 0;
+      z-index: 2;
+
+      display: grid;
+      grid-template-columns: repeat(64, var(--face-select-scale));
+      grid-template-rows: repeat(64, var(--face-select-scale));
+      grid-template-areas:
+        ".    .    .    .    .    .    .    .    fi02 fi02 fi02 fi02 fi02 fi02 fi02 fi02 fi03 fi03 fi03 fi03 fi03 fi03 fi03 fi03 .    .    .    .    .    .    .    .    .    .    .    .    .    .    .    .    fi38 fi38 fi38 fi38 fi38 fi38 fi38 fi38 fi39 fi39 fi39 fi39 fi39 fi39 fi39 fi39 .    .    .    .    .    .    .    .   "
+        ".    .    .    .    .    .    .    .    fi02 fi02 fi02 fi02 fi02 fi02 fi02 fi02 fi03 fi03 fi03 fi03 fi03 fi03 fi03 fi03 .    .    .    .    .    .    .    .    .    .    .    .    .    .    .    .    fi38 fi38 fi38 fi38 fi38 fi38 fi38 fi38 fi39 fi39 fi39 fi39 fi39 fi39 fi39 fi39 .    .    .    .    .    .    .    .   "
+        ".    .    .    .    .    .    .    .    fi02 fi02 fi02 fi02 fi02 fi02 fi02 fi02 fi03 fi03 fi03 fi03 fi03 fi03 fi03 fi03 .    .    .    .    .    .    .    .    .    .    .    .    .    .    .    .    fi38 fi38 fi38 fi38 fi38 fi38 fi38 fi38 fi39 fi39 fi39 fi39 fi39 fi39 fi39 fi39 .    .    .    .    .    .    .    .   "
+        ".    .    .    .    .    .    .    .    fi02 fi02 fi02 fi02 fi02 fi02 fi02 fi02 fi03 fi03 fi03 fi03 fi03 fi03 fi03 fi03 .    .    .    .    .    .    .    .    .    .    .    .    .    .    .    .    fi38 fi38 fi38 fi38 fi38 fi38 fi38 fi38 fi39 fi39 fi39 fi39 fi39 fi39 fi39 fi39 .    .    .    .    .    .    .    .   "
+        ".    .    .    .    .    .    .    .    fi02 fi02 fi02 fi02 fi02 fi02 fi02 fi02 fi03 fi03 fi03 fi03 fi03 fi03 fi03 fi03 .    .    .    .    .    .    .    .    .    .    .    .    .    .    .    .    fi38 fi38 fi38 fi38 fi38 fi38 fi38 fi38 fi39 fi39 fi39 fi39 fi39 fi39 fi39 fi39 .    .    .    .    .    .    .    .   "
+        ".    .    .    .    .    .    .    .    fi02 fi02 fi02 fi02 fi02 fi02 fi02 fi02 fi03 fi03 fi03 fi03 fi03 fi03 fi03 fi03 .    .    .    .    .    .    .    .    .    .    .    .    .    .    .    .    fi38 fi38 fi38 fi38 fi38 fi38 fi38 fi38 fi39 fi39 fi39 fi39 fi39 fi39 fi39 fi39 .    .    .    .    .    .    .    .   "
+        ".    .    .    .    .    .    .    .    fi02 fi02 fi02 fi02 fi02 fi02 fi02 fi02 fi03 fi03 fi03 fi03 fi03 fi03 fi03 fi03 .    .    .    .    .    .    .    .    .    .    .    .    .    .    .    .    fi38 fi38 fi38 fi38 fi38 fi38 fi38 fi38 fi39 fi39 fi39 fi39 fi39 fi39 fi39 fi39 .    .    .    .    .    .    .    .   "
+        ".    .    .    .    .    .    .    .    fi02 fi02 fi02 fi02 fi02 fi02 fi02 fi02 fi03 fi03 fi03 fi03 fi03 fi03 fi03 fi03 .    .    .    .    .    .    .    .    .    .    .    .    .    .    .    .    fi38 fi38 fi38 fi38 fi38 fi38 fi38 fi38 fi39 fi39 fi39 fi39 fi39 fi39 fi39 fi39 .    .    .    .    .    .    .    .   "
+        "fi01 fi01 fi01 fi01 fi01 fi01 fi01 fi01 fi04 fi04 fi04 fi04 fi04 fi04 fi04 fi04 fi00 fi00 fi00 fi00 fi00 fi00 fi00 fi00 fi05 fi05 fi05 fi05 fi05 fi05 fi05 fi05 fi37 fi37 fi37 fi37 fi37 fi37 fi37 fi37 fi40 fi40 fi40 fi40 fi40 fi40 fi40 fi40 fi36 fi36 fi36 fi36 fi36 fi36 fi36 fi36 fi41 fi41 fi41 fi41 fi41 fi41 fi41 fi41"
+        "fi01 fi01 fi01 fi01 fi01 fi01 fi01 fi01 fi04 fi04 fi04 fi04 fi04 fi04 fi04 fi04 fi00 fi00 fi00 fi00 fi00 fi00 fi00 fi00 fi05 fi05 fi05 fi05 fi05 fi05 fi05 fi05 fi37 fi37 fi37 fi37 fi37 fi37 fi37 fi37 fi40 fi40 fi40 fi40 fi40 fi40 fi40 fi40 fi36 fi36 fi36 fi36 fi36 fi36 fi36 fi36 fi41 fi41 fi41 fi41 fi41 fi41 fi41 fi41"
+        "fi01 fi01 fi01 fi01 fi01 fi01 fi01 fi01 fi04 fi04 fi04 fi04 fi04 fi04 fi04 fi04 fi00 fi00 fi00 fi00 fi00 fi00 fi00 fi00 fi05 fi05 fi05 fi05 fi05 fi05 fi05 fi05 fi37 fi37 fi37 fi37 fi37 fi37 fi37 fi37 fi40 fi40 fi40 fi40 fi40 fi40 fi40 fi40 fi36 fi36 fi36 fi36 fi36 fi36 fi36 fi36 fi41 fi41 fi41 fi41 fi41 fi41 fi41 fi41"
+        "fi01 fi01 fi01 fi01 fi01 fi01 fi01 fi01 fi04 fi04 fi04 fi04 fi04 fi04 fi04 fi04 fi00 fi00 fi00 fi00 fi00 fi00 fi00 fi00 fi05 fi05 fi05 fi05 fi05 fi05 fi05 fi05 fi37 fi37 fi37 fi37 fi37 fi37 fi37 fi37 fi40 fi40 fi40 fi40 fi40 fi40 fi40 fi40 fi36 fi36 fi36 fi36 fi36 fi36 fi36 fi36 fi41 fi41 fi41 fi41 fi41 fi41 fi41 fi41"
+        "fi01 fi01 fi01 fi01 fi01 fi01 fi01 fi01 fi04 fi04 fi04 fi04 fi04 fi04 fi04 fi04 fi00 fi00 fi00 fi00 fi00 fi00 fi00 fi00 fi05 fi05 fi05 fi05 fi05 fi05 fi05 fi05 fi37 fi37 fi37 fi37 fi37 fi37 fi37 fi37 fi40 fi40 fi40 fi40 fi40 fi40 fi40 fi40 fi36 fi36 fi36 fi36 fi36 fi36 fi36 fi36 fi41 fi41 fi41 fi41 fi41 fi41 fi41 fi41"
+        "fi01 fi01 fi01 fi01 fi01 fi01 fi01 fi01 fi04 fi04 fi04 fi04 fi04 fi04 fi04 fi04 fi00 fi00 fi00 fi00 fi00 fi00 fi00 fi00 fi05 fi05 fi05 fi05 fi05 fi05 fi05 fi05 fi37 fi37 fi37 fi37 fi37 fi37 fi37 fi37 fi40 fi40 fi40 fi40 fi40 fi40 fi40 fi40 fi36 fi36 fi36 fi36 fi36 fi36 fi36 fi36 fi41 fi41 fi41 fi41 fi41 fi41 fi41 fi41"
+        "fi01 fi01 fi01 fi01 fi01 fi01 fi01 fi01 fi04 fi04 fi04 fi04 fi04 fi04 fi04 fi04 fi00 fi00 fi00 fi00 fi00 fi00 fi00 fi00 fi05 fi05 fi05 fi05 fi05 fi05 fi05 fi05 fi37 fi37 fi37 fi37 fi37 fi37 fi37 fi37 fi40 fi40 fi40 fi40 fi40 fi40 fi40 fi40 fi36 fi36 fi36 fi36 fi36 fi36 fi36 fi36 fi41 fi41 fi41 fi41 fi41 fi41 fi41 fi41"
+        "fi01 fi01 fi01 fi01 fi01 fi01 fi01 fi01 fi04 fi04 fi04 fi04 fi04 fi04 fi04 fi04 fi00 fi00 fi00 fi00 fi00 fi00 fi00 fi00 fi05 fi05 fi05 fi05 fi05 fi05 fi05 fi05 fi37 fi37 fi37 fi37 fi37 fi37 fi37 fi37 fi40 fi40 fi40 fi40 fi40 fi40 fi40 fi40 fi36 fi36 fi36 fi36 fi36 fi36 fi36 fi36 fi41 fi41 fi41 fi41 fi41 fi41 fi41 fi41"
+        ".    .    .    .    fi32 fi32 fi32 fi32 fi33 fi33 fi33 fi33 .    .    .    .    .    .    .    .    fi08 fi08 fi08 fi08 fi08 fi08 fi08 fi08 fi09 fi09 fi09 fi09 fi09 fi09 fi09 fi09 .    .    .    .    .    .    .    .    fi20 fi20 fi20 fi20 fi21 fi21 fi21 fi21 .    .    .    .    .    .    .    .    .    .    .    .   "
+        ".    .    .    .    fi32 fi32 fi32 fi32 fi33 fi33 fi33 fi33 .    .    .    .    .    .    .    .    fi08 fi08 fi08 fi08 fi08 fi08 fi08 fi08 fi09 fi09 fi09 fi09 fi09 fi09 fi09 fi09 .    .    .    .    .    .    .    .    fi20 fi20 fi20 fi20 fi21 fi21 fi21 fi21 .    .    .    .    .    .    .    .    .    .    .    .   "
+        ".    .    .    .    fi32 fi32 fi32 fi32 fi33 fi33 fi33 fi33 .    .    .    .    .    .    .    .    fi08 fi08 fi08 fi08 fi08 fi08 fi08 fi08 fi09 fi09 fi09 fi09 fi09 fi09 fi09 fi09 .    .    .    .    .    .    .    .    fi20 fi20 fi20 fi20 fi21 fi21 fi21 fi21 .    .    .    .    .    .    .    .    .    .    .    .   "
+        ".    .    .    .    fi32 fi32 fi32 fi32 fi33 fi33 fi33 fi33 .    .    .    .    .    .    .    .    fi08 fi08 fi08 fi08 fi08 fi08 fi08 fi08 fi09 fi09 fi09 fi09 fi09 fi09 fi09 fi09 .    .    .    .    .    .    .    .    fi20 fi20 fi20 fi20 fi21 fi21 fi21 fi21 .    .    .    .    .    .    .    .    .    .    .    .   "
+        "fi31 fi31 fi31 fi31 fi34 fi34 fi34 fi34 fi30 fi30 fi30 fi30 fi35 fi35 fi35 fi35 fi07 fi07 fi07 fi07 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi06 fi06 fi06 fi06 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi19 fi19 fi19 fi19 fi22 fi22 fi22 fi22 fi18 fi18 fi18 fi18 fi23 fi23 fi23 fi23 .    .    .    .    .    .    .    .   "
+        "fi31 fi31 fi31 fi31 fi34 fi34 fi34 fi34 fi30 fi30 fi30 fi30 fi35 fi35 fi35 fi35 fi07 fi07 fi07 fi07 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi06 fi06 fi06 fi06 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi19 fi19 fi19 fi19 fi22 fi22 fi22 fi22 fi18 fi18 fi18 fi18 fi23 fi23 fi23 fi23 .    .    .    .    .    .    .    .   "
+        "fi31 fi31 fi31 fi31 fi34 fi34 fi34 fi34 fi30 fi30 fi30 fi30 fi35 fi35 fi35 fi35 fi07 fi07 fi07 fi07 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi06 fi06 fi06 fi06 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi19 fi19 fi19 fi19 fi22 fi22 fi22 fi22 fi18 fi18 fi18 fi18 fi23 fi23 fi23 fi23 .    .    .    .    .    .    .    .   "
+        "fi31 fi31 fi31 fi31 fi34 fi34 fi34 fi34 fi30 fi30 fi30 fi30 fi35 fi35 fi35 fi35 fi07 fi07 fi07 fi07 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi06 fi06 fi06 fi06 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi19 fi19 fi19 fi19 fi22 fi22 fi22 fi22 fi18 fi18 fi18 fi18 fi23 fi23 fi23 fi23 .    .    .    .    .    .    .    .   "
+        "fi31 fi31 fi31 fi31 fi34 fi34 fi34 fi34 fi30 fi30 fi30 fi30 fi35 fi35 fi35 fi35 fi07 fi07 fi07 fi07 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi06 fi06 fi06 fi06 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi19 fi19 fi19 fi19 fi22 fi22 fi22 fi22 fi18 fi18 fi18 fi18 fi23 fi23 fi23 fi23 .    .    .    .    .    .    .    .   "
+        "fi31 fi31 fi31 fi31 fi34 fi34 fi34 fi34 fi30 fi30 fi30 fi30 fi35 fi35 fi35 fi35 fi07 fi07 fi07 fi07 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi06 fi06 fi06 fi06 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi19 fi19 fi19 fi19 fi22 fi22 fi22 fi22 fi18 fi18 fi18 fi18 fi23 fi23 fi23 fi23 .    .    .    .    .    .    .    .   "
+        "fi31 fi31 fi31 fi31 fi34 fi34 fi34 fi34 fi30 fi30 fi30 fi30 fi35 fi35 fi35 fi35 fi07 fi07 fi07 fi07 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi06 fi06 fi06 fi06 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi19 fi19 fi19 fi19 fi22 fi22 fi22 fi22 fi18 fi18 fi18 fi18 fi23 fi23 fi23 fi23 .    .    .    .    .    .    .    .   "
+        "fi31 fi31 fi31 fi31 fi34 fi34 fi34 fi34 fi30 fi30 fi30 fi30 fi35 fi35 fi35 fi35 fi07 fi07 fi07 fi07 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi06 fi06 fi06 fi06 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi19 fi19 fi19 fi19 fi22 fi22 fi22 fi22 fi18 fi18 fi18 fi18 fi23 fi23 fi23 fi23 .    .    .    .    .    .    .    .   "
+        "fi31 fi31 fi31 fi31 fi34 fi34 fi34 fi34 fi30 fi30 fi30 fi30 fi35 fi35 fi35 fi35 fi07 fi07 fi07 fi07 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi06 fi06 fi06 fi06 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi19 fi19 fi19 fi19 fi22 fi22 fi22 fi22 fi18 fi18 fi18 fi18 fi23 fi23 fi23 fi23 .    .    .    .    .    .    .    .   "
+        "fi31 fi31 fi31 fi31 fi34 fi34 fi34 fi34 fi30 fi30 fi30 fi30 fi35 fi35 fi35 fi35 fi07 fi07 fi07 fi07 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi06 fi06 fi06 fi06 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi19 fi19 fi19 fi19 fi22 fi22 fi22 fi22 fi18 fi18 fi18 fi18 fi23 fi23 fi23 fi23 .    .    .    .    .    .    .    .   "
+        "fi31 fi31 fi31 fi31 fi34 fi34 fi34 fi34 fi30 fi30 fi30 fi30 fi35 fi35 fi35 fi35 fi07 fi07 fi07 fi07 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi06 fi06 fi06 fi06 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi19 fi19 fi19 fi19 fi22 fi22 fi22 fi22 fi18 fi18 fi18 fi18 fi23 fi23 fi23 fi23 .    .    .    .    .    .    .    .   "
+        "fi31 fi31 fi31 fi31 fi34 fi34 fi34 fi34 fi30 fi30 fi30 fi30 fi35 fi35 fi35 fi35 fi07 fi07 fi07 fi07 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi10 fi06 fi06 fi06 fi06 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi11 fi19 fi19 fi19 fi19 fi22 fi22 fi22 fi22 fi18 fi18 fi18 fi18 fi23 fi23 fi23 fi23 .    .    .    .    .    .    .    .   "
+        ".    .    .    .    fi44 fi44 fi44 fi44 fi45 fi45 fi45 fi45 .    .    .    .    .    .    .    .    fi68 fi68 fi68 fi68 fi68 fi68 fi68 fi68 fi69 fi69 fi69 fi69 fi69 fi69 fi69 fi69 .    .    .    .    .    .    .    .    fi62 fi62 fi62 fi62 fi63 fi63 fi63 fi63 .    .    .    .    .    .    .    .    .    .    .    .   "
+        ".    .    .    .    fi44 fi44 fi44 fi44 fi45 fi45 fi45 fi45 .    .    .    .    .    .    .    .    fi68 fi68 fi68 fi68 fi68 fi68 fi68 fi68 fi69 fi69 fi69 fi69 fi69 fi69 fi69 fi69 .    .    .    .    .    .    .    .    fi62 fi62 fi62 fi62 fi63 fi63 fi63 fi63 .    .    .    .    .    .    .    .    .    .    .    .   "
+        ".    .    .    .    fi44 fi44 fi44 fi44 fi45 fi45 fi45 fi45 .    .    .    .    .    .    .    .    fi68 fi68 fi68 fi68 fi68 fi68 fi68 fi68 fi69 fi69 fi69 fi69 fi69 fi69 fi69 fi69 .    .    .    .    .    .    .    .    fi62 fi62 fi62 fi62 fi63 fi63 fi63 fi63 .    .    .    .    .    .    .    .    .    .    .    .   "
+        ".    .    .    .    fi44 fi44 fi44 fi44 fi45 fi45 fi45 fi45 .    .    .    .    .    .    .    .    fi68 fi68 fi68 fi68 fi68 fi68 fi68 fi68 fi69 fi69 fi69 fi69 fi69 fi69 fi69 fi69 .    .    .    .    .    .    .    .    fi62 fi62 fi62 fi62 fi63 fi63 fi63 fi63 .    .    .    .    .    .    .    .    .    .    .    .   "
+        "fi43 fi43 fi43 fi43 fi46 fi46 fi46 fi46 fi42 fi42 fi42 fi42 fi47 fi47 fi47 fi47 fi67 fi67 fi67 fi67 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi66 fi66 fi66 fi66 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi61 fi61 fi61 fi61 fi64 fi64 fi64 fi64 fi60 fi60 fi60 fi60 fi65 fi65 fi65 fi65 .    .    .    .    .    .    .    .   "
+        "fi43 fi43 fi43 fi43 fi46 fi46 fi46 fi46 fi42 fi42 fi42 fi42 fi47 fi47 fi47 fi47 fi67 fi67 fi67 fi67 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi66 fi66 fi66 fi66 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi61 fi61 fi61 fi61 fi64 fi64 fi64 fi64 fi60 fi60 fi60 fi60 fi65 fi65 fi65 fi65 .    .    .    .    .    .    .    .   "
+        "fi43 fi43 fi43 fi43 fi46 fi46 fi46 fi46 fi42 fi42 fi42 fi42 fi47 fi47 fi47 fi47 fi67 fi67 fi67 fi67 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi66 fi66 fi66 fi66 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi61 fi61 fi61 fi61 fi64 fi64 fi64 fi64 fi60 fi60 fi60 fi60 fi65 fi65 fi65 fi65 .    .    .    .    .    .    .    .   "
+        "fi43 fi43 fi43 fi43 fi46 fi46 fi46 fi46 fi42 fi42 fi42 fi42 fi47 fi47 fi47 fi47 fi67 fi67 fi67 fi67 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi66 fi66 fi66 fi66 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi61 fi61 fi61 fi61 fi64 fi64 fi64 fi64 fi60 fi60 fi60 fi60 fi65 fi65 fi65 fi65 .    .    .    .    .    .    .    .   "
+        "fi43 fi43 fi43 fi43 fi46 fi46 fi46 fi46 fi42 fi42 fi42 fi42 fi47 fi47 fi47 fi47 fi67 fi67 fi67 fi67 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi66 fi66 fi66 fi66 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi61 fi61 fi61 fi61 fi64 fi64 fi64 fi64 fi60 fi60 fi60 fi60 fi65 fi65 fi65 fi65 .    .    .    .    .    .    .    .   "
+        "fi43 fi43 fi43 fi43 fi46 fi46 fi46 fi46 fi42 fi42 fi42 fi42 fi47 fi47 fi47 fi47 fi67 fi67 fi67 fi67 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi66 fi66 fi66 fi66 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi61 fi61 fi61 fi61 fi64 fi64 fi64 fi64 fi60 fi60 fi60 fi60 fi65 fi65 fi65 fi65 .    .    .    .    .    .    .    .   "
+        "fi43 fi43 fi43 fi43 fi46 fi46 fi46 fi46 fi42 fi42 fi42 fi42 fi47 fi47 fi47 fi47 fi67 fi67 fi67 fi67 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi66 fi66 fi66 fi66 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi61 fi61 fi61 fi61 fi64 fi64 fi64 fi64 fi60 fi60 fi60 fi60 fi65 fi65 fi65 fi65 .    .    .    .    .    .    .    .   "
+        "fi43 fi43 fi43 fi43 fi46 fi46 fi46 fi46 fi42 fi42 fi42 fi42 fi47 fi47 fi47 fi47 fi67 fi67 fi67 fi67 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi66 fi66 fi66 fi66 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi61 fi61 fi61 fi61 fi64 fi64 fi64 fi64 fi60 fi60 fi60 fi60 fi65 fi65 fi65 fi65 .    .    .    .    .    .    .    .   "
+        "fi43 fi43 fi43 fi43 fi46 fi46 fi46 fi46 fi42 fi42 fi42 fi42 fi47 fi47 fi47 fi47 fi67 fi67 fi67 fi67 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi66 fi66 fi66 fi66 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi61 fi61 fi61 fi61 fi64 fi64 fi64 fi64 fi60 fi60 fi60 fi60 fi65 fi65 fi65 fi65 .    .    .    .    .    .    .    .   "
+        "fi43 fi43 fi43 fi43 fi46 fi46 fi46 fi46 fi42 fi42 fi42 fi42 fi47 fi47 fi47 fi47 fi67 fi67 fi67 fi67 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi66 fi66 fi66 fi66 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi61 fi61 fi61 fi61 fi64 fi64 fi64 fi64 fi60 fi60 fi60 fi60 fi65 fi65 fi65 fi65 .    .    .    .    .    .    .    .   "
+        "fi43 fi43 fi43 fi43 fi46 fi46 fi46 fi46 fi42 fi42 fi42 fi42 fi47 fi47 fi47 fi47 fi67 fi67 fi67 fi67 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi66 fi66 fi66 fi66 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi61 fi61 fi61 fi61 fi64 fi64 fi64 fi64 fi60 fi60 fi60 fi60 fi65 fi65 fi65 fi65 .    .    .    .    .    .    .    .   "
+        "fi43 fi43 fi43 fi43 fi46 fi46 fi46 fi46 fi42 fi42 fi42 fi42 fi47 fi47 fi47 fi47 fi67 fi67 fi67 fi67 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi70 fi66 fi66 fi66 fi66 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi71 fi61 fi61 fi61 fi61 fi64 fi64 fi64 fi64 fi60 fi60 fi60 fi60 fi65 fi65 fi65 fi65 .    .    .    .    .    .    .    .   "
+        ".    .    .    .    fi50 fi50 fi50 fi50 fi51 fi51 fi51 fi51 .    .    .    .    .    .    .    .    fi26 fi26 fi26 fi26 fi27 fi27 fi27 fi27 .    .    .    .    .    .    .    .    fi14 fi14 fi14 fi14 fi15 fi15 fi15 fi15 .    .    .    .    .    .    .    .    fi56 fi56 fi56 fi56 fi57 fi57 fi57 fi57 .    .    .    .   "
+        ".    .    .    .    fi50 fi50 fi50 fi50 fi51 fi51 fi51 fi51 .    .    .    .    .    .    .    .    fi26 fi26 fi26 fi26 fi27 fi27 fi27 fi27 .    .    .    .    .    .    .    .    fi14 fi14 fi14 fi14 fi15 fi15 fi15 fi15 .    .    .    .    .    .    .    .    fi56 fi56 fi56 fi56 fi57 fi57 fi57 fi57 .    .    .    .   "
+        ".    .    .    .    fi50 fi50 fi50 fi50 fi51 fi51 fi51 fi51 .    .    .    .    .    .    .    .    fi26 fi26 fi26 fi26 fi27 fi27 fi27 fi27 .    .    .    .    .    .    .    .    fi14 fi14 fi14 fi14 fi15 fi15 fi15 fi15 .    .    .    .    .    .    .    .    fi56 fi56 fi56 fi56 fi57 fi57 fi57 fi57 .    .    .    .   "
+        ".    .    .    .    fi50 fi50 fi50 fi50 fi51 fi51 fi51 fi51 .    .    .    .    .    .    .    .    fi26 fi26 fi26 fi26 fi27 fi27 fi27 fi27 .    .    .    .    .    .    .    .    fi14 fi14 fi14 fi14 fi15 fi15 fi15 fi15 .    .    .    .    .    .    .    .    fi56 fi56 fi56 fi56 fi57 fi57 fi57 fi57 .    .    .    .   "
+        "fi49 fi49 fi49 fi49 fi52 fi52 fi52 fi52 fi48 fi48 fi48 fi48 fi53 fi53 fi53 fi53 fi25 fi25 fi25 fi25 fi28 fi28 fi28 fi28 fi24 fi24 fi24 fi24 fi29 fi29 fi29 fi29 fi13 fi13 fi13 fi13 fi16 fi16 fi16 fi16 fi12 fi12 fi12 fi12 fi17 fi17 fi17 fi17 fi55 fi55 fi55 fi55 fi58 fi58 fi58 fi58 fi54 fi54 fi54 fi54 fi59 fi59 fi59 fi59"
+        "fi49 fi49 fi49 fi49 fi52 fi52 fi52 fi52 fi48 fi48 fi48 fi48 fi53 fi53 fi53 fi53 fi25 fi25 fi25 fi25 fi28 fi28 fi28 fi28 fi24 fi24 fi24 fi24 fi29 fi29 fi29 fi29 fi13 fi13 fi13 fi13 fi16 fi16 fi16 fi16 fi12 fi12 fi12 fi12 fi17 fi17 fi17 fi17 fi55 fi55 fi55 fi55 fi58 fi58 fi58 fi58 fi54 fi54 fi54 fi54 fi59 fi59 fi59 fi59"
+        "fi49 fi49 fi49 fi49 fi52 fi52 fi52 fi52 fi48 fi48 fi48 fi48 fi53 fi53 fi53 fi53 fi25 fi25 fi25 fi25 fi28 fi28 fi28 fi28 fi24 fi24 fi24 fi24 fi29 fi29 fi29 fi29 fi13 fi13 fi13 fi13 fi16 fi16 fi16 fi16 fi12 fi12 fi12 fi12 fi17 fi17 fi17 fi17 fi55 fi55 fi55 fi55 fi58 fi58 fi58 fi58 fi54 fi54 fi54 fi54 fi59 fi59 fi59 fi59"
+        "fi49 fi49 fi49 fi49 fi52 fi52 fi52 fi52 fi48 fi48 fi48 fi48 fi53 fi53 fi53 fi53 fi25 fi25 fi25 fi25 fi28 fi28 fi28 fi28 fi24 fi24 fi24 fi24 fi29 fi29 fi29 fi29 fi13 fi13 fi13 fi13 fi16 fi16 fi16 fi16 fi12 fi12 fi12 fi12 fi17 fi17 fi17 fi17 fi55 fi55 fi55 fi55 fi58 fi58 fi58 fi58 fi54 fi54 fi54 fi54 fi59 fi59 fi59 fi59"
+        "fi49 fi49 fi49 fi49 fi52 fi52 fi52 fi52 fi48 fi48 fi48 fi48 fi53 fi53 fi53 fi53 fi25 fi25 fi25 fi25 fi28 fi28 fi28 fi28 fi24 fi24 fi24 fi24 fi29 fi29 fi29 fi29 fi13 fi13 fi13 fi13 fi16 fi16 fi16 fi16 fi12 fi12 fi12 fi12 fi17 fi17 fi17 fi17 fi55 fi55 fi55 fi55 fi58 fi58 fi58 fi58 fi54 fi54 fi54 fi54 fi59 fi59 fi59 fi59"
+        "fi49 fi49 fi49 fi49 fi52 fi52 fi52 fi52 fi48 fi48 fi48 fi48 fi53 fi53 fi53 fi53 fi25 fi25 fi25 fi25 fi28 fi28 fi28 fi28 fi24 fi24 fi24 fi24 fi29 fi29 fi29 fi29 fi13 fi13 fi13 fi13 fi16 fi16 fi16 fi16 fi12 fi12 fi12 fi12 fi17 fi17 fi17 fi17 fi55 fi55 fi55 fi55 fi58 fi58 fi58 fi58 fi54 fi54 fi54 fi54 fi59 fi59 fi59 fi59"
+        "fi49 fi49 fi49 fi49 fi52 fi52 fi52 fi52 fi48 fi48 fi48 fi48 fi53 fi53 fi53 fi53 fi25 fi25 fi25 fi25 fi28 fi28 fi28 fi28 fi24 fi24 fi24 fi24 fi29 fi29 fi29 fi29 fi13 fi13 fi13 fi13 fi16 fi16 fi16 fi16 fi12 fi12 fi12 fi12 fi17 fi17 fi17 fi17 fi55 fi55 fi55 fi55 fi58 fi58 fi58 fi58 fi54 fi54 fi54 fi54 fi59 fi59 fi59 fi59"
+        "fi49 fi49 fi49 fi49 fi52 fi52 fi52 fi52 fi48 fi48 fi48 fi48 fi53 fi53 fi53 fi53 fi25 fi25 fi25 fi25 fi28 fi28 fi28 fi28 fi24 fi24 fi24 fi24 fi29 fi29 fi29 fi29 fi13 fi13 fi13 fi13 fi16 fi16 fi16 fi16 fi12 fi12 fi12 fi12 fi17 fi17 fi17 fi17 fi55 fi55 fi55 fi55 fi58 fi58 fi58 fi58 fi54 fi54 fi54 fi54 fi59 fi59 fi59 fi59"
+        "fi49 fi49 fi49 fi49 fi52 fi52 fi52 fi52 fi48 fi48 fi48 fi48 fi53 fi53 fi53 fi53 fi25 fi25 fi25 fi25 fi28 fi28 fi28 fi28 fi24 fi24 fi24 fi24 fi29 fi29 fi29 fi29 fi13 fi13 fi13 fi13 fi16 fi16 fi16 fi16 fi12 fi12 fi12 fi12 fi17 fi17 fi17 fi17 fi55 fi55 fi55 fi55 fi58 fi58 fi58 fi58 fi54 fi54 fi54 fi54 fi59 fi59 fi59 fi59"
+        "fi49 fi49 fi49 fi49 fi52 fi52 fi52 fi52 fi48 fi48 fi48 fi48 fi53 fi53 fi53 fi53 fi25 fi25 fi25 fi25 fi28 fi28 fi28 fi28 fi24 fi24 fi24 fi24 fi29 fi29 fi29 fi29 fi13 fi13 fi13 fi13 fi16 fi16 fi16 fi16 fi12 fi12 fi12 fi12 fi17 fi17 fi17 fi17 fi55 fi55 fi55 fi55 fi58 fi58 fi58 fi58 fi54 fi54 fi54 fi54 fi59 fi59 fi59 fi59"
+        "fi49 fi49 fi49 fi49 fi52 fi52 fi52 fi52 fi48 fi48 fi48 fi48 fi53 fi53 fi53 fi53 fi25 fi25 fi25 fi25 fi28 fi28 fi28 fi28 fi24 fi24 fi24 fi24 fi29 fi29 fi29 fi29 fi13 fi13 fi13 fi13 fi16 fi16 fi16 fi16 fi12 fi12 fi12 fi12 fi17 fi17 fi17 fi17 fi55 fi55 fi55 fi55 fi58 fi58 fi58 fi58 fi54 fi54 fi54 fi54 fi59 fi59 fi59 fi59"
+        "fi49 fi49 fi49 fi49 fi52 fi52 fi52 fi52 fi48 fi48 fi48 fi48 fi53 fi53 fi53 fi53 fi25 fi25 fi25 fi25 fi28 fi28 fi28 fi28 fi24 fi24 fi24 fi24 fi29 fi29 fi29 fi29 fi13 fi13 fi13 fi13 fi16 fi16 fi16 fi16 fi12 fi12 fi12 fi12 fi17 fi17 fi17 fi17 fi55 fi55 fi55 fi55 fi58 fi58 fi58 fi58 fi54 fi54 fi54 fi54 fi59 fi59 fi59 fi59"
+      ;
+    }
+
+    /* The container */
+    .SkinPreviewOverlayItemWrapper {
+      display: block;
+      position: relative;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    /* Hide the browser's default checkbox */
+    .SkinPreviewOverlayItemWrapper input {
+      position: absolute;
+      cursor: pointer;
+      opacity: 0;
+      height: 0;
+      width: 0;
+    }
+    /* Create a custom checkbox */
+    .SkinPreviewOverlayItemVisual {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    /* On mouse-over, add a grey background color */
+    .SkinPreviewOverlayItemWrapper:hover input ~ .SkinPreviewOverlayItemVisual {
+      background-color: rgba(127, 255, 127, 0.5);
+      outline: 2px solid rgba(127, 255, 127, 1);
+    }
+    .SkinPreviewOverlayItemWrapper input:checked ~ .SkinPreviewOverlayItemVisual {
+      background-color: rgba(222, 255, 222, 0.5);
+      outline: 2px solid rgba(222, 255, 222, 1);
+    }
+
     #winEditorGrid {
       display: grid;
       width: 100%;
@@ -75,6 +188,14 @@
         linear-gradient(to right, #aaaaaa 1px, transparent 1px),
         linear-gradient(to bottom, #aaaaaa 1px, transparent 1px);
     }
+    #canvasSkinPreview {
+      height: 100%;
+      width: 100%;
+      position: absolute;
+      left: 0; top: 0;
+      z-index: 0;
+    }
+
     #winFaceTransformSettings {
       grid-area: transform;
       min-width: 0;
@@ -95,7 +216,8 @@
       uv_offset_slider_min:0,
       uv_crop_slider_max:63,
       uv_crop_slider_min:0,
-    }
+    },
+    selectedFace:0,
   }'>
     <div id="winEditorGrid">
       <div id="winGlobal">
@@ -121,18 +243,25 @@
 
       <div id="winFaceSelect">
         <div id="winFaceSelectFixedResolution">
-          <canvas id="canvasSkinPreview" width="64" height="64" style="
-            height: 100%;
-            position: absolute;
-            left: 0; top: 0;
-            z-index: 0;
-          ">
+          <canvas id="canvasSkinPreview" width="64" height="64">
           </canvas>
+          <div id="winSkinPreviewOverlayContainer">
+            <template x-for="[faceid, arrs] in Object.entries(MAIN.id2uvs)">
+              <label class="SkinPreviewOverlayItemWrapper" x-bind:style='`grid-area: fi${String(faceid).padStart(2,"0")};`'>
+                <input type="radio"
+                  x-bind:value='faceid'
+                  x-model="selectedFace"
+                ></input>
+                <span class="SkinPreviewOverlayItemVisual"></span>
+              </label>
+            </template>
+          </div>
         </div>
       </div>
 
       <div id="winFaceTransformSettings">
         <div id="setting" class="PixelSettings" x-data='{content:[]}'>
+
           <!--Add New Transform DOM-->
           <div class="PixelSettingsItem">
             <div>Face Transforms</div>

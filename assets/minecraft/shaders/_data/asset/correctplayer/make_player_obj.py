@@ -271,25 +271,28 @@ def generateUV2FaceidCode(cubeAndOriginPairs):
         f.write(dump)
 
 def generateAreaToFaceCode(cubeAndOriginPairs):
-    with open("rectcode.txt", "w+") as f:
-        f.write("{\n")
-        for dirid in range(6):
-            for cubeId, (partname, cube, origin) in enumerate(cubeAndOriginPairs):
-                uvids = counterClockwiseCornerUVIds(dirid, 0)
-                uvId2Coord = corverUvs(origin, partname)
-                a = [uvId2Coord[uvid] for uvid in uvids]
-                us, vs = zip(*a)
-                us = [int(u*64) for u in us]
-                vs = [int((1-v)*64) for v in vs]
+    pixelgrid = [[f".   " for _ in range(64)] for _ in range(64)]
+    for dirid in range(6):
+        for cubeId, (partname, cube, origin) in enumerate(cubeAndOriginPairs):
+            uvids = counterClockwiseCornerUVIds(dirid, 0)
+            uvId2Coord = corverUvs(origin, partname)
+            a = [uvId2Coord[uvid] for uvid in uvids]
+            us, vs = zip(*a)
+            us = [int(u*64) for u in us]
+            vs = [int((1-v)*64) for v in vs]
 
-                mincorner = (min(us), min(vs))
-                maxcorner = (max(us), max(vs))
+            umin, vmin = (min(us), min(vs))
+            umax, vmax = (max(us), max(vs))
 
-                faceId = cubeId*6 + dirid
+            faceId = cubeId*6 + dirid
 
-                f.write(f"    {faceId}: [{list(mincorner)}, {list(maxcorner)}]")
-                f.write(",\n")
-        f.write("}")
+            for u in range(umin, umax):
+                for v in range(vmin, vmax):
+                    pixelgrid[v][u] = f"fi{faceId:>02}"
+
+    with open("cssgridcode.txt", "w+") as f:
+        for line in pixelgrid:
+            f.write(f'\"{" ".join(line)}\"\n')
 
 # case 4
 #   if (uvx == {uv.x} && uvy == {uv.x}) return {faceid}
