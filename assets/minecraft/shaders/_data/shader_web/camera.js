@@ -5,7 +5,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
 async function main() {
-  const skinTexture = new THREE.CanvasTexture(document.getElementById("canvasSkinPreview").getContext('2d').canvas);
+  const canvas = document.getElementById("canvasSkinPreview")
+  const skinTexture = new THREE.CanvasTexture(canvas.getContext('2d').canvas);
 
   const renderCanvas = document.querySelector('#camera');
   const renderer = new THREE.WebGLRenderer({canvas: renderCanvas});
@@ -70,9 +71,9 @@ async function main() {
     // compute a unit vector that points in the direction the camera is now
     // in the xz plane from the center of the box
     const direction = (new THREE.Vector3())
-        .subVectors(camera.position, boxCenter)
-        .multiply(new THREE.Vector3(1, 0, 1))
-        .normalize();
+      .subVectors(camera.position, boxCenter)
+      .multiply(new THREE.Vector3(1, 0, 1))
+      .normalize();
 
     // move the camera to a position distance units way from the center
     // in whatever direction the camera was from the center already
@@ -89,6 +90,19 @@ async function main() {
     camera.lookAt(boxCenter.x, boxCenter.y, boxCenter.z);
   }
 
+  const forceTextureInitialization = function() {
+    const material = new THREE.MeshBasicMaterial();
+    const geometry = new THREE.PlaneBufferGeometry();
+    const scene = new THREE.Scene();
+    scene.add(new THREE.Mesh(geometry, material));
+    const camera = new THREE.Camera();
+
+    return function forceTextureInitialization(texture) {
+      material.map = texture;
+      renderer.render(scene, camera);
+    };
+  }();
+
   {
     //const textureLoader = new THREE.TextureLoader();
     const objLoader = new OBJLoader();
@@ -98,6 +112,36 @@ async function main() {
 
       root.traverse( async (child) => {
         if ( child.isMesh ) {
+          const gl = renderer.getContext();
+          const glTex = gl.createTexture();
+          gl.bindTexture(gl.TEXTURE_2D, glTex);
+          gl.texImage2D(
+            gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
+            gl.RGBA, gl.UNSIGNED_BYTE,
+            // TEMP
+            canvas.getContext('2d').getImageData(0, 0, 64, 64).data
+          )
+          gl.generateMipmap(gl.TEXTURE_2D);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+          // Hack to force in webgl texture in three
+          // https://stackoverflow.com/questions/29325906/can-you-use-raw-webgl-textures-with-three-js
+          const texture = new THREE.Texture();
+          forceTextureInitialization(texture);
+          const texProps = renderer.properties.get(texture);
+          texProps.__webglTexture = glTex;
+
+          const material = new THREE.ShaderMaterial({
+            uniforms: {
+              Sampler0: { type: "t", value: texture }
+            },
+            vertexShader: await fetch("shader/vertex.glsl", {credentials: 'same-origin'}).then((response) => response.text()),
+            fragmentShader: await fetch("shader/fragment.glsl", {credentials: 'same-origin'}).then((response) => response.text()),
+            glslVersion: THREE.GLSL3,
+            side: THREE.DoubleSide,
+          });
+
+          /*
           skinTexture.wrapS = THREE.RepeatWrapping;
           skinTexture.wrapT = THREE.RepeatWrapping;
           skinTexture.minFilter = THREE.NearestFilter;
@@ -114,6 +158,7 @@ async function main() {
             glslVersion: THREE.GLSL3,
             side: THREE.DoubleSide,
           });
+          */
 
           child.material = material;
           //child.material.map = texture;
@@ -123,8 +168,9 @@ async function main() {
       });
 
       scene.add(root);
-      const box = new THREE.Box3().setFromObject(root);
 
+      // CAMERA CONTROLS
+      const box = new THREE.Box3().setFromObject(root);
       const boxSize = box.getSize(new THREE.Vector3()).length();
       const boxCenter = box.getCenter(new THREE.Vector3());
 
@@ -136,30 +182,6 @@ async function main() {
       controls.target.copy(boxCenter);
       controls.update();
     });
-
-    /*
-    objLoader.loadMtl('assets/steve.mtl', null, (materials) => {
-      objLoader.setMaterials(materials);
-      objLoader.load('assets/steve.obj', (event) => {
-        const root = event.detail.loaderRootNode;
-        scene.add(root);
-
-        // compute the box that contains all the stuff
-        // from root and below
-        const box = new THREE.Box3().setFromObject(root);
-
-        const boxSize = box.getSize(new THREE.Vector3()).length();
-        const boxCenter = box.getCenter(new THREE.Vector3());
-
-        // set the camera to frame the box
-        frameArea(boxSize * 1.2, boxSize, boxCenter, camera);
-
-        // update the Trackball controls to handle the new size
-        controls.maxDistance = boxSize * 10;
-        controls.target.copy(boxCenter);
-        controls.update();
-      });
-    }); */
   }
 
   function resizeRendererToDisplaySize(renderer) {

@@ -97,7 +97,7 @@ void main() {
     wx_isEdited = 0.0;
     NewPosition = Position;
 
-    if (true) { //(gl_VertexID >= 18*8){ //is second layer
+    if (false) { //(gl_VertexID >= 18*8){ //is second layer
 
         // Get header pixel
         vec4 topRightPixel = texelFetch(Sampler0, ivec2(0, 0), 0)*256.0;

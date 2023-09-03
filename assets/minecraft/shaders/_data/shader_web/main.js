@@ -1,3 +1,7 @@
+// So painfully inconvenient
+// https://stackoverflow.com/questions/29325906/can-you-use-raw-webgl-textures-with-three-js
+// https://stackoverflow.com/questions/73133566/pixels-are-changing-back-after-putimagedata-with-png
+
 let uploadInputImage = document.getElementById('uploadInputImage')
 let canvasSkinPreview = document.getElementById('canvasSkinPreview')
 let canvasSkinPreviewCtx = canvasSkinPreview.getContext('2d')
