@@ -50,7 +50,7 @@
         <div id="winFaceSelectFixedResolution">
           <canvas id="canvasSkinPreview" width="64" height="64">
           </canvas>
-          <div id="winSkinPreviewOverlayContainer">
+          <div id="winSkinPreviewOverlayGrid">
             <template x-for="[faceid, arrs] in Object.entries(MAIN.id2uvs)">
               <label class="SkinPreviewOverlayItemWrapper" x-bind:style='`grid-area: fi${String(faceid).padStart(2,"0")};`'>
                 <input type="radio"

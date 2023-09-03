@@ -6,10 +6,29 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
 async function main() {
   const canvas = document.getElementById("canvasSkinPreview")
-  const skinTexture = new THREE.CanvasTexture(canvas.getContext('2d').canvas);
 
   const renderCanvas = document.querySelector('#camera');
   const renderer = new THREE.WebGLRenderer({canvas: renderCanvas});
+
+  // Init texture
+  const gl = renderer.getContext();
+  const glTex = gl.createTexture();
+  {
+    const img = new Image();
+    img.addEventListener('load', render);
+    img.crossOrigin = "";
+    img.src = "assets/steve.png";
+    img.onload = () => {
+      gl.bindTexture(gl.TEXTURE_2D, glTex);
+      gl.texImage2D(
+        gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
+        gl.RGBA, gl.UNSIGNED_BYTE,
+        img
+      )
+      gl.generateMipmap(gl.TEXTURE_2D);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    }
+  }
 
   const fov = 45;
   const aspect = 2;  // the canvas default
@@ -25,6 +44,7 @@ async function main() {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('black');
 
+  // Setup base plane
   {
     const planeSize = 4000;
 
@@ -47,23 +67,7 @@ async function main() {
     //scene.add(mesh);
   }
 
-  {
-    const skyColor = 0xB1E1FF;  // light blue
-    const groundColor = 0xB97A20;  // brownish orange
-    const intensity = 1;
-    const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
-    scene.add(light);
-  }
-
-  {
-    const color = 0xFFFFFF;
-    const intensity = 1;
-    const light = new THREE.DirectionalLight(color, intensity);
-    light.position.set(5, 10, 2);
-    scene.add(light);
-    scene.add(light.target);
-  }
-
+  // Camera helper function
   function frameArea(sizeToFitOnScreen, boxSize, boxCenter, camera) {
     const halfSizeToFitOnScreen = sizeToFitOnScreen * 0.5;
     const halfFovY = THREE.Math.degToRad(camera.fov * .5);
@@ -90,6 +94,7 @@ async function main() {
     camera.lookAt(boxCenter.x, boxCenter.y, boxCenter.z);
   }
 
+  // https://stackoverflow.com/questions/29325906/can-you-use-raw-webgl-textures-with-three-js
   const forceTextureInitialization = function() {
     const material = new THREE.MeshBasicMaterial();
     const geometry = new THREE.PlaneBufferGeometry();
@@ -104,7 +109,6 @@ async function main() {
   }();
 
   {
-    //const textureLoader = new THREE.TextureLoader();
     const objLoader = new OBJLoader();
 
     objLoader.load( 'assets/steve.obj', (root) => {
@@ -112,18 +116,6 @@ async function main() {
 
       root.traverse( async (child) => {
         if ( child.isMesh ) {
-          const gl = renderer.getContext();
-          const glTex = gl.createTexture();
-          gl.bindTexture(gl.TEXTURE_2D, glTex);
-          gl.texImage2D(
-            gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
-            gl.RGBA, gl.UNSIGNED_BYTE,
-            // TEMP
-            canvas.getContext('2d').getImageData(0, 0, 64, 64).data
-          )
-          gl.generateMipmap(gl.TEXTURE_2D);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-
           // Hack to force in webgl texture in three
           // https://stackoverflow.com/questions/29325906/can-you-use-raw-webgl-textures-with-three-js
           const texture = new THREE.Texture();
@@ -141,29 +133,7 @@ async function main() {
             side: THREE.DoubleSide,
           });
 
-          /*
-          skinTexture.wrapS = THREE.RepeatWrapping;
-          skinTexture.wrapT = THREE.RepeatWrapping;
-          skinTexture.minFilter = THREE.NearestFilter;
-          skinTexture.magFilter = THREE.NearestFilter;
-          skinTexture.flipY = false;
-          skinTexture.needsUpdate = true;
-
-          const material = new THREE.ShaderMaterial({
-            uniforms: {
-              Sampler0: { type: "t", value: skinTexture }
-            },
-            vertexShader: await fetch("shader/vertex.glsl", {credentials: 'same-origin'}).then((response) => response.text()),
-            fragmentShader: await fetch("shader/fragment.glsl", {credentials: 'same-origin'}).then((response) => response.text()),
-            glslVersion: THREE.GLSL3,
-            side: THREE.DoubleSide,
-          });
-          */
-
           child.material = material;
-          //child.material.map = texture;
-          //child.material.transparent = true;
-          //child.geometry.computeVertexNormals();
         }
       });
 
@@ -173,11 +143,7 @@ async function main() {
       const box = new THREE.Box3().setFromObject(root);
       const boxSize = box.getSize(new THREE.Vector3()).length();
       const boxCenter = box.getCenter(new THREE.Vector3());
-
-      // set the camera to frame the box
       frameArea(boxSize * 1.2, boxSize, boxCenter, camera);
-
-      // update the Trackball controls to handle the new size
       controls.maxDistance = boxSize * 10;
       controls.target.copy(boxCenter);
       controls.update();
@@ -201,7 +167,7 @@ async function main() {
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
       camera.updateProjectionMatrix();
     }
-    skinTexture.needsUpdate = true;
+    //skinTexture.needsUpdate = true;
     renderer.render(scene, camera);
     requestAnimationFrame(render);
   }
