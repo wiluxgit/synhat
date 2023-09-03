@@ -4,15 +4,22 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
+let skinBitmap = null;
+
 async function main() {
-  const canvas = document.getElementById("canvasSkinPreview")
+  const modelCanvas = document.getElementById("camera");
+  const previewCanvas = document.getElementById("canvasSkinPreview")
 
-  const renderCanvas = document.querySelector('#camera');
-  const renderer = new THREE.WebGLRenderer({canvas: renderCanvas});
+  const modelRenderer = new THREE.WebGLRenderer({canvas: modelCanvas});
 
-  // Init texture
-  const gl = renderer.getContext();
-  const glTex = gl.createTexture();
+  const glModel = modelRenderer.getContext();
+  const glModelTexture = glModel.createTexture();
+  const glPreview = previewCanvas.getContext('webgl2')
+
+  // ONLY USE FOR WEBGL CONSTANTS
+  const gl = glModel
+
+  // Init textures
   {
     const img = new Image();
     img.addEventListener('load', render);
@@ -23,21 +30,23 @@ async function main() {
         alert("Skin file is not 64x64")
         return
       }
-      createImageBitmap(img).then((bitmap) => {
-        console.log(bitmap)
+      createImageBitmap(img).then((load) => {
+        skinBitmap = load
 
-        gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE)
-        gl.bindTexture(gl.TEXTURE_2D, glTex);
-        gl.texImage2D(
+        // Camera view
+        glModel.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE)
+        glModel.bindTexture(gl.TEXTURE_2D, glModelTexture);
+        glModel.texImage2D(
           gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
           gl.RGBA, gl.UNSIGNED_BYTE,
-          bitmap
+          skinBitmap
         )
-        gl.generateMipmap(gl.TEXTURE_2D);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        glModel.generateMipmap(gl.TEXTURE_2D);
+        glModel.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        glModel.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        glModel.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-        // Preview canvas
-        const canvasGL = canvas.getContext('webgl2')
+        // Preview view
         const vs = `
           attribute vec4 position;
           void main() {
@@ -50,23 +59,21 @@ async function main() {
           void main() {
             gl_FragColor = texture2D(tex, gl_PointCoord);
           }`;
-        const program = twgl.createProgram(canvasGL, [vs, fs]);
-        const glTex2 = canvasGL.createTexture();
-        canvasGL.useProgram(program);
-        const positionLoc = canvasGL.getAttribLocation(program, "position");
+        const program = twgl.createProgram(glPreview, [vs, fs]);
+        const glTex2 = glPreview.createTexture();
+        glPreview.useProgram(program);
 
-        canvasGL.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE)
-        canvasGL.bindTexture(gl.TEXTURE_2D, glTex2);
-        canvasGL.texImage2D(
+        glPreview.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE)
+        glPreview.bindTexture(gl.TEXTURE_2D, glTex2);
+        glPreview.texImage2D(
           gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
           gl.RGBA, gl.UNSIGNED_BYTE,
-          bitmap
+          skinBitmap
         )
-        canvasGL.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        canvasGL.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        canvasGL.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        canvasGL.vertexAttrib1f(positionLoc, 0);
-        canvasGL.drawArrays(canvasGL.POINTS, 0, 1);
+        glPreview.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        glPreview.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        glPreview.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        glPreview.drawArrays(gl.POINTS, 0, 1);
       });
     }
   }
@@ -78,7 +85,7 @@ async function main() {
   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
   camera.position.set(0, 10, 20);
 
-  const controls = new OrbitControls(camera, renderCanvas);
+  const controls = new OrbitControls(camera, modelCanvas);
   controls.target.set(0, 5, 0);
   controls.update();
 
@@ -145,7 +152,7 @@ async function main() {
 
     return function forceTextureInitialization(texture) {
       material.map = texture;
-      renderer.render(scene, camera);
+      modelRenderer.render(scene, camera);
     };
   }();
 
@@ -161,8 +168,8 @@ async function main() {
           // https://stackoverflow.com/questions/29325906/can-you-use-raw-webgl-textures-with-three-js
           const texture = new THREE.Texture();
           forceTextureInitialization(texture);
-          const texProps = renderer.properties.get(texture);
-          texProps.__webglTexture = glTex;
+          const texProps = modelRenderer.properties.get(texture);
+          texProps.__webglTexture = glModelTexture;
 
           const material = new THREE.ShaderMaterial({
             uniforms: {
@@ -203,13 +210,13 @@ async function main() {
   }
 
   function render() {
-    if (resizeRendererToDisplaySize(renderer)) {
-      const canvas = renderer.domElement;
+    if (resizeRendererToDisplaySize(modelRenderer)) {
+      const canvas = modelRenderer.domElement;
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
       camera.updateProjectionMatrix();
     }
     //skinTexture.needsUpdate = true;
-    renderer.render(scene, camera);
+    modelRenderer.render(scene, camera);
     requestAnimationFrame(render);
   }
 
