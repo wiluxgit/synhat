@@ -28,6 +28,7 @@ async function main() {
     img.onload = async () => {
       if (img.width != 64 || img.width != 64) {
         alert("Skin file is not 64x64")
+        // TODO, reset or something
         return
       }
       createImageBitmap(img).then((load) => {
@@ -73,7 +74,6 @@ async function main() {
         glPreview.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
         glPreview.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         glPreview.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        glPreview.drawArrays(gl.POINTS, 0, 1);
       });
     }
   }
@@ -216,7 +216,10 @@ async function main() {
       camera.updateProjectionMatrix();
     }
     //skinTexture.needsUpdate = true;
+
     modelRenderer.render(scene, camera);
+    glPreview.drawArrays(gl.POINTS, 0, 1);
+
     requestAnimationFrame(render);
   }
 
