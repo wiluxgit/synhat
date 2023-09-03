@@ -4,12 +4,13 @@
 
 let uploadInputImage = document.getElementById('uploadInputImage')
 let canvasSkinPreview = document.getElementById('canvasSkinPreview')
-let canvasSkinPreviewCtx = canvasSkinPreview.getContext('2d')
+let canvasSkinPreviewCtx = canvasSkinPreview.getContext('webgl2')
 
 MAIN = {}
 MAIN.changedUploadImage = (inputEvent) => {
     let reader = new FileReader()
     reader.onload = (e) => {
+        /* TODO
         var img = new Image()
         img.onload = () => {
             if (!(img.width == 64 && img.height == 64)) {
@@ -19,6 +20,7 @@ MAIN.changedUploadImage = (inputEvent) => {
             canvasSkinPreviewCtx.drawImage(img, 0, 0)
         }
         img.src = e.target.result
+        */
     }
     reader.readAsDataURL(inputEvent.target.files[0]);
 }
@@ -27,10 +29,11 @@ MAIN.resetSkinCanvas = () => {
     var img = new Image()
     img.src = "assets/steve.png"
     uploadInputImage.value = ""
+    /* TODO
     img.onload = () => {
         canvasSkinPreviewCtx.clearRect(0, 0, canvasSkinPreview.width, canvasSkinPreview.height);
         canvasSkinPreviewCtx.drawImage(img, 0, 0)
-    }
+    }*/
 }
 
 MAIN.newDefaultTransformDictionary = () => {

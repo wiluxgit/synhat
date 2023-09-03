@@ -18,15 +18,56 @@ async function main() {
     img.addEventListener('load', render);
     img.crossOrigin = "";
     img.src = "assets/steve.png";
-    img.onload = () => {
-      gl.bindTexture(gl.TEXTURE_2D, glTex);
-      gl.texImage2D(
-        gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
-        gl.RGBA, gl.UNSIGNED_BYTE,
-        img
-      )
-      gl.generateMipmap(gl.TEXTURE_2D);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    img.onload = async () => {
+      if (img.width != 64 || img.width != 64) {
+        alert("Skin file is not 64x64")
+        return
+      }
+      createImageBitmap(img).then((bitmap) => {
+        console.log(bitmap)
+
+        gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE)
+        gl.bindTexture(gl.TEXTURE_2D, glTex);
+        gl.texImage2D(
+          gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
+          gl.RGBA, gl.UNSIGNED_BYTE,
+          bitmap
+        )
+        gl.generateMipmap(gl.TEXTURE_2D);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+        // Preview canvas
+        const canvasGL = canvas.getContext('webgl2')
+        const vs = `
+          attribute vec4 position;
+          void main() {
+            gl_PointSize = 64.0;
+            gl_Position = position;
+          }`;
+        const fs = `
+          precision mediump float;
+          uniform sampler2D tex;
+          void main() {
+            gl_FragColor = texture2D(tex, gl_PointCoord);
+          }`;
+        const program = twgl.createProgram(canvasGL, [vs, fs]);
+        const glTex2 = canvasGL.createTexture();
+        canvasGL.useProgram(program);
+        const positionLoc = canvasGL.getAttribLocation(program, "position");
+
+        canvasGL.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE)
+        canvasGL.bindTexture(gl.TEXTURE_2D, glTex2);
+        canvasGL.texImage2D(
+          gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
+          gl.RGBA, gl.UNSIGNED_BYTE,
+          bitmap
+        )
+        canvasGL.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        canvasGL.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        canvasGL.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        canvasGL.vertexAttrib1f(positionLoc, 0);
+        canvasGL.drawArrays(canvasGL.POINTS, 0, 1);
+      });
     }
   }
 
