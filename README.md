@@ -28,6 +28,9 @@ Edit the `JVM arguments` field and add ` -javaagent:synhat.jar` at the end it 
 ![enter image description here](https://media.discordapp.net/attachments/519088004812505088/917837559059591229/unknown.png)
 
 **7**
-Start minecraft, a synhat window should then appear and download the latest version
+Start **THAT MINECRAFT INSTALLATION** (in this case snap), a synhat window should then appear and download the latest version
 ![enter image description here](https://cdn.discordapp.com/attachments/519088004812505088/917837993295880213/unknown.png)
 
+**8**
+Wait until minecraft started, synhat should now be in the resourcepack list
+![enter image description here](https://cdn.discordapp.com/attachments/458986139769110539/1147950570993369149/image.png)
