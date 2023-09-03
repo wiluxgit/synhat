@@ -3,7 +3,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+import * as twgl from 'twgl';
 
+// TODO: probably needs to be changed to an array
 let skinBitmap = null;
 
 async function main() {
@@ -61,11 +63,11 @@ async function main() {
             gl_FragColor = texture2D(tex, gl_PointCoord);
           }`;
         const program = twgl.createProgram(glPreview, [vs, fs]);
-        const glTex2 = glPreview.createTexture();
+        const glPreviewTexture = glPreview.createTexture();
         glPreview.useProgram(program);
 
         glPreview.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE)
-        glPreview.bindTexture(gl.TEXTURE_2D, glTex2);
+        glPreview.bindTexture(gl.TEXTURE_2D, glPreviewTexture);
         glPreview.texImage2D(
           gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
           gl.RGBA, gl.UNSIGNED_BYTE,
