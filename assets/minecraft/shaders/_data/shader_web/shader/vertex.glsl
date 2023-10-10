@@ -171,6 +171,17 @@ void main() {
     //normal = ProjMat * ModelViewMat * vec4(Normal, 0.0);
 }
 
+void getWorldspaceMatrix(vec3 lightCameraspace, vec3 lightWorldspace) {
+    // https://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d
+    vec3 c = cross(lightWorldspace, lightCameraspace)
+    float d = dot(lightWorldspace, lightCameraspace)
+
+    // skew-symmetric cross-product
+    mat3 skewsym = mat3(vec3(0.0, c.z, -c.y), vec3(-c.z, 0.0, c.x), vec3(c.y, -c.x, 0.0))
+
+    mat3 rot = mat3(1.0) + skewsym + skewsym * skewsym * (1/(1+d))
+}
+
 void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
     bool isNegativeOffset 			 = (dataR & FLAG_TTD_sign) != 0;
     bool isSnap				         = (dataR & FLAG_TTD_snap) != 0;
