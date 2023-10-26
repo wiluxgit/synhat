@@ -1,4 +1,6 @@
 {"parent": "item/_clock_state/clock_00", "overrides": [
+	{"predicate": {"custom_model_data": -390}, "model": "synhat/zielridder/red_dude"},
+	{"predicate": {"custom_model_data": -389}, "model": "synhat/zielridder/red_speedster"},
 	{"predicate": {"custom_model_data": -388}, "model": "synhat/zielridder/skulky_zielhead"},
 	{"predicate": {"custom_model_data": -387}, "model": "synhat/wilux/phoenix_wright/objection"},
 	{"predicate": {"custom_model_data": -386}, "model": "synhat/wilux/player/technoblade"},

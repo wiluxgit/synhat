@@ -1,3 +1,5 @@
 {"models": [
-	{"item": "minecraft:clock", "model": "synhat/zielridder/skulky_zielhead", "displayName": "Skulky Ziely Head"}
+	{"item": "minecraft:clock", "model": "synhat/zielridder/skulky_zielhead", "displayName": "Skulky Ziely Head"},
+	{"item": "minecraft:clock", "model": "synhat/zielridder/red_speedster", "displayName": "Red Speedster"},
+	{"item": "minecraft:clock", "model": "synhat/zielridder/red_dude", "displayName": "Red Dude"}
 ]}

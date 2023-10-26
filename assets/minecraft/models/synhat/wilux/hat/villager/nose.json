@@ -1,6 +1,5 @@
 {
 	"credit": "Made with Blockbench",
-	"parent": "Villager nose",
 	"textures": {
 		"0": "synhat/wilux/hat/villager/nose",
 		"particle": "synhat/wilux/hat/villager/nose"
