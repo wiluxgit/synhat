@@ -1,0 +1,4 @@
+{"parent": "minecraft:item/generated", "textures": {"layer0": "minecraft:item/cooked_cod"}, "overrides": [
+	{"predicate": {"custom_model_data": 1}, "model": "synhat/old/held/food/canned_fish"},
+	{"predicate": {"custom_model_data": 2}, "model": "synhat/old/held/food/fish_dish"},
+	{"predicate": {"custom_model_data": 3}, "model": "synhat/old/held/food/pizza_marina"}]}

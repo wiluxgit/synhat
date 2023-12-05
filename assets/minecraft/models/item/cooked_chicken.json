@@ -1,0 +1,2 @@
+{"parent": "minecraft:item/generated", "textures": {"layer0": "minecraft:item/cooked_chicken"}, "overrides": [
+	{"predicate": {"custom_model_data": 1}, "model": "synhat/old/held/food/chicken_spicy"}]}

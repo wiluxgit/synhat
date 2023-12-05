@@ -1,0 +1,8 @@
+{"parent": "minecraft:item/generated", "textures": {"layer0": "minecraft:item/bread"}, "overrides": [
+	{"predicate": {"custom_model_data": 1}, "model": "synhat/old/held/food/sandwich_jam"},
+	{"predicate": {"custom_model_data": 2}, "model": "synhat/old/held/food/sandwich_cheese"},
+	{"predicate": {"custom_model_data": 3}, "model": "synhat/old/held/food/sandwich_grand"},
+	{"predicate": {"custom_model_data": 4}, "model": "synhat/old/held/food/pasta"},
+	{"predicate": {"custom_model_data": 5}, "model": "synhat/old/held/food/pizza_dough"},
+	{"predicate": {"custom_model_data": 6}, "model": "synhat/old/held/food/pizza_blank"},
+	{"predicate": {"custom_model_data": 7}, "model": "synhat/old/held/food/pizza_magarita"}]}

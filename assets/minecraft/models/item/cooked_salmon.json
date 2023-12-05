@@ -1,0 +1,3 @@
+{"parent": "minecraft:item/generated", "textures": {"layer0": "minecraft:item/cooked_salmon"}, "overrides": [
+	{"predicate": {"custom_model_data": 1}, "model": "synhat/old/held/food/omelette_keto"},
+	{"predicate": {"custom_model_data": 2}, "model": "synhat/old/held/food/omelette_japan"}]}

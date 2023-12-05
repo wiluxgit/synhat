@@ -1,0 +1,3 @@
+{"parent": "minecraft:item/generated", "textures": {"layer0": "minecraft:item/honey_bottle"}, "overrides": [
+	{"predicate": {"custom_model_data": 1}, "model": "synhat/old/held/food/ketchup"},
+	{"predicate": {"custom_model_data": 2}, "model": "synhat/old/held/food/red_sauce"}]}

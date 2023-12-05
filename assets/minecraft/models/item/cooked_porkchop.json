@@ -1,0 +1,7 @@
+{"parent": "minecraft:item/generated", "textures": {"layer0": "minecraft:item/cooked_porkchop"}, "overrides": [
+	{"predicate": {"custom_model_data": 1}, "model": "synhat/old/held/food/minced_pork"},
+	{"predicate": {"custom_model_data": 2}, "model": "synhat/old/held/food/pizza_vesuvio"},
+	{"predicate": {"custom_model_data": 3}, "model": "synhat/old/held/food/pizza_capricciosa"},
+	{"predicate": {"custom_model_data": 4}, "model": "synhat/old/held/food/pizza_pollo"},
+	{"predicate": {"custom_model_data": 5}, "model": "synhat/old/held/food/pizza_speciale"},
+	{"predicate": {"custom_model_data": 6}, "model": "synhat/old/held/food/bacon"}]}

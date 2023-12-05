@@ -1,0 +1,9 @@
+{"parent": "minecraft:item/generated", "textures": {"layer0": "minecraft:item/cooked_beef"}, "overrides": [
+	{"predicate": {"custom_model_data": 1}, "model": "synhat/old/held/food/minced_beef"},
+	{"predicate": {"custom_model_data": 2}, "model": "synhat/old/held/food/meat_sauce"},
+	{"predicate": {"custom_model_data": 3}, "model": "synhat/old/held/food/lasagna"},
+	{"predicate": {"custom_model_data": 4}, "model": "synhat/old/held/food/magic_lasagna"},
+	{"predicate": {"custom_model_data": 5}, "model": "synhat/old/held/food/pizza_kebab"},
+	{"predicate": {"custom_model_data": 6}, "model": "synhat/old/held/food/pizza_gothemburg"},
+	{"predicate": {"custom_model_data": 7}, "model": "synhat/old/held/food/pizza_reale"},
+	{"predicate": {"custom_model_data": 8}, "model": "synhat/old/held/food/pizza_grand_deluxe"}]}
