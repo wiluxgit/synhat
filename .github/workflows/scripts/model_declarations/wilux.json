@@ -1,4 +1,22 @@
 {"models": [
-	{"item": "minecraft:clock", "model": "synhat/wilux/player/technoblade", "displayName": "Technoblade", "lore": "Technoblade"},
-	{"item": "minecraft:clock", "model": "synhat/wilux/phoenix_wright/objection", "displayName": "Objection!"}
+	{"item": "minecraft:shield", "model": "synhat/wilux/trophies/rsa2023/rsa_door", "displayName": "Best Piston Door Creator", "lore": "RSA 2023"},
+	{"item": "minecraft:shield", "model": "synhat/wilux/trophies/rsa2023/rsa_0tick", "displayName": "Best 0-Tick Redstoner", "lore": "RSA 2023"},
+	{"item": "minecraft:shield", "model": "synhat/wilux/trophies/rsa2023/rsa_compute", "displayName": "Best Computational Redstoner", "lore": "RSA 2023"},
+	{"item": "minecraft:shield", "model": "synhat/wilux/trophies/rsa2023/rsa_slime", "displayName": "Best Slimestoner", "lore": "RSA 2023"},
+	{"item": "minecraft:shield", "model": "synhat/wilux/trophies/rsa2023/rsa_creative", "displayName": "Most Creative Redstoner", "lore": "RSA 2023"},
+	{"item": "minecraft:shield", "model": "synhat/wilux/trophies/rsa2023/rsa_content_creator", "displayName": "Best Redstone Content Creator", "lore": "RSA 2023"},
+	{"item": "minecraft:shield", "model": "synhat/wilux/trophies/rsa2023/rsa_farm", "displayName": "Best Farm Designer", "lore": "RSA 2023"},
+	{"item": "minecraft:shield", "model": "synhat/wilux/trophies/rsa2023/rsa_storage", "displayName": "Best Storage Tech", "lore": "RSA 2023"},
+	{"item": "minecraft:shield", "model": "synhat/wilux/trophies/rsa2023/rsa_server", "displayName": "Best Redstone Server", "lore": "RSA 2023"},
+	{"item": "minecraft:shield", "model": "synhat/wilux/trophies/rsa2023/rsa_redstoner", "displayName": "Redstoner Of The Year", "lore": "RSA 2023"},
+	{"item": "minecraft:shield_blocking", "model": "synhat/wilux/trophies/rsa2023/blocking_rsa_door"},
+	{"item": "minecraft:shield_blocking", "model": "synhat/wilux/trophies/rsa2023/blocking_rsa_0tick"},
+	{"item": "minecraft:shield_blocking", "model": "synhat/wilux/trophies/rsa2023/blocking_rsa_compute"},
+	{"item": "minecraft:shield_blocking", "model": "synhat/wilux/trophies/rsa2023/blocking_rsa_slime"},
+	{"item": "minecraft:shield_blocking", "model": "synhat/wilux/trophies/rsa2023/blocking_rsa_creative"},
+	{"item": "minecraft:shield_blocking", "model": "synhat/wilux/trophies/rsa2023/blocking_rsa_content_creator"},
+	{"item": "minecraft:shield_blocking", "model": "synhat/wilux/trophies/rsa2023/blocking_rsa_farm"},
+	{"item": "minecraft:shield_blocking", "model": "synhat/wilux/trophies/rsa2023/blocking_rsa_storage"},
+	{"item": "minecraft:shield_blocking", "model": "synhat/wilux/trophies/rsa2023/blocking_rsa_server"},
+	{"item": "minecraft:shield_blocking", "model": "synhat/wilux/trophies/rsa2023/blocking_rsa_redstoner"}
 ]}

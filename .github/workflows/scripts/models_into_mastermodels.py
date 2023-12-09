@@ -26,10 +26,10 @@ def insertNew():
             modelPath = nd["model"]
             mcItem = nd["item"]
             try:
-                if modelPath in alreadyRegistered[mcItem]: #print(f"SKIP (already defined): {mcItem}:{modelPath}")
+                if modelPath in alreadyRegistered[mcItem]:
+                    print(f"SKIP (already defined): {mcItem}[]={modelPath}")
                     continue
-            except Exception:""
-            print(f"REGISTER: {mcItem}:{modelPath}")
+            except Exception: ""
 
             if "displayName" not in nd:
                 nd["displayName"] = makeDisplayName(modelPath)
@@ -37,23 +37,26 @@ def insertNew():
             nd["data"] = getNextAvailableCMData(hatData, mcItem)
             hatData.append(nd)
 
+            print(f"REGISTER: {mcItem}[{nd['data']}]={modelPath}")
+
     with open(hatDataPath, "w+") as f:
         json.dump(fileData, f)
 
     xsort(file = hatDataPath)
 
 def getNextAvailableCMData(hatData, mcItem):
+    matchingItemData = [hat for hat in hatData if hat["item"] == mcItem]
+
     if mcItem == "minecraft:clock":
-        mx = max(hatData, key=lambda x: -getCMDataIfCorrectItem(x, mcItem))["data"]
+        mx = max(matchingItemData, key=lambda x: -getCMDataIfCorrectItem(x, mcItem), default={"data":0})["data"]
         return mx-1
     else:
-        mx = max(hatData, key=lambda x: getCMDataIfCorrectItem(x, mcItem))["data"]
+        mx = max(matchingItemData, key=lambda x: getCMDataIfCorrectItem(x, mcItem), default={"data":0})["data"]
         return mx+1
 
 def getCMDataIfCorrectItem(hatProperties, matchItem):
-    if hatProperties["item"] == matchItem:
-        return int(hatProperties["data"])
-    return 0
+    assert hatProperties["item"] == matchItem
+    return int(hatProperties["data"])
 
 def makeDisplayName(modelPath):
     s = modelPath.split("/")[-1]

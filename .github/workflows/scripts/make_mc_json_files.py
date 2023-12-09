@@ -32,8 +32,12 @@ def make_mc_files():
                 print(f"Can not add {cropBegining(path,25)}:{data} since {item}.json does not exist")
                 continue
 
+        newPredicate = {"custom_model_data":data}
+        if "extra_predicate" in declr:
+            newPredicate.update(declr["extra_predicate"])
+
         item2Model[item]["overrides"].append(
-            {"predicate":{"custom_model_data":data},"model":path}
+            {"predicate":newPredicate,"model":path}
         )
 
     for k,v in item2Model.items():
