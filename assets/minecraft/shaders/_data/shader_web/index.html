@@ -17,14 +17,14 @@
   }'
   x-init='
     $watch("id2transform",
-      MAIN.debounce(() => MAIN.writeTransformsToCanvas(id2transform))
+      MAIN.debounce(() => MAIN.writeTransformsAndRender(id2transform))
     )
   '>
     <div id="winEditorGrid">
       <div id="winGlobal">
         <input type="file" id="uploadInputImage" name="uploadInputImage" accept="image/*"
           x-on:change='MAIN.changedUploadImage'
-          x-init='MAIN.resetSkinCanvas'>
+          x-init='MAIN.loadImage'>
         </input>
         <br><button type="button" x-on:click='MAIN.downloadCanvas()'>Download Skin</button>
         <br>
@@ -32,9 +32,9 @@
         <br><button type="button" x-on:click='alert("TODO")'>Download Model Json</button>
         <br>
         <br><button type="button" x-on:click='
-          MAIN.resetSkinCanvas()
           selectedId = 0
           id2transform = MAIN.newDefaultTransformDictionary()
+          MAIN.loadImage()
         '>Reset</button>
       </div>
 
@@ -84,7 +84,7 @@
             <button type="button" x-on:click='alert("copy all")'>Copy All</button>
             <button type="button" x-on:click='alert("paste all")'>Paste All</button>
             <button type="button" x-on:click='id2transform[selectedId]=[]'>Delete All</button>
-            <button type="button" x-on:click='MAIN.writeTransformsToCanvas(id2transform[selectedId])'>Debug</button>
+            <button type="button" x-on:click='MAIN.writeTransformsAndRender(id2transform[selectedId])'>Debug</button>
           </div>
 
           <template x-if="id2transform[selectedId].length == 0">

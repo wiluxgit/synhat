@@ -25,62 +25,54 @@ async function main() {
 
   // Init textures
   {
-    const img = new Image();
-    img.addEventListener('load', render);
-    img.crossOrigin = "";
-    img.src = "assets/steve.png";
-    img.onload = async () => {
-      if (img.width != 64 || img.width != 64) {
-        alert("Skin file is not 64x64")
-        // TODO, reset or something
-        return
-      }
-      createImageBitmap(img).then((imageBitmap) => {
-        // Camera view
-        glModel.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE)
-        glModel.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
-        glModel.bindTexture(gl.TEXTURE_2D, glModelTexture);
-        glModel.texImage2D(
-          gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
-          gl.RGBA, gl.UNSIGNED_BYTE,
-          imageBitmap
-        )
-        glModel.generateMipmap(gl.TEXTURE_2D);
-        glModel.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        glModel.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        glModel.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        glModel.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    var raw = new Uint8ClampedArray(64*64*4)
+    raw.fill(200)
+    const imageData = new ImageData(raw, 64,64)
+    createImageBitmap(imageData).then((imageBitmap) => {
+      // Preview view
+      const vs = `
+        attribute vec4 position;
+        void main() {
+          gl_PointSize = 64.0;
+          gl_Position = position;
+        }`;
+      const fs = `
+        precision mediump float;
+        uniform sampler2D tex;
+        void main() {
+          gl_FragColor = texture2D(tex, gl_PointCoord);
+        }`;
+      const program = twgl.createProgram(glPreview, [vs, fs]);
+      glPreview.useProgram(program);
 
-        // Preview view
-        const vs = `
-          attribute vec4 position;
-          void main() {
-            gl_PointSize = 64.0;
-            gl_Position = position;
-          }`;
-        const fs = `
-          precision mediump float;
-          uniform sampler2D tex;
-          void main() {
-            gl_FragColor = texture2D(tex, gl_PointCoord);
-          }`;
-        const program = twgl.createProgram(glPreview, [vs, fs]);
-        glPreview.useProgram(program);
+      glPreview.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE)
+      glPreview.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
+      glPreview.bindTexture(gl.TEXTURE_2D, glPreviewTexture);
+      glPreview.texImage2D(
+        gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
+        gl.RGBA, gl.UNSIGNED_BYTE,
+        imageBitmap
+      )
+      glPreview.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      glPreview.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      glPreview.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      glPreview.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-        glPreview.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE)
-        glPreview.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
-        glPreview.bindTexture(gl.TEXTURE_2D, glPreviewTexture);
-        glPreview.texImage2D(
-          gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
-          gl.RGBA, gl.UNSIGNED_BYTE,
-          imageBitmap
-        )
-        glPreview.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        glPreview.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        glPreview.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        glPreview.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      });
-    }
+      // Camera view
+      glModel.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE)
+      glModel.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
+      glModel.bindTexture(gl.TEXTURE_2D, glModelTexture);
+      // glModel.texImage2D(
+      //   gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
+      //   gl.RGBA, gl.UNSIGNED_BYTE,
+      //   imageBitmap
+      // )
+      glModel.generateMipmap(gl.TEXTURE_2D);
+      glModel.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      glModel.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      glModel.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      glModel.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    });
   }
 
   const fov = 45;

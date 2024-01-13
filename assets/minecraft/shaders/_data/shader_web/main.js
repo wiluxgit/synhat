@@ -5,6 +5,7 @@
 const uploadInputImage = document.getElementById("uploadInputImage")
 const canvasSkinPreview = document.getElementById("canvasSkinPreview")
 const canvasSkinPreviewCtx = canvasSkinPreview.getContext("webgl2", {preserveDrawingBuffer: true})
+const canvasCameraCtx = document.getElementById("camera").getContext("webgl2")
 
 const gl = canvasSkinPreviewCtx
 
@@ -29,19 +30,82 @@ MAIN.changedUploadImage = (inputEvent) => {
     reader.readAsDataURL(inputEvent.target.files[0]);
 }
 
-MAIN.resetSkinCanvas = () => {
-    var img = new Image()
-    img.src = "assets/steve.png"
-    uploadInputImage.value = ""
-    /* TODO
-    img.onload = () => {
-        canvasSkinPreviewCtx.clearRect(0, 0, canvasSkinPreview.width, canvasSkinPreview.height);
-        canvasSkinPreviewCtx.drawImage(img, 0, 0)
-    }*/
-
-    img.onload = () => {
-        console.log("loadCanvas")
+// take a serializable image, put it into imageData, render
+// nullableImage : ImageBitmap and? (ImageData | HTMLImageElement | HTMLCanvasElement | HTMLVideoElement | ImageBitmap)
+MAIN.loadImage = async (nullableImage) => {
+    console.log("MAIN.loadImage")
+    let attempts = 0
+    let err = undefined
+    while (attempts < 10) {
+        gl.getError() // flush error buffer
+        MAIN.loadImageTry(nullableImage)
+        await new Promise(r => setTimeout(r, 100));
+        err = gl.getError()
+        if (err == gl.INVALID_OPERATION) {
+            attempts++
+            console.error(`gl.INVALID_OPERATION while loading image, retrying. Attempt ${attempts}`);
+            await new Promise(r => setTimeout(r, 500));
+        } else {
+            break
+        }
     }
+    if (attempts == 10) {
+        alert(`FAILED TO INITIALIZE RENDERER: WebGL ERROR ${err}`)
+    }
+}
+MAIN.loadImageTry = async (nullableImage) => {
+    console.log("MAIN.loadImageTry")
+
+    let glCompatibleImage = undefined
+    if (nullableImage === undefined) {
+        uploadInputImage.value = ""
+        img = await new Promise((resolve, reject) => {
+            let img = new Image()
+            img.src = "assets/steve.png"
+            img.onload = () => resolve(img)
+            img.onerror = reject
+        })
+        glCompatibleImage = await createImageBitmap(img)
+    } else {
+        glCompatibleImage = nullableImage
+    }
+
+    if (glCompatibleImage.width != 64 || glCompatibleImage.width != 64) {
+      alert("Skin file is not 64x64")
+      // TODO, reset or something?
+      return
+    }
+
+    // Very janky soluton to serilze imagedata
+    // Apparently there doesn't exist a good one. https://stackoverflow.com/questions/68102995/is-it-possible-to-get-pixels-from-imagebitmap-web-object-without-a-canvas
+    canvasSkinPreviewCtx.finish();
+    canvasSkinPreviewCtx.texImage2D(
+        gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
+        gl.RGBA, gl.UNSIGNED_BYTE,
+        glCompatibleImage
+    )
+    await new Promise(r => setTimeout(r, 200))
+    canvasSkinPreviewCtx.readPixels(0, 0, 64, 64, gl.RGBA, gl.UNSIGNED_BYTE, imageData, 0)
+
+    MAIN.renderImageNow()
+}
+MAIN.renderImage = () => {
+    MAIN.debounce(MAIN.renderImageNow)()
+}
+MAIN.renderImageNow = () => {
+    const firstbyte = [0,1,2,3].map((x) => imageData[getByteOffset(0,0,x)])
+    console.log("MAIN.renderImageNow", firstbyte, hexstr(firstbyte))
+
+    canvasSkinPreviewCtx.texImage2D(
+        gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
+        gl.RGBA, gl.UNSIGNED_BYTE,
+        imageData
+    )
+    canvasCameraCtx.texImage2D(
+        gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
+        gl.RGBA, gl.UNSIGNED_BYTE,
+        imageData
+    )
 }
 
 MAIN.newDefaultTransformDictionary = () => {
@@ -50,9 +114,12 @@ MAIN.newDefaultTransformDictionary = () => {
     return d
 }
 
+function hexstr(buf, extra="") {
+    return [...buf].map((b) => b.toString(16).padStart(2, "0").toUpperCase()).join("_")
+}
 function logHexAndBin(buf, extra="") {
     binStr = [...buf].map((b) => b.toString(2).padStart(8, "0")).join("_");
-    hexStr = buf.toString("hex")
+    hexStr = [...buf].map((b) => b.toString(16).padStart(2, "0").toUpperCase()).join("_")
     console.log(`0b${binStr} | 0x${hexStr} (len=${buf.length}) ${extra}`);
 }
 function getFaceOperationEntryPos(faceId) {
@@ -68,6 +135,10 @@ function getTransformPosition(transform_arugment_index) {
     let y = (temp / 8) >> 0;
     return [x, y]
 }
+function getByteOffset(x, y, c=0) {
+    y = 63-y
+    return 4 * (y * 64 + x) + c;
+}
 
 MAIN.debounce = (func, timeout = 500) => {
     let timer;
@@ -78,20 +149,18 @@ MAIN.debounce = (func, timeout = 500) => {
 }
 
 MAIN.downloadCanvas = () => {
-    var dataURL = canvasSkinPreview.toDataURL("image/png");
-    var newTab = window.open('about:blank','image from canvas');
+    let dataURL = canvasSkinPreview.toDataURL("image/png");
+    let newTab = window.open('about:blank','image from canvas');
     newTab.document.write("<img src='" + dataURL + "' alt='from canvas'/>");
 }
 
-MAIN.writeTransformsToCanvas = (id2transform) => {
-    console.log("MAIN.debugAllTransforms")
+MAIN.writeTransformsAndRender = (id2transform) => {
+    console.log("MAIN.writeTransformsAndRender")
 
-    serializedFaceEntries = new Uint8Array(72)
-    serializedTransforms = new Uint32Array(44)
+    const serializedFaceEntries = new Uint8Array(72)
+    const serializedTransforms = new Uint32Array(44)
 
-    transformIndex = 1
-
-    faceOperationEntryParser = MAIN.faceOperationParser
+    let transformIndex = 1
 
     for ([faceId, faceTransfroms] of Object.entries(id2transform)){
         for (faceTransfrom of faceTransfroms) {
@@ -102,7 +171,7 @@ MAIN.writeTransformsToCanvas = (id2transform) => {
                 "transform_type": type,
                 "transform_argument_index": transformIndex,
             }
-            let feBuf = faceOperationEntryParser.encode(faceOperation)
+            let feBuf = MAIN.faceOperationParser.encode(faceOperation)
             logHexAndBin(feBuf, `(face=${faceId})`);
             serializedFaceEntries[faceId] = feBuf[0]
 
@@ -122,17 +191,10 @@ MAIN.writeTransformsToCanvas = (id2transform) => {
         }
     }
 
-    let width = canvasSkinPreviewCtx.drawingBufferWidth
-    let height = canvasSkinPreviewCtx.drawingBufferHeight
-
-    console.log({"glwidth":width, "glheight":height})
-    canvasSkinPreviewCtx.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, imageData, 0)
-
-    /*
     for (let [pos, int] of serializedFaceEntries.entries()) {
         let [x,y,c] = getFaceOperationEntryPos(pos)
 
-        let offset = 4 * (y * width + x) + c;
+        let offset = getByteOffset(x,y,c)
         imageData[offset] = int
 
         // Temp, makes debugging easier
@@ -152,11 +214,11 @@ MAIN.writeTransformsToCanvas = (id2transform) => {
         // Temp, makes debugging easier
         int |= 0x000000ff
 
-        let offset = 4 * (y * width + x);
-        imageData[offset+0] = (int >> 24) & 0xff;
-        imageData[offset+1] = (int >> 16) & 0xff;
-        imageData[offset+2] = (int >> 8) & 0xff;
-        imageData[offset+3] = (int >> 0) & 0xff;
+        let offset = getByteOffset(x,y)
+        imageData[offset+0] = (int >> 24) & 0xff
+        imageData[offset+1] = (int >> 16) & 0xff
+        imageData[offset+2] = (int >> 8) & 0xff
+        imageData[offset+3] = (int >> 0) & 0xff
 
         if((int & 0xffffff00) != 0) {
             hexstr = [...Array(4).keys()].map(
@@ -165,18 +227,8 @@ MAIN.writeTransformsToCanvas = (id2transform) => {
             console.log(`T pos=${pos} offset=${offset}, x=${x}, y=${y} value=${hexstr}`)
         }
     }
-    */
 
-    console.log("imageData", imageData)
-    canvasSkinPreviewCtx.texImage2D(
-        gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
-        gl.RGBA, gl.UNSIGNED_BYTE,
-        imageData
-    )
-
-    //let imageData2 = new Uint8Array(width*height*4)
-    //canvasSkinPreview.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, imageData, 0)
-    //console.log("imageData2", imageData2)
+    MAIN.renderImage()
 }
 
 MAIN.enums = {
