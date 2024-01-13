@@ -24,7 +24,7 @@
       <div id="winGlobal">
         <input type="file" id="uploadInputImage" name="uploadInputImage" accept="image/*"
           x-on:change='MAIN.changedUploadImage'
-          x-init='MAIN.loadImage'>
+          x-init='MAIN.loadImage(undefined, id2transform)'>
         </input>
         <br><button type="button" x-on:click='MAIN.downloadCanvas()'>Download Skin</button>
         <br>
@@ -34,7 +34,7 @@
         <br><button type="button" x-on:click='
           selectedId = 0
           id2transform = MAIN.newDefaultTransformDictionary()
-          MAIN.loadImage()
+          MAIN.loadImage(undefined, id2transform)
         '>Reset</button>
       </div>
 

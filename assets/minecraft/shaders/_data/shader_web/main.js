@@ -15,30 +15,24 @@ MAIN = {}
 MAIN.changedUploadImage = (inputEvent) => {
     let reader = new FileReader()
     reader.onload = (e) => {
-        /* TODO
-        var img = new Image()
-        img.onload = () => {
-            if (!(img.width == 64 && img.height == 64)) {
-                alert('Image is not 64x64')
-            }
-            canvasSkinPreviewCtx.clearRect(0, 0, canvasSkinPreview.width, canvasSkinPreview.height);
-            canvasSkinPreviewCtx.drawImage(img, 0, 0)
-        }
+        let img = new Image()
         img.src = e.target.result
-        */
+        img.onload = () => {
+            createImageBitmap(img).then(MAIN.loadImage)
+        }
     }
     reader.readAsDataURL(inputEvent.target.files[0]);
 }
 
 // take a serializable image, put it into imageData, render
 // nullableImage : ImageBitmap and? (ImageData | HTMLImageElement | HTMLCanvasElement | HTMLVideoElement | ImageBitmap)
-MAIN.loadImage = async (nullableImage) => {
+MAIN.loadImage = async (nullableImage, id2transformOutput) => {
     console.log("MAIN.loadImage")
     let attempts = 0
     let err = undefined
     while (attempts < 10) {
         gl.getError() // flush error buffer
-        MAIN.loadImageTry(nullableImage)
+        MAIN.loadImageTry(nullableImage, id2transformOutput)
         await new Promise(r => setTimeout(r, 100));
         err = gl.getError()
         if (err == gl.INVALID_OPERATION) {
@@ -53,7 +47,7 @@ MAIN.loadImage = async (nullableImage) => {
         alert(`FAILED TO INITIALIZE RENDERER: WebGL ERROR ${err}`)
     }
 }
-MAIN.loadImageTry = async (nullableImage) => {
+MAIN.loadImageTry = async (nullableImage, id2transformOutput) => {
     console.log("MAIN.loadImageTry")
 
     let glCompatibleImage = undefined
@@ -72,7 +66,7 @@ MAIN.loadImageTry = async (nullableImage) => {
 
     if (glCompatibleImage.width != 64 || glCompatibleImage.width != 64) {
       alert("Skin file is not 64x64")
-      // TODO, reset or something?
+      // TODO, better handling
       return
     }
 
@@ -84,8 +78,11 @@ MAIN.loadImageTry = async (nullableImage) => {
         gl.RGBA, gl.UNSIGNED_BYTE,
         glCompatibleImage
     )
-    await new Promise(r => setTimeout(r, 200))
+    await new Promise(r => setTimeout(r, 500))
     canvasSkinPreviewCtx.readPixels(0, 0, 64, 64, gl.RGBA, gl.UNSIGNED_BYTE, imageData, 0)
+
+    // Load Custom Data
+    MAIN.readtransforms(id2transformOutput)
 
     MAIN.renderImageNow()
 }
@@ -154,6 +151,54 @@ MAIN.downloadCanvas = () => {
     newTab.document.write("<img src='" + dataURL + "' alt='from canvas'/>");
 }
 
+MAIN.readtransforms = (id2transformOutput) => {
+    faceId2typeAndOffset = {}
+    // read lookup tables
+    for (let index of [...Array(72).keys()]) {
+        let [x,y,c] = getFaceOperationEntryPos(index)
+        let offset = getByteOffset(x,y,c)
+        data = imageData[offset]
+        if (data == 0 || data == 0xff) {
+            continue
+        }
+        const buf = new Uint8Array(1)
+        buf[0] = imageData[offset]
+        parse = MAIN.faceOperationParser.parse(buf)
+        faceId2typeAndOffset[index] = parse
+        console.log(`F[${x},${y},${c}] = ${data}`, parse)
+    }
+    if(Object.keys(faceId2typeAndOffset).length == 72) {
+        // Error during loading
+        return
+    }
+
+    for (let [faceindex, v] of Object.entries(faceId2typeAndOffset)) {
+        const transformType = v.transform_type
+        const argumentIndex = v.transform_argument_index
+
+        id2transformOutput[faceindex] = []
+
+        let [x, y] = getTransformPosition(argumentIndex)
+        let transformOffset = getByteOffset(x,y)
+
+        let parser = MAIN.transform_parsers[transformType]
+        const transformBuf = new Uint8Array(4)
+        for (let i of [0,1,2,3]) {
+            transformBuf[3-i] = imageData[transformOffset+i] //fixes endianness
+        }
+        const parse = parser.parse(transformBuf)
+
+        console.log("parse", JSON.stringify(parse))
+        id2transformOutput[faceindex].push({
+            "face":`${faceindex}`,
+            "id":1,
+            "type":transformType,
+            "data":parse
+        })
+
+        // TODO continued
+    }
+}
 MAIN.writeTransformsAndRender = (id2transform) => {
     console.log("MAIN.writeTransformsAndRender")
 
@@ -162,6 +207,7 @@ MAIN.writeTransformsAndRender = (id2transform) => {
 
     let transformIndex = 1
 
+    // write transforms
     for ([faceId, faceTransfroms] of Object.entries(id2transform)){
         for (faceTransfrom of faceTransfroms) {
             let type = faceTransfrom.type
@@ -191,8 +237,9 @@ MAIN.writeTransformsAndRender = (id2transform) => {
         }
     }
 
-    for (let [pos, int] of serializedFaceEntries.entries()) {
-        let [x,y,c] = getFaceOperationEntryPos(pos)
+    // write lookup tables
+    for (let [index, int] of serializedFaceEntries.entries()) {
+        let [x,y,c] = getFaceOperationEntryPos(index)
 
         let offset = getByteOffset(x,y,c)
         imageData[offset] = int
@@ -204,12 +251,12 @@ MAIN.writeTransformsAndRender = (id2transform) => {
         }
 
         if(int != 0) {
-            console.log(`F pos=${pos} offset=${offset}, x=${x}, y=${y}, c=${c} value=0x${int.toString(16)}`)
+            console.log(`F pos=${index} offset=${offset}, x=${x}, y=${y}, c=${c} value=0x${int.toString(16)}`)
         }
     }
 
-    for (let [pos, int] of serializedTransforms.entries()) {
-        let [x, y] = getTransformPosition(pos)
+    for (let [index, int] of serializedTransforms.entries()) {
+        let [x, y] = getTransformPosition(index)
 
         // Temp, makes debugging easier
         int |= 0x000000ff
@@ -221,10 +268,10 @@ MAIN.writeTransformsAndRender = (id2transform) => {
         imageData[offset+3] = (int >> 0) & 0xff
 
         if((int & 0xffffff00) != 0) {
-            hexstr = [...Array(4).keys()].map(
+            let hexstr = [...Array(4).keys()].map(
                 (x) => imageData[offset+x].toString(16).padStart(2, "0")
             ).join("|")
-            console.log(`T pos=${pos} offset=${offset}, x=${x}, y=${y} value=${hexstr}`)
+            console.log(`T pos=${index} offset=${offset}, x=${x}, y=${y} value=${hexstr}`)
         }
     }
 
