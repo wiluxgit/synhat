@@ -13,9 +13,9 @@ const imageData = new Uint8Array(64*64*4)
 
 MAIN = {}
 MAIN.changedUploadImage = (inputEvent) => {
-    let reader = new FileReader()
+    const reader = new FileReader()
     reader.onload = (e) => {
-        let img = new Image()
+        const img = new Image()
         img.src = e.target.result
         img.onload = () => {
             createImageBitmap(img).then(MAIN.loadImage)
@@ -32,7 +32,7 @@ MAIN.loadImage = async (nullableImage, id2transformOutput) => {
     let err = undefined
     while (attempts < 10) {
         gl.getError() // flush error buffer
-        MAIN.loadImageTry(nullableImage, id2transformOutput)
+        glloadImage(nullableImage, id2transformOutput)
         await new Promise(r => setTimeout(r, 100));
         err = gl.getError()
         if (err == gl.INVALID_OPERATION) {
@@ -46,14 +46,22 @@ MAIN.loadImage = async (nullableImage, id2transformOutput) => {
     if (attempts == 10) {
         alert(`FAILED TO INITIALIZE RENDERER: WebGL ERROR ${err}`)
     }
+
+    // Very janky soluton to serilze imagedata. Part 2
+    canvasSkinPreviewCtx.readPixels(0, 0, 64, 64, gl.RGBA, gl.UNSIGNED_BYTE, imageData, 0)
+
+    // Load Custom Data
+    MAIN.readtransforms(id2transformOutput)
+
+    MAIN.renderImageNow()
 }
-MAIN.loadImageTry = async (nullableImage, id2transformOutput) => {
+async function glloadImage(nullableImage, id2transformOutput) {
     console.log("MAIN.loadImageTry")
 
     let glCompatibleImage = undefined
     if (nullableImage === undefined) {
         uploadInputImage.value = ""
-        img = await new Promise((resolve, reject) => {
+        const img = await new Promise((resolve, reject) => {
             let img = new Image()
             img.src = "assets/steve.png"
             img.onload = () => resolve(img)
@@ -70,7 +78,7 @@ MAIN.loadImageTry = async (nullableImage, id2transformOutput) => {
       return
     }
 
-    // Very janky soluton to serilze imagedata
+    // Very janky soluton to serilze imagedata. Part 1
     // Apparently there doesn't exist a good one. https://stackoverflow.com/questions/68102995/is-it-possible-to-get-pixels-from-imagebitmap-web-object-without-a-canvas
     canvasSkinPreviewCtx.finish();
     canvasSkinPreviewCtx.texImage2D(
@@ -78,15 +86,10 @@ MAIN.loadImageTry = async (nullableImage, id2transformOutput) => {
         gl.RGBA, gl.UNSIGNED_BYTE,
         glCompatibleImage
     )
-    await new Promise(r => setTimeout(r, 500))
-    canvasSkinPreviewCtx.readPixels(0, 0, 64, 64, gl.RGBA, gl.UNSIGNED_BYTE, imageData, 0)
-
-    // Load Custom Data
-    MAIN.readtransforms(id2transformOutput)
-
-    MAIN.renderImageNow()
 }
+
 MAIN.renderImage = () => {
+    console.log("MAIN.renderImage")
     MAIN.debounce(MAIN.renderImageNow)()
 }
 MAIN.renderImageNow = () => {
@@ -106,8 +109,8 @@ MAIN.renderImageNow = () => {
 }
 
 MAIN.newDefaultTransformDictionary = () => {
-    d = {}
-    list = [...Array(72).keys()].map((i) => d[i] = [])
+    const d = {}
+    const list = [...Array(72).keys()].map((i) => d[i] = [])
     return d
 }
 
@@ -115,8 +118,8 @@ function hexstr(buf, extra="") {
     return [...buf].map((b) => b.toString(16).padStart(2, "0").toUpperCase()).join("_")
 }
 function logHexAndBin(buf, extra="") {
-    binStr = [...buf].map((b) => b.toString(2).padStart(8, "0")).join("_");
-    hexStr = [...buf].map((b) => b.toString(16).padStart(2, "0").toUpperCase()).join("_")
+    const binStr = [...buf].map((b) => b.toString(2).padStart(8, "0")).join("_");
+    const hexStr = [...buf].map((b) => b.toString(16).padStart(2, "0").toUpperCase()).join("_")
     console.log(`0b${binStr} | 0x${hexStr} (len=${buf.length}) ${extra}`);
 }
 function getFaceOperationEntryPos(faceId) {
@@ -163,16 +166,16 @@ MAIN.downloadCanvas = () => {
 MAIN.readtransforms = (id2transformOutput) => {
     faceId2typeAndOffset = {}
     // read lookup tables
-    for (let index of [...Array(72).keys()]) {
-        let [x,y,c] = getFaceOperationEntryPos(index)
-        let offset = getByteOffset(x,y,c)
-        data = imageData[offset]
+    for (const index of [...Array(72).keys()]) {
+        const [x,y,c] = getFaceOperationEntryPos(index)
+        const offset = getByteOffset(x,y,c)
+        const data = imageData[offset]
         if (data == 0 || data == 0xff) {
             continue
         }
         const buf = new Uint8Array(1)
         buf[0] = imageData[offset]
-        parse = MAIN.faceOperationParser.parse(buf)
+        const parse = MAIN.faceOperationParser.parse(buf)
         faceId2typeAndOffset[index] = parse
         console.log(`F[${x},${y},${c}] = ${data}`, parse)
     }
@@ -264,8 +267,8 @@ MAIN.writeTransformsAndRender = (id2transform) => {
         }
     }
 
-    for (let [index, int] of serializedTransforms.entries()) {
-        let [x, y] = getTransformPosition(index)
+    for (const [index, int] of serializedTransforms.entries()) {
+        const [x, y] = getTransformPosition(index)
 
         // // Temp, makes debugging easier
         // int |= 0x000000ff
@@ -277,7 +280,7 @@ MAIN.writeTransformsAndRender = (id2transform) => {
         imageData[offset+3] = (int >> 0) & 0xff
 
         if((int & 0xffffff00) != 0) {
-            let hexstr = [...Array(4).keys()].map(
+            const hexstr = [...Array(4).keys()].map(
                 (x) => imageData[offset+x].toString(16).padStart(2, "0")
             ).join("|")
             console.log(`T pos=${index} offset=${offset}, x=${x}, y=${y} value=${hexstr}`)
