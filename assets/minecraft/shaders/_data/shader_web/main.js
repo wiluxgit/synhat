@@ -146,9 +146,18 @@ MAIN.debounce = (func, timeout = 500) => {
 }
 
 MAIN.downloadCanvas = () => {
-    let dataURL = canvasSkinPreview.toDataURL("image/png");
-    let newTab = window.open('about:blank','image from canvas');
-    newTab.document.write("<img src='" + dataURL + "' alt='from canvas'/>");
+    const png = new PngJS.PNG({ width: 64, height: 64, filterType: -1})
+    // ChatGPT
+    const flippedData = []
+    for (let y = png.height - 1; y >= 0; y--) {
+        for (let x = 0; x < png.width; x++) {
+            const idx = (png.width * y + x) << 2;
+            flippedData.push(imageData[idx], imageData[idx + 1], imageData[idx + 2], imageData[idx + 3]);
+        }
+    }
+    png.data = new Uint8Array(flippedData);
+    const blob = new Blob([PngJS.PNG.sync.write(png)], { type: 'image/png' });
+    FileSaver.saveAs(blob, 'output64x64.png');
 }
 
 MAIN.readtransforms = (id2transformOutput) => {
@@ -178,10 +187,10 @@ MAIN.readtransforms = (id2transformOutput) => {
 
         id2transformOutput[faceindex] = []
 
-        let [x, y] = getTransformPosition(argumentIndex)
-        let transformOffset = getByteOffset(x,y)
+        const [x, y] = getTransformPosition(argumentIndex)
+        const transformOffset = getByteOffset(x,y)
 
-        let parser = MAIN.transform_parsers[transformType]
+        const parser = MAIN.transform_parsers[transformType]
         const transformBuf = new Uint8Array(4)
         for (let i of [0,1,2,3]) {
             transformBuf[3-i] = imageData[transformOffset+i] //fixes endianness
@@ -210,21 +219,21 @@ MAIN.writeTransformsAndRender = (id2transform) => {
     // write transforms
     for ([faceId, faceTransfroms] of Object.entries(id2transform)){
         for (faceTransfrom of faceTransfroms) {
-            let type = faceTransfrom.type
+            const type = faceTransfrom.type
 
             // Create FaceEntries
             faceOperation = {
                 "transform_type": type,
                 "transform_argument_index": transformIndex,
             }
-            let feBuf = MAIN.faceOperationParser.encode(faceOperation)
+            const feBuf = MAIN.faceOperationParser.encode(faceOperation)
             logHexAndBin(feBuf, `(face=${faceId})`);
             serializedFaceEntries[faceId] = feBuf[0]
 
             // Create Transforms
             // TODO: ADD CONTINUES
-            let transformParser = MAIN.transform_parsers[type];
-            let tfBuf = transformParser.encode(faceTransfrom.data);
+            const transformParser = MAIN.transform_parsers[type];
+            const tfBuf = transformParser.encode(faceTransfrom.data);
             logHexAndBin(tfBuf, `(tfindex=${transformIndex})`);
             serializedTransforms[transformIndex] = tfBuf.readInt32LE(0)
 
@@ -239,16 +248,16 @@ MAIN.writeTransformsAndRender = (id2transform) => {
 
     // write lookup tables
     for (let [index, int] of serializedFaceEntries.entries()) {
-        let [x,y,c] = getFaceOperationEntryPos(index)
+        const [x,y,c] = getFaceOperationEntryPos(index)
 
-        let offset = getByteOffset(x,y,c)
+        const offset = getByteOffset(x,y,c)
         imageData[offset] = int
 
-        // Temp, makes debugging easier
-        if (int == 0 && c == 3){
-            // data is lost with transparent data... need to find fix for this
-            imageData[offset] |= 0xff
-        }
+        // // Temp, makes debugging easier
+        // if (int == 0 && c == 3){
+        //     // data is lost with transparent data... need to find fix for this
+        //     imageData[offset] |= 0xff
+        // }
 
         if(int != 0) {
             console.log(`F pos=${index} offset=${offset}, x=${x}, y=${y}, c=${c} value=0x${int.toString(16)}`)
@@ -258,10 +267,10 @@ MAIN.writeTransformsAndRender = (id2transform) => {
     for (let [index, int] of serializedTransforms.entries()) {
         let [x, y] = getTransformPosition(index)
 
-        // Temp, makes debugging easier
-        int |= 0x000000ff
+        // // Temp, makes debugging easier
+        // int |= 0x000000ff
 
-        let offset = getByteOffset(x,y)
+        const offset = getByteOffset(x,y)
         imageData[offset+0] = (int >> 24) & 0xff
         imageData[offset+1] = (int >> 16) & 0xff
         imageData[offset+2] = (int >> 8) & 0xff

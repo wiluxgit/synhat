@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "binary-parser-encoder": "^1.5.3",
-    "browserify": "^17.0.0"
+    "browserify": "^17.0.0",
+    "file-saver": "^2.0.5",
+    "pngjs": "^7.0.0"
   }
 }
