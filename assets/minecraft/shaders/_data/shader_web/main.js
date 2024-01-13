@@ -2,9 +2,13 @@
 // https://stackoverflow.com/questions/29325906/can-you-use-raw-webgl-textures-with-three-js
 // https://stackoverflow.com/questions/73133566/pixels-are-changing-back-after-putimagedata-with-png
 
-let uploadInputImage = document.getElementById('uploadInputImage')
-let canvasSkinPreview = document.getElementById('canvasSkinPreview')
-let canvasSkinPreviewCtx = canvasSkinPreview.getContext('webgl2')
+const uploadInputImage = document.getElementById("uploadInputImage")
+const canvasSkinPreview = document.getElementById("canvasSkinPreview")
+const canvasSkinPreviewCtx = canvasSkinPreview.getContext("webgl2", {preserveDrawingBuffer: true})
+
+const gl = canvasSkinPreviewCtx
+
+const imageData = new Uint8Array(64*64*4)
 
 MAIN = {}
 MAIN.changedUploadImage = (inputEvent) => {
@@ -34,6 +38,10 @@ MAIN.resetSkinCanvas = () => {
         canvasSkinPreviewCtx.clearRect(0, 0, canvasSkinPreview.width, canvasSkinPreview.height);
         canvasSkinPreviewCtx.drawImage(img, 0, 0)
     }*/
+
+    img.onload = () => {
+        console.log("loadCanvas")
+    }
 }
 
 MAIN.newDefaultTransformDictionary = () => {
@@ -114,22 +122,23 @@ MAIN.writeTransformsToCanvas = (id2transform) => {
         }
     }
 
-    let width = canvasSkinPreview.width
-    let height = canvasSkinPreview.height
+    let width = canvasSkinPreviewCtx.drawingBufferWidth
+    let height = canvasSkinPreviewCtx.drawingBufferHeight
 
-    imageData = canvasSkinPreviewCtx.getImageData(0, 0, width, height),
-    data = imageData.data;
+    console.log({"glwidth":width, "glheight":height})
+    canvasSkinPreviewCtx.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, imageData, 0)
 
+    /*
     for (let [pos, int] of serializedFaceEntries.entries()) {
         let [x,y,c] = getFaceOperationEntryPos(pos)
 
         let offset = 4 * (y * width + x) + c;
-        data[offset] = int
+        imageData[offset] = int
 
         // Temp, makes debugging easier
         if (int == 0 && c == 3){
             // data is lost with transparent data... need to find fix for this
-            data[offset] |= 0xff
+            imageData[offset] |= 0xff
         }
 
         if(int != 0) {
@@ -144,23 +153,30 @@ MAIN.writeTransformsToCanvas = (id2transform) => {
         int |= 0x000000ff
 
         let offset = 4 * (y * width + x);
-        data[offset+0] = (int >> 24) & 0xff;
-        data[offset+1] = (int >> 16) & 0xff;
-        data[offset+2] = (int >> 8) & 0xff;
-        data[offset+3] = (int >> 0) & 0xff;
+        imageData[offset+0] = (int >> 24) & 0xff;
+        imageData[offset+1] = (int >> 16) & 0xff;
+        imageData[offset+2] = (int >> 8) & 0xff;
+        imageData[offset+3] = (int >> 0) & 0xff;
 
         if((int & 0xffffff00) != 0) {
             hexstr = [...Array(4).keys()].map(
-                (x) => data[offset+x].toString(16).padStart(2, "0")
+                (x) => imageData[offset+x].toString(16).padStart(2, "0")
             ).join("|")
             console.log(`T pos=${pos} offset=${offset}, x=${x}, y=${y} value=${hexstr}`)
         }
     }
+    */
 
-    console.log(data)
-    canvasSkinPreviewCtx.putImageData(imageData, 0, 0);
-    const imageData2 = canvasSkinPreviewCtx.getImageData(0, 0, width, height);
-    console.log(imageData2.data)
+    console.log("imageData", imageData)
+    canvasSkinPreviewCtx.texImage2D(
+        gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
+        gl.RGBA, gl.UNSIGNED_BYTE,
+        imageData
+    )
+
+    //let imageData2 = new Uint8Array(width*height*4)
+    //canvasSkinPreview.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, imageData, 0)
+    //console.log("imageData2", imageData2)
 }
 
 MAIN.enums = {

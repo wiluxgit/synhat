@@ -5,8 +5,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import * as twgl from 'twgl';
 
-// TODO: probably needs to be changed to an array
-let skinBitmap = null;
+// TODO?: make it exist
+// const skinBytes = new Uint8Array(64*64*4);
 
 async function main() {
   const modelCanvas = document.getElementById("camera");
@@ -14,9 +14,11 @@ async function main() {
 
   const modelRenderer = new THREE.WebGLRenderer({canvas: modelCanvas});
 
-  const glModel = modelRenderer.getContext();
-  const glModelTexture = glModel.createTexture();
-  const glPreview = previewCanvas.getContext('webgl2')
+  const glModel = modelRenderer.getContext("webgl2")
+  const glPreview = previewCanvas.getContext("webgl2")
+  const glModelTexture = glModel.createTexture()
+  const glPreviewTexture = glPreview.createTexture()
+  var framebuffer;
 
   // ONLY USE FOR WEBGL CONSTANTS
   const gl = glModel
@@ -33,18 +35,18 @@ async function main() {
         // TODO, reset or something
         return
       }
-      createImageBitmap(img).then((load) => {
-        skinBitmap = load
-
+      createImageBitmap(img).then((imageBitmap) => {
         // Camera view
         glModel.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE)
+        glModel.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
         glModel.bindTexture(gl.TEXTURE_2D, glModelTexture);
         glModel.texImage2D(
           gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
           gl.RGBA, gl.UNSIGNED_BYTE,
-          skinBitmap
+          imageBitmap
         )
         glModel.generateMipmap(gl.TEXTURE_2D);
+        glModel.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
         glModel.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         glModel.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         glModel.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
@@ -63,17 +65,18 @@ async function main() {
             gl_FragColor = texture2D(tex, gl_PointCoord);
           }`;
         const program = twgl.createProgram(glPreview, [vs, fs]);
-        const glPreviewTexture = glPreview.createTexture();
         glPreview.useProgram(program);
 
         glPreview.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE)
+        glPreview.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
         glPreview.bindTexture(gl.TEXTURE_2D, glPreviewTexture);
         glPreview.texImage2D(
           gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
           gl.RGBA, gl.UNSIGNED_BYTE,
-          skinBitmap
+          imageBitmap
         )
-        glPreview.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        glPreview.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        glPreview.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         glPreview.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         glPreview.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       });

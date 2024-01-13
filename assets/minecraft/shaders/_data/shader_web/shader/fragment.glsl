@@ -11,8 +11,8 @@ out vec4 fragColor;
 void main() {
     vec4 color = texture2D(Sampler0, texCoord0);
 
-    if (1==0) {
-    //if (wx_isEdited != 0.0) {
+    //if (1==0) {
+    if (wx_isEdited != 0.0) {
         fragColor = wx_vertexColor;
     } else {
         if (color.a < 0.1) {

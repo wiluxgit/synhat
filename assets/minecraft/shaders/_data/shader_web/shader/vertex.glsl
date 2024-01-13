@@ -91,13 +91,13 @@ void main() {
     //<DEBUG>
     float mcidx = float(mcid)/400.0;
     float mcidy = float((mcid/4)%6)/6.0;
-    wx_vertexColor = vec4(mcidx,mcidy,0,1);
+    wx_vertexColor = vec4(mcidx, mcidy, 0, 1);
     //</DEBUG>
 
     wx_isEdited = 0.0;
     NewPosition = Position;
 
-    if (false) { //(gl_VertexID >= 18*8){ //is second layer
+    if (true) { //(gl_VertexID >= 18*8){ //is second layer
 
         // Get header pixel
         vec4 topRightPixel = texelFetch(Sampler0, ivec2(0, 0), 0)*256.0;
@@ -116,12 +116,11 @@ void main() {
             wx_vertexColor = colorFromInt(nextFaceOperationEntry);
 
             //<DEBUG>
-            /*
             switch(faceId) {
                 case 38: // top hat
                     nextFaceOperationEntry = 1; //use data block 1
                     break;
-            }*/
+            }
             //wx_isEdited = 1.0;
             //wx_vertexColor = getFaceOperationPixel(faceId)/256.0;
             //wx_vertexColor = colorFromInt(faceId % 4);
@@ -171,16 +170,18 @@ void main() {
     //normal = ProjMat * ModelViewMat * vec4(Normal, 0.0);
 }
 
+/*
 void getWorldspaceMatrix(vec3 lightCameraspace, vec3 lightWorldspace) {
     // https://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d
-    vec3 c = cross(lightWorldspace, lightCameraspace)
-    float d = dot(lightWorldspace, lightCameraspace)
+    vec3 c = cross(lightWorldspace, lightCameraspace);
+    float d = dot(lightWorldspace, lightCameraspace);
 
     // skew-symmetric cross-product
-    mat3 skewsym = mat3(vec3(0.0, c.z, -c.y), vec3(-c.z, 0.0, c.x), vec3(c.y, -c.x, 0.0))
+    mat3 skewsym = mat3(vec3(0.0, c.z, -c.y), vec3(-c.z, 0.0, c.x), vec3(c.y, -c.x, 0.0));
 
-    mat3 rot = mat3(1.0) + skewsym + skewsym * skewsym * (1/(1+d))
+    mat3 rot = mat3(1.0) + skewsym + skewsym * skewsym * (1/(1+d));
 }
+*/
 
 void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
     bool isNegativeOffset 			 = (dataR & FLAG_TTD_sign) != 0;
