@@ -9,83 +9,105 @@ const canvasCameraCtx = document.getElementById("camera").getContext("webgl2")
 
 const gl = canvasSkinPreviewCtx
 
+let skinName = "steve.png"
 const imageData = new Uint8Array(64*64*4)
 
 MAIN = {}
-MAIN.changedUploadImage = (inputEvent) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-        const img = new Image()
-        img.src = e.target.result
-        img.onload = () => {
-            createImageBitmap(img).then(MAIN.loadImage)
-        }
+MAIN.changedUploadImage = async (id2transformOutput, inputEvent) => {
+    console.log("MAIN.changedUploadImage")
+
+    const fileInput = inputEvent.target
+    if (fileInput.files.length <= 0) {
+        alert("No image chosen")
+        return
     }
-    reader.readAsDataURL(inputEvent.target.files[0]);
+
+    const fileName = inputEvent.target.files[0]
+    const pngbufPromise = new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onerror = ((e) => reject(e))
+        reader.onload = ((e) => {
+            skinName = fileName
+            const fileContent = e.target.result
+            console.log("MAIN.changedUploadImage>", fileContent)
+            resolve(fileContent)
+        })
+        reader.readAsArrayBuffer(fileName)
+    })
+    MAIN.loadImage(id2transformOutput, pngbufPromise)
 }
 
-// take a serializable image, put it into imageData, render
-// nullableImage : ImageBitmap and? (ImageData | HTMLImageElement | HTMLCanvasElement | HTMLVideoElement | ImageBitmap)
-MAIN.loadImage = async (nullableImage, id2transformOutput) => {
+MAIN.loadImage = async (id2transformOutput, nullablePngbufPromise) => {
     console.log("MAIN.loadImage")
+    let imgageFetch
+    if (nullablePngbufPromise !== undefined) {
+        imgageFetch = nullablePngbufPromise
+    } else {
+        skinName = "steve.png"
+        imgageFetch = fetch("assets/steve.png", {credentials: 'same-origin'})
+            .then((response) => response.arrayBuffer())
+    }
+    await imgageFetch.then((buf) => loadPngfilebuf(buf))
+    await glRetry(MAIN.renderImageNow)
+    MAIN.readtransforms(id2transformOutput)
+}
+function loadPngfilebuf(buf) {
+    return new Promise(
+        (resolve, reject) => new PngJS.PNG().parse(buf, (error, data) => error ? reject(error) : resolve(data))
+    ).then((png) => new Promise(
+        (resolve, reject) => {
+            if (png.width != 64 || png.height != 64) {
+                reject("image is not 64x64")
+            }
+            // Flip image
+            // <Chat GPT>
+            for (let y = 0; y < png.height; y++) {
+                for (let x = 0; x < png.width; x++) {
+                    const newY = png.height - y - 1; // Flip vertically
+                    const existingIndex = (y * png.width + x) << 2;
+                    const newIndex = (newY * png.width + x) << 2;
+
+                    // Copy RGBA values
+                    imageData[existingIndex] = png.data[newIndex];
+                    imageData[existingIndex + 1] = png.data[newIndex + 1];
+                    imageData[existingIndex + 2] = png.data[newIndex + 2];
+                    imageData[existingIndex + 3] = png.data[newIndex + 3];
+                }
+            }
+            // </Chat GPT>
+            return resolve()
+        }
+    ))
+}
+async function glRetry(func, ntries=10, retryDelayMs=500) {
     let attempts = 0
     let err = undefined
-    while (attempts < 10) {
+    while (true) {
         gl.getError() // flush error buffer
-        glloadImage(nullableImage, id2transformOutput)
+        func()
         await new Promise(r => setTimeout(r, 100));
         err = gl.getError()
-        if (err == gl.INVALID_OPERATION) {
-            attempts++
-            console.error(`gl.INVALID_OPERATION while loading image, retrying. Attempt ${attempts}`);
-            await new Promise(r => setTimeout(r, 500));
+        if (err == gl.NO_ERROR) {
+            return
         } else {
-            break
+            ntries++
+            if (attempts >= ntries) {
+                break
+            }
+            console.warn(`glRetry> WEBGL error: ${err}, retrying (attempt ${ntries})`)
+            await new Promise(r => setTimeout(r, retryDelayMs));
         }
     }
-    if (attempts == 10) {
-        alert(`FAILED TO INITIALIZE RENDERER: WebGL ERROR ${err}`)
-    }
-
-    // Very janky soluton to serilze imagedata. Part 2
-    canvasSkinPreviewCtx.readPixels(0, 0, 64, 64, gl.RGBA, gl.UNSIGNED_BYTE, imageData, 0)
-
-    // Load Custom Data
-    MAIN.readtransforms(id2transformOutput)
-
-    MAIN.renderImageNow()
-}
-async function glloadImage(nullableImage, id2transformOutput) {
-    console.log("MAIN.loadImageTry")
-
-    let glCompatibleImage = undefined
-    if (nullableImage === undefined) {
-        uploadInputImage.value = ""
-        const img = await new Promise((resolve, reject) => {
-            let img = new Image()
-            img.src = "assets/steve.png"
-            img.onload = () => resolve(img)
-            img.onerror = reject
-        })
-        glCompatibleImage = await createImageBitmap(img)
-    } else {
-        glCompatibleImage = nullableImage
-    }
-
-    if (glCompatibleImage.width != 64 || glCompatibleImage.width != 64) {
-      alert("Skin file is not 64x64")
-      // TODO, better handling
-      return
-    }
-
-    // Very janky soluton to serilze imagedata. Part 1
-    // Apparently there doesn't exist a good one. https://stackoverflow.com/questions/68102995/is-it-possible-to-get-pixels-from-imagebitmap-web-object-without-a-canvas
-    canvasSkinPreviewCtx.finish();
-    canvasSkinPreviewCtx.texImage2D(
-        gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
-        gl.RGBA, gl.UNSIGNED_BYTE,
-        glCompatibleImage
-    )
+    const errNames = {}
+    errNames[gl.INVALID_ENUM] = "gl.INVALID_ENUM"
+    errNames[gl.INVALID_VALUE] = "gl.INVALID_VALUE"
+    errNames[gl.INVALID_OPERATION] = "gl.INVALID_OPERATION"
+    errNames[gl.INVALID_FRAMEBUFFER_OPERATION] = "gl.INVALID_FRAMEBUFFER_OPERATION"
+    errNames[gl.OUT_OF_MEMORY] = "gl.OUT_OF_MEMORY"
+    errNames[gl.CONTEXT_LOST_WEBGL] = "gl.CONTEXT_LOST_WEBGL"
+    const errstr = `Unsolveable WEBGL error: ${err} (${errNames[err]})`
+    console.error(errstr)
+    alert(errstr)
 }
 
 MAIN.renderImage = () => {
@@ -94,7 +116,12 @@ MAIN.renderImage = () => {
 }
 MAIN.renderImageNow = () => {
     const firstbyte = [0,1,2,3].map((x) => imageData[getByteOffset(0,0,x)])
-    console.log("MAIN.renderImageNow", firstbyte, hexstr(firstbyte))
+    const dataSquare = [...Array(8).keys()].map((y) =>
+        [...Array(8).keys()].map((x) =>
+            hexstr([0,1,2,3].map((c) => imageData[getByteOffset(x,y,c)]))
+        )
+    )
+    console.log("MAIN.renderImageNow", firstbyte, dataSquare)
 
     canvasSkinPreviewCtx.texImage2D(
         gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
@@ -107,10 +134,9 @@ MAIN.renderImageNow = () => {
         imageData
     )
 }
-
 MAIN.newDefaultTransformDictionary = () => {
     const d = {}
-    const list = [...Array(72).keys()].map((i) => d[i] = [])
+    const _ = [...Array(72).keys()].map((i) => d[i] = [])
     return d
 }
 
@@ -150,7 +176,7 @@ MAIN.debounce = (func, timeout = 500) => {
 
 MAIN.downloadCanvas = () => {
     const png = new PngJS.PNG({ width: 64, height: 64, filterType: -1})
-    // ChatGPT
+    // <ChatGPT>
     const flippedData = []
     for (let y = png.height - 1; y >= 0; y--) {
         for (let x = 0; x < png.width; x++) {
@@ -159,6 +185,7 @@ MAIN.downloadCanvas = () => {
         }
     }
     png.data = new Uint8Array(flippedData);
+    // </ChatGPT>
     const blob = new Blob([PngJS.PNG.sync.write(png)], { type: 'image/png' });
     FileSaver.saveAs(blob, 'output64x64.png');
 }
@@ -177,7 +204,7 @@ MAIN.readtransforms = (id2transformOutput) => {
         buf[0] = imageData[offset]
         const parse = MAIN.faceOperationParser.parse(buf)
         faceId2typeAndOffset[index] = parse
-        console.log(`F[${x},${y},${c}] = ${data}`, parse)
+        console.log(`readtransforms> F[${x},${y},${c}] = ${data}`, parse)
     }
     if(Object.keys(faceId2typeAndOffset).length == 72) {
         // Error during loading
@@ -200,7 +227,7 @@ MAIN.readtransforms = (id2transformOutput) => {
         }
         const parse = parser.parse(transformBuf)
 
-        console.log("parse", JSON.stringify(parse))
+        console.log("readtransforms> parse:", parse)
         id2transformOutput[faceindex].push({
             "face":`${faceindex}`,
             "id":1,
