@@ -79,7 +79,7 @@ function loadPngfilebuf(buf) {
         }
     ))
 }
-async function glRetry(func, ntries=10, retryDelayMs=500) {
+async function glRetry(func, maxtires=10, retryDelayMs=500) {
     let attempts = 0
     let err = undefined
     while (true) {
@@ -90,11 +90,11 @@ async function glRetry(func, ntries=10, retryDelayMs=500) {
         if (err == gl.NO_ERROR) {
             return
         } else {
-            ntries++
-            if (attempts >= ntries) {
+            attempts++
+            if (attempts >= maxtires) {
                 break
             }
-            console.warn(`glRetry> WEBGL error: ${err}, retrying (attempt ${ntries})`)
+            console.warn(`glRetry> WEBGL error: ${err}, retrying (attempt ${attempts})`)
             await new Promise(r => setTimeout(r, retryDelayMs));
         }
     }
@@ -105,7 +105,7 @@ async function glRetry(func, ntries=10, retryDelayMs=500) {
     errNames[gl.INVALID_FRAMEBUFFER_OPERATION] = "gl.INVALID_FRAMEBUFFER_OPERATION"
     errNames[gl.OUT_OF_MEMORY] = "gl.OUT_OF_MEMORY"
     errNames[gl.CONTEXT_LOST_WEBGL] = "gl.CONTEXT_LOST_WEBGL"
-    const errstr = `Unsolveable WEBGL error: ${err} (${errNames[err]})`
+    const errstr = `glRetry> Unsolveable WEBGL error: ${err} (${errNames[err]}). ${attempts} where made.`
     console.error(errstr)
     alert(errstr)
 }
