@@ -5,9 +5,6 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import * as twgl from 'twgl';
 
-// TODO?: make it exist
-// const skinBytes = new Uint8Array(64*64*4);
-
 async function main() {
   const modelCanvas = document.getElementById("camera");
   const previewCanvas = document.getElementById("canvasSkinPreview")
@@ -18,7 +15,6 @@ async function main() {
   const glPreview = previewCanvas.getContext("webgl2")
   const glModelTexture = glModel.createTexture()
   const glPreviewTexture = glPreview.createTexture()
-  var framebuffer;
 
   // ONLY USE FOR WEBGL CONSTANTS
   const gl = glModel

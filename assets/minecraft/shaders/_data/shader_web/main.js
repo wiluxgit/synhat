@@ -207,7 +207,7 @@ MAIN.readtransforms = (id2transformOutput) => {
         console.log(`readtransforms> F[${x},${y},${c}] = ${data}`, parse)
     }
     if(Object.keys(faceId2typeAndOffset).length == 72) {
-        // Error during loading
+        // TODO: make good
         return
     }
 
@@ -220,11 +220,11 @@ MAIN.readtransforms = (id2transformOutput) => {
         const [x, y] = getTransformPosition(argumentIndex)
         const transformOffset = getByteOffset(x,y)
 
-        const parser = MAIN.transform_parsers[transformType]
         const transformBuf = new Uint8Array(4)
         for (let i of [0,1,2,3]) {
             transformBuf[3-i] = imageData[transformOffset+i] //fixes endianness
         }
+        const parser = MAIN.transform_parsers[transformType]
         const parse = parser.parse(transformBuf)
 
         console.log("readtransforms> parse:", parse)

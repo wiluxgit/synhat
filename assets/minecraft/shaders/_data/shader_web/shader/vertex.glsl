@@ -113,14 +113,14 @@ void main() {
 
             int nextFaceOperationEntry = getFaceOperationEntry(faceId);
 
-            wx_vertexColor = colorFromInt(nextFaceOperationEntry);
+            // wx_vertexColor = colorFromInt(nextFaceOperationEntry);
 
             //<DEBUG>
-            switch(faceId) {
-                case 38: // top hat
-                    nextFaceOperationEntry = 1; //use data block 1
-                    break;
-            }
+            // switch(faceId) {
+            //     case 38: // top hat
+            //         nextFaceOperationEntry = 1; //use data block 1
+            //         break;
+            // }
             //wx_isEdited = 1.0;
             //wx_vertexColor = getFaceOperationPixel(faceId)/256.0;
             //wx_vertexColor = colorFromInt(faceId % 4);
