@@ -244,36 +244,38 @@ MAIN.writeTransformsAndRender = (id2transform) => {
     const serializedFaceEntries = new Uint8Array(72)
     const serializedTransforms = new Uint32Array(44)
 
+    // fill serializedFaceEntries, serializedTransforms
     let transformIndex = 1
-
-    // write transforms
     for ([faceId, faceTransfroms] of Object.entries(id2transform)){
-        for (faceTransfrom of faceTransfroms) {
-            const type = faceTransfrom.type
+        if (faceTransfroms.length === 0) {
+            continue
+        }
 
-            // Create FaceEntries
-            faceOperation = {
-                "transform_type": type,
+        // next of last entry is always 0
+        let nextSerialized = 0
+        for (let faceTransfrom of [...faceTransfroms].reverse()) {
+            const ttype = faceTransfrom.type
+
+            // Create Transforms entry
+            const transform = {...faceTransfrom.data, ...{"next": nextSerialized}}
+            const transformParser = MAIN.transform_parsers[ttype];
+            const tfBuf = transformParser.encode(transform);
+            serializedTransforms[transformIndex] = tfBuf.readInt32LE(0)
+            logHexAndBin(tfBuf, `= serializedTransforms[${transformIndex}]`);
+
+            // Create Lookup entry
+            const faceOperation = {
+                "transform_type": ttype,
                 "transform_argument_index": transformIndex,
             }
-            const feBuf = MAIN.faceOperationParser.encode(faceOperation)
-            logHexAndBin(feBuf, `(face=${faceId})`);
-            serializedFaceEntries[faceId] = feBuf[0]
+            nextSerialized = MAIN.faceOperationParser.encode(faceOperation)[0]
 
-            // Create Transforms
-            // TODO: ADD CONTINUES
-            const transformParser = MAIN.transform_parsers[type];
-            const tfBuf = transformParser.encode(faceTransfrom.data);
-            logHexAndBin(tfBuf, `(tfindex=${transformIndex})`);
-            serializedTransforms[transformIndex] = tfBuf.readInt32LE(0)
-
-            // <debug>
-            // let parsres = parser.parse(tfBuf)
-            // console.log(parsres)
-            // </debug>
-
-            transformIndex++;
+            transformIndex++
         }
+
+        // First facetransform should be used in lookup.
+        serializedFaceEntries[faceId] = nextSerialized
+        console.log(`${nextSerialized} = serializedFaceEntries[${faceId}]`);
     }
 
     // write lookup tables
@@ -283,22 +285,14 @@ MAIN.writeTransformsAndRender = (id2transform) => {
         const offset = getByteOffset(x,y,c)
         imageData[offset] = int
 
-        // // Temp, makes debugging easier
-        // if (int == 0 && c == 3){
-        //     // data is lost with transparent data... need to find fix for this
-        //     imageData[offset] |= 0xff
-        // }
-
         if(int != 0) {
             console.log(`F pos=${index} offset=${offset}, x=${x}, y=${y}, c=${c} value=0x${int.toString(16)}`)
         }
     }
 
-    for (const [index, int] of serializedTransforms.entries()) {
+    // write transforms
+    for (let [index, int] of serializedTransforms.entries()) {
         const [x, y] = getTransformPosition(index)
-
-        // // Temp, makes debugging easier
-        // int |= 0x000000ff
 
         const offset = getByteOffset(x,y)
         imageData[offset+0] = (int >> 24) & 0xff
@@ -306,7 +300,7 @@ MAIN.writeTransformsAndRender = (id2transform) => {
         imageData[offset+2] = (int >> 8) & 0xff
         imageData[offset+3] = (int >> 0) & 0xff
 
-        if((int & 0xffffff00) != 0) {
+        if(int != 0) {
             const hexstr = [...Array(4).keys()].map(
                 (x) => imageData[offset+x].toString(16).padStart(2, "0")
             ).join("|")
@@ -449,7 +443,6 @@ MAIN.transform_parsers[MAIN.enums.transform_type.special] = (
         .bit4("__filler__")
         .bit8("__filler2__")
         .bit8("__filler3__")
-        .bit8("__filler4__")
         .bit8("next")
 )
 MAIN.default_transform[MAIN.enums.transform_type.special] = {
