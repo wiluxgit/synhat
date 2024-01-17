@@ -181,30 +181,34 @@
               <!--UV Offset DOM-->
               <template x-if='item.type == MAIN.enums.transform_type.uv_offset'>
                 <div>
-                  <label>UV Crop</label><br>
+                  <label>UV Offset</label><br>
                   <div class="xslider">
                     <label>X min</label>
-                    <input type="reset" x-on:click="item.data.x_min=0">
-                    <input type="number" x-model.number="item.data.x_min" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
-                    <input type="range" x-model.number="item.data.x_min" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                    <input type="reset" x-on:click="item.data.uv_x_min=0">
+                    <input type="number" x-model.number="item.data.uv_x_min" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                    <input type="range" x-model.number="item.data.uv_x_min" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
                   </div>
                   <div class="xslider">
                     <label>X max</label>
-                    <input type="reset" x-on:click="item.data.x_max=0">
-                    <input type="number" x-model.number="item.data.x_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
-                    <input type="range" x-model.number="item.data.x_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                    <input type="reset" x-on:click="item.data.uv_x_max=0">
+                    <input type="number" x-model.number="item.data.uv_x_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                    <input type="range" x-model.number="item.data.uv_x_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
                   </div>
-                  <div class="xslider">
+                  <div class="xslider" x-data='{_uv_y_min: null}' x-init='
+                    eval(MAIN.MakeExprToCreate3x2BitsTwoWayBinding(
+                      "_uv_y_min", "item.data.uv_y_min_0", "item.data.uv_y_min_1", "item.data.uv_y_min_2"
+                    ))
+                  '>
                     <label>Y min</label>
-                    <input type="reset" x-on:click="item.data.y_min=0">
-                    <input type="number" x-model.number="item.data.y_min" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
-                    <input type="range" x-model.number="item.data.y_min" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                    <input type="reset" x-on:click="_uv_y_min=0">
+                    <input type="number" x-model.number="_uv_y_min" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                    <input type="range" x-model.number="_uv_y_min" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
                   </div>
                   <div class="xslider">
                     <label>Y max</label>
-                    <input type="reset" x-on:click="item.data.y_max=0">
-                    <input type="number" x-model.number="item.data.y_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
-                    <input type="range" x-model.number="item.data.y_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                    <input type="reset" x-on:click="item.data.uv_y_max=0">
+                    <input type="number" x-model.number="item.data.uv_y_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                    <input type="range" x-model.number="item.data.uv_y_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
                   </div>
                 </div>
               </template>
@@ -212,7 +216,7 @@
               <!--UV Crop DOM-->
               <template x-if='item.type == MAIN.enums.transform_type.uv_crop'>
                 <div>
-                  <label>UV Offset</label><br>
+                  <label>UV Crop</label><br>
                   <div class="xslider">
                     <label>Top</label>
                     <input type="reset" x-on:click="item.data.top=0">
