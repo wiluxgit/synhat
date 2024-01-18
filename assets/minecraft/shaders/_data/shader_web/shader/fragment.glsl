@@ -4,11 +4,11 @@
 uniform sampler2D Sampler0;
 
 in vec2 texCoord0;
-in vec2 wx_clipMin;
-in vec2 wx_clipMax;
-in vec2 wx_clipOffset;
 in vec4 wx_vertexColor;
 in float wx_isEdited;
+in vec2 wx_clipCenter;
+in vec2 wx_clipMin;
+in vec2 wx_clipMax;
 
 out vec4 fragColor;
 

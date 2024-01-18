@@ -35,7 +35,7 @@ uniform sampler2D Sampler0;
 
 // Data Reading
 int getMCVertID();
-int getFaceId(int vertId);
+int getfaceId(int vertId);
 int getCornerId(int vertId);
 int getDirId(int vertId);
 int getFaceOperationEntry(int faceId);
@@ -45,7 +45,11 @@ vec4 getTransformArguments(int activeTransformIndex);
 // hard coded face properties
 int getPerpendicularLength(int faceId, bool isAlex);
 bool isSecondaryLayer(int vertId);
-void defaultInitUVBounds(int faceId, bool isAlex);
+void initVanillaUV(int faceId, bool isAlex);
+void initVanillaUV2(int faceId, bool isAlex);
+vec2 vanillaMinUV;
+vec2 vanillaMaxUV;
+vec2 vanillaCenterUV;
 
 // bit data helpers
 int extractCombineBits6and7(int r, int g, int b);
@@ -60,42 +64,51 @@ void applyPostFlags   (bool isAlex, int vertId, int dataR, int dataG, int dataB)
 
 vec3 pixelNormal();
 
-// minecraft in
+#ifdef BONE_TEXTURE // ThreeJS
+#define BROWSER
 mat4 ModelViewMat;
 mat4 ProjMat;
 vec3 Position;
 vec3 Normal;
 vec2 UV0;
+#elif // Minecraft
+in mat4 ModelViewMat;
+in mat4 ProjMat;
+in vec3 Position;
+in vec3 Normal;
+in vec2 UV0;
+#endif
 
 // global temp
 vec3 NewPosition;
-vec2 loopupMinUV;
-vec2 loopupMaxUV;
+vec2 FaceCenter;
 
 // Custom out variables
 out vec2 texCoord0;
-in vec2 wx_clipMin;
-in vec2 wx_clipMax;
-in vec2 wx_clipOffset;
 out vec4 wx_vertexColor;
 out float wx_isEdited;
+out vec2 wx_clipCenter;
+out vec2 wx_clipMin;
+out vec2 wx_clipMax;
 
 void main() {
 
+#ifdef BROWSER
     // ThreeJS fix to convert all names to the same as minecraft
     ModelViewMat = viewMatrix;
     ProjMat = projectionMatrix;
     Position = position;
     Normal = normal;
     UV0 = vec2(uv.x, 1.0-uv.y); // ThreeJS reverses the UV coordinates AND the texture by default
+#endif
 
     texCoord0 = UV0;
-    int mcid = getMCVertID();
+    int vertId = getMCVertID();
 
     //<DEBUG>
-    float mcidx = float(mcid)/400.0;
-    float mcidy = float((mcid/4)%6)/6.0;
-    wx_vertexColor = vec4(mcidx, mcidy, 0, 1);
+    float vertIdx = float(vertId)/400.0;
+    float vertIdy = float((vertId/4)%6)/6.0;
+    wx_vertexColor = vec4(vertIdx, vertIdy, 0, 1);
     //</DEBUG>
 
     wx_isEdited = 0.0;
@@ -112,8 +125,8 @@ void main() {
         if (headerR == 0xda && headerG == 0x67) {
             bool isAlex = (headerB == 1);
 
-            int faceId = getFaceId(mcid);
-            int cornerId = getCornerId(mcid);
+            int faceId = getfaceId(vertId);
+            int cornerId = getCornerId(vertId);
 
             int nextFaceOperationEntry = getFaceOperationEntry(faceId);
 
@@ -130,37 +143,42 @@ void main() {
             //wx_vertexColor = colorFromInt(faceId % 4);
             //</DEBUG>
 
-            while (1==1) {
-                int activeTransformIndex = nextFaceOperationEntry & MASK_FACE_OPERATION_ENTRY_TRANFORM_ARGUMENT_INDEX;
-                int activeTransformType = nextFaceOperationEntry & MASK_TRANFORM_TYPE;
+            if (nextFaceOperationEntry != 0) {
+                initVanillaUV(faceId, isAlex);
+                FaceCenter = vanillaCenterUV;
 
-                if (activeTransformIndex == 0 || activeTransformIndex > 44) {
-                    break;
-                }
+                while (1==1) {
+                    int activeTransformIndex = nextFaceOperationEntry & MASK_FACE_OPERATION_ENTRY_TRANFORM_ARGUMENT_INDEX;
+                    int activeTransformType = nextFaceOperationEntry & MASK_TRANFORM_TYPE;
 
-                wx_isEdited = 1.0;
-
-                vec4 transformData = getTransformArguments(activeTransformIndex);
-                //wx_vertexColor = transformData / 256.0;
-
-                int dataR = int(transformData.r+0.1);
-                int dataG = int(transformData.g+0.1);
-                int dataB = int(transformData.b+0.1);
-                nextFaceOperationEntry = int(transformData.a+0.1);
-
-                switch (activeTransformType) {
-                    case TRANFORM_TYPE_DISPLACEMENT:
-                        applyDisplacement(isAlex, mcid, dataR, dataG, dataB);
+                    if (activeTransformIndex == 0 || activeTransformIndex > 44) {
                         break;
-                    case TRANFORM_TYPE_UV_CROP:
-                        applyUVCrop(isAlex, mcid, dataR, dataG, dataB);
-                        break;
-                    case TRANFORM_TYPE_UV_OFFSET:
-                        applyUVOffset(isAlex, mcid, dataR, dataG, dataB);
-                        break;
-                    case TRANFORM_TYPE_SPECIAL:
-                        applyPostFlags(isAlex, mcid, dataR, dataG, dataB);
-                        break;
+                    }
+
+                    wx_isEdited = 1.0;
+
+                    vec4 transformData = getTransformArguments(activeTransformIndex);
+                    //wx_vertexColor = transformData / 256.0;
+
+                    int dataR = int(transformData.r+0.1);
+                    int dataG = int(transformData.g+0.1);
+                    int dataB = int(transformData.b+0.1);
+                    nextFaceOperationEntry = int(transformData.a+0.1);
+
+                    switch (activeTransformType) {
+                        case TRANFORM_TYPE_DISPLACEMENT:
+                            applyDisplacement(isAlex, vertId, dataR, dataG, dataB);
+                            break;
+                        case TRANFORM_TYPE_UV_CROP:
+                            applyUVCrop(isAlex, vertId, dataR, dataG, dataB);
+                            break;
+                        case TRANFORM_TYPE_UV_OFFSET:
+                            applyUVOffset(isAlex, vertId, dataR, dataG, dataB);
+                            break;
+                        case TRANFORM_TYPE_SPECIAL:
+                            applyPostFlags(isAlex, vertId, dataR, dataG, dataB);
+                            break;
+                    }
                 }
             }
 
@@ -183,7 +201,7 @@ void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB)
     float offset					 = float(dataR & MASK_TTD_globalDisplacement);
     int asymEdge 		             = dataB & MASK_TTD_asymEdge;
 
-    int faceId = getFaceId(vertId);
+    int faceId = getfaceId(vertId);
     int cornerId = getCornerId(vertId);
     int dirId = getDirId(vertId);
     bool isSecondary = isSecondaryLayer(vertId);
@@ -244,14 +262,12 @@ void applyUVCrop(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
     return;
 }
 void applyUVOffset(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
-    //defaultInitUVBounds(isAlex, vertId);
-
     int xmax = dataR & 63; // 0b00111111
     int xmin = dataG & 63;
     int ymax = dataB & 63;
     int ymin = extractCombineBits6and7(dataR, dataG, dataB);
 
-    int faceId = getFaceId(vertId);
+    int faceId = getfaceId(vertId);
     int cornerId = getCornerId(vertId);
 
     switch(cornerId) {
@@ -268,6 +284,10 @@ void applyUVOffset(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
             texCoord0 += vec2(float(xmax), float(ymax)) / 64.0;
             break;
     }
+
+    FaceCenter += (vec2(float(xmax), float(ymax)) / 64.0) + (vec2(float(xmin), float(ymin)) / 64.0) / 2.0;
+
+    // Debug
     wx_vertexColor = colorFromInt(cornerId);
     return;
 }
@@ -282,7 +302,7 @@ vec3 pixelNormal() {
 bool isSecondaryLayer(int vertId) {
     return vertId >= 36*4;
 }
-int getFaceId(int vertId) {
+int getfaceId(int vertId) {
     return (vertId / 4);
 }
 int getDirId(int vertId) {
@@ -379,7 +399,7 @@ int getPerpendicularLength(int faceId, bool isAlex) {
     }
 }
 
-int faceIDLookup(int dirid, int uvu, int uvv);
+int faceIdLookup(int dirid, int uvu, int uvv);
 int getMCVertID() {
     int dirid;
     int corner;
@@ -417,11 +437,11 @@ int getMCVertID() {
 
     int uvu = int(UV0.x*64.0 + 0.1);
     int uvv = int(UV0.y*64.0 + 0.1);
-    int faceid = faceIDLookup(dirid, uvu, uvv);
-    return faceid*4 + corner;
+    int faceId = faceIdLookup(dirid, uvu, uvv);
+    return faceId*4 + corner;
 }
 
-int faceIDLookup(int dirid, int uvu, int uvv) {
+int faceIdLookup(int dirid, int uvu, int uvv) {
     switch(dirid){
     case 0:
         if ((uvu == 24) && (uvv == 8)) return 0;
@@ -727,213 +747,217 @@ int faceIDLookup(int dirid, int uvu, int uvv) {
     return -1;
 }
 
+void initVanillaUV(int faceId, bool isAlex){
+    initVanillaUV2(faceId, isAlex);
+    vanillaCenterUV = (vanillaMinUV + vanillaMaxUV) / 2.0;
+}
 // Can be optimized
-void defaultInitUVBounds(int faceId, bool isAlex){
+void initVanillaUV2(int faceId, bool isAlex){
     switch(faceId){
     // ======== Hat ========
     case 36: //Left Hat
-        loopupMinUV = vec2(48, 8)/64.0;
-        loopupMaxUV = vec2(56, 16)/64.0;
+        vanillaMinUV = vec2(48, 8)/64.0;
+        vanillaMaxUV = vec2(56, 16)/64.0;
         return;
     case 37: //Right Hat
-        loopupMinUV = vec2(32, 8)/64.0;
-        loopupMaxUV = vec2(40, 16)/64.0;
+        vanillaMinUV = vec2(32, 8)/64.0;
+        vanillaMaxUV = vec2(40, 16)/64.0;
         return;
     case 38: //Top Hat
-        loopupMinUV = vec2(40, 0)/64.0;
-        loopupMaxUV = vec2(48, 8)/64.0;
+        vanillaMinUV = vec2(40, 0)/64.0;
+        vanillaMaxUV = vec2(48, 8)/64.0;
         return;
     case 39: //Bottom Hat
-        loopupMinUV = vec2(48, 0)/64.0;
-        loopupMaxUV = vec2(56, 8)/64.0;
+        vanillaMinUV = vec2(48, 0)/64.0;
+        vanillaMaxUV = vec2(56, 8)/64.0;
         return;
     case 40: //Front Hat
-        loopupMinUV = vec2(40, 8)/64.0;
-        loopupMaxUV = vec2(48, 16)/64.0;
+        vanillaMinUV = vec2(40, 8)/64.0;
+        vanillaMaxUV = vec2(48, 16)/64.0;
         return;
     case 41: //Back Hat
-        loopupMinUV = vec2(56, 8)/64.0;
-        loopupMaxUV = vec2(64, 16)/64.0;
+        vanillaMinUV = vec2(56, 8)/64.0;
+        vanillaMaxUV = vec2(64, 16)/64.0;
         return;
 
     // ======== L-pant ========
     case 42: //Left L-Pant
-        loopupMinUV = vec2(8, 52)/64.0;
-        loopupMaxUV = vec2(12, 64)/64.0;
+        vanillaMinUV = vec2(8, 52)/64.0;
+        vanillaMaxUV = vec2(12, 64)/64.0;
         return;
     case 43: //Right L-Pant
-        loopupMinUV = vec2(0, 52)/64.0;
-        loopupMaxUV = vec2(4, 64)/64.0;
+        vanillaMinUV = vec2(0, 52)/64.0;
+        vanillaMaxUV = vec2(4, 64)/64.0;
         return;
     case 44: //Top L-Pant
-        loopupMinUV = vec2(4, 48)/64.0;
-        loopupMaxUV = vec2(8, 52)/64.0;
+        vanillaMinUV = vec2(4, 48)/64.0;
+        vanillaMaxUV = vec2(8, 52)/64.0;
         return;
     case 45: //Bottom L-Pant
-        loopupMinUV = vec2(8, 48)/64.0;
-        loopupMaxUV = vec2(12, 52)/64.0;
+        vanillaMinUV = vec2(8, 48)/64.0;
+        vanillaMaxUV = vec2(12, 52)/64.0;
         return;
     case 46: //Front L-Pant
-        loopupMinUV = vec2(4, 52)/64.0;
-        loopupMaxUV = vec2(8, 64)/64.0;
+        vanillaMinUV = vec2(4, 52)/64.0;
+        vanillaMaxUV = vec2(8, 64)/64.0;
         return;
     case 47: //Back L-Pant
-        loopupMinUV = vec2(12, 52)/64.0;
-        loopupMaxUV = vec2(16, 64)/64.0;
+        vanillaMinUV = vec2(12, 52)/64.0;
+        vanillaMaxUV = vec2(16, 64)/64.0;
         return;
 
     // ======== R-Pant ========
     case 48: //Left R-Pant
-        loopupMinUV = vec2(8, 36)/64.0;
-        loopupMaxUV = vec2(12, 48)/64.0;
+        vanillaMinUV = vec2(8, 36)/64.0;
+        vanillaMaxUV = vec2(12, 48)/64.0;
         return;
     case 49: //Right R-Pant
-        loopupMinUV = vec2(0, 36)/64.0;
-        loopupMaxUV = vec2(4, 48)/64.0;
+        vanillaMinUV = vec2(0, 36)/64.0;
+        vanillaMaxUV = vec2(4, 48)/64.0;
         return;
     case 50: //Top R-Pant
-        loopupMinUV = vec2(4, 32)/64.0;
-        loopupMaxUV = vec2(8, 36)/64.0;
+        vanillaMinUV = vec2(4, 32)/64.0;
+        vanillaMaxUV = vec2(8, 36)/64.0;
         return;
     case 51: //Bottom R-Pant
-        loopupMinUV = vec2(8, 32)/64.0;
-        loopupMaxUV = vec2(12, 36)/64.0;
+        vanillaMinUV = vec2(8, 32)/64.0;
+        vanillaMaxUV = vec2(12, 36)/64.0;
         return;
     case 52: //Front R-Pant
-        loopupMinUV = vec2(4, 36)/64.0;
-        loopupMaxUV = vec2(8, 48)/64.0;
+        vanillaMinUV = vec2(4, 36)/64.0;
+        vanillaMaxUV = vec2(8, 48)/64.0;
         return;
     case 53: //Back R-Pant
-        loopupMinUV = vec2(12, 36)/64.0;
-        loopupMaxUV = vec2(16, 48)/64.0;
+        vanillaMinUV = vec2(12, 36)/64.0;
+        vanillaMaxUV = vec2(16, 48)/64.0;
         return;
 
     // ======== L-Shirt ========
     case 54: //Left L-Shirt
         if(isAlex){
-            loopupMinUV = vec2(8+48-1, 52)/64.0;
-            loopupMaxUV = vec2(12+48-1, 64)/64.0;
+            vanillaMinUV = vec2(8+48-1, 52)/64.0;
+            vanillaMaxUV = vec2(12+48-1, 64)/64.0;
         } else {
-            loopupMinUV = vec2(8+48, 52)/64.0;
-            loopupMaxUV = vec2(12+48, 64)/64.0;
+            vanillaMinUV = vec2(8+48, 52)/64.0;
+            vanillaMaxUV = vec2(12+48, 64)/64.0;
         }
         return;
     case 55: //Right L-Shirt
-        loopupMinUV = vec2(0+48, 52)/64.0;
-        loopupMaxUV = vec2(4+48, 64)/64.0;
+        vanillaMinUV = vec2(0+48, 52)/64.0;
+        vanillaMaxUV = vec2(4+48, 64)/64.0;
         return;
     case 56: //Top L-Shirt
         if(isAlex){
-            loopupMinUV = vec2(4+48, 48)/64.0;
-            loopupMaxUV = vec2(8+48-1, 52)/64.0;
+            vanillaMinUV = vec2(4+48, 48)/64.0;
+            vanillaMaxUV = vec2(8+48-1, 52)/64.0;
         } else {
-            loopupMinUV = vec2(4+48, 48)/64.0;
-            loopupMaxUV = vec2(8+48, 52)/64.0;
+            vanillaMinUV = vec2(4+48, 48)/64.0;
+            vanillaMaxUV = vec2(8+48, 52)/64.0;
         }
         return;
     case 57: //Bottom L-Shirt
         if(isAlex){
-            loopupMinUV = vec2(8+48-1, 48)/64.0;
-            loopupMaxUV = vec2(12+48-2, 52)/64.0;
+            vanillaMinUV = vec2(8+48-1, 48)/64.0;
+            vanillaMaxUV = vec2(12+48-2, 52)/64.0;
         } else {
-            loopupMinUV = vec2(8+48, 48)/64.0;
-            loopupMaxUV = vec2(12+48, 52)/64.0;
+            vanillaMinUV = vec2(8+48, 48)/64.0;
+            vanillaMaxUV = vec2(12+48, 52)/64.0;
         }
         return;
     case 58: //Front L-Shirt
         if(isAlex){
-            loopupMinUV = vec2(4+48, 52)/64.0;
-            loopupMaxUV = vec2(8+48-1, 64)/64.0;
+            vanillaMinUV = vec2(4+48, 52)/64.0;
+            vanillaMaxUV = vec2(8+48-1, 64)/64.0;
         } else {
-            loopupMinUV = vec2(4+48, 52)/64.0;
-            loopupMaxUV = vec2(8+48, 64)/64.0;
+            vanillaMinUV = vec2(4+48, 52)/64.0;
+            vanillaMaxUV = vec2(8+48, 64)/64.0;
         }
         return;
     case 59: //Back L-Shirt
         if(isAlex){
-            loopupMinUV = vec2(12+48-1, 52)/64.0;
-            loopupMaxUV = vec2(16+48-2, 64)/64.0;
+            vanillaMinUV = vec2(12+48-1, 52)/64.0;
+            vanillaMaxUV = vec2(16+48-2, 64)/64.0;
         } else {
-            loopupMinUV = vec2(12+48, 52)/64.0;
-            loopupMaxUV = vec2(16+48, 64)/64.0;
+            vanillaMinUV = vec2(12+48, 52)/64.0;
+            vanillaMaxUV = vec2(16+48, 64)/64.0;
         }
         return;
 
     // ======== R-Shirt ========
     case 60: //Left R-Shirt
         if(isAlex){
-            loopupMinUV = vec2(48-1, 36)/64.0;
-            loopupMaxUV = vec2(52-1, 48)/64.0;
+            vanillaMinUV = vec2(48-1, 36)/64.0;
+            vanillaMaxUV = vec2(52-1, 48)/64.0;
         } else {
-            loopupMinUV = vec2(48, 36)/64.0;
-            loopupMaxUV = vec2(52, 48)/64.0;
+            vanillaMinUV = vec2(48, 36)/64.0;
+            vanillaMaxUV = vec2(52, 48)/64.0;
         }
         return;
     case 61: //Right R-Shirt
-        loopupMinUV = vec2(40, 36)/64.0;
-        loopupMaxUV = vec2(44, 48)/64.0;
+        vanillaMinUV = vec2(40, 36)/64.0;
+        vanillaMaxUV = vec2(44, 48)/64.0;
         return;
     case 62: //Top R-Shirt
         if(isAlex){
-            loopupMinUV = vec2(44, 32)/64.0;
-            loopupMaxUV = vec2(48-1, 36)/64.0;
+            vanillaMinUV = vec2(44, 32)/64.0;
+            vanillaMaxUV = vec2(48-1, 36)/64.0;
         } else {
-            loopupMinUV = vec2(44, 32)/64.0;
-            loopupMaxUV = vec2(48, 36)/64.0;
+            vanillaMinUV = vec2(44, 32)/64.0;
+            vanillaMaxUV = vec2(48, 36)/64.0;
         }
         return;
     case 63: //Bottom R-Shirt
         if(isAlex){
-            loopupMinUV = vec2(48-1, 32)/64.0;
-            loopupMaxUV = vec2(52-2, 36)/64.0;
+            vanillaMinUV = vec2(48-1, 32)/64.0;
+            vanillaMaxUV = vec2(52-2, 36)/64.0;
         } else {
-            loopupMinUV = vec2(48, 32)/64.0;
-            loopupMaxUV = vec2(52, 36)/64.0;
+            vanillaMinUV = vec2(48, 32)/64.0;
+            vanillaMaxUV = vec2(52, 36)/64.0;
         }
         return;
     case 64: //Front R-Shirt
         if(isAlex){
-            loopupMinUV = vec2(44, 36)/64.0;
-            loopupMinUV = vec2(48-1, 48)/64.0;
+            vanillaMinUV = vec2(44, 36)/64.0;
+            vanillaMinUV = vec2(48-1, 48)/64.0;
         } else {
-            loopupMinUV = vec2(44, 36)/64.0;
-            loopupMinUV = vec2(48, 48)/64.0;
+            vanillaMinUV = vec2(44, 36)/64.0;
+            vanillaMinUV = vec2(48, 48)/64.0;
         }
         return;
     case 65: //Back R-Shirt
         if(isAlex){
-            loopupMinUV = vec2(52-1, 36)/64.0;
-            loopupMaxUV = vec2(56-2, 48)/64.0;
+            vanillaMinUV = vec2(52-1, 36)/64.0;
+            vanillaMaxUV = vec2(56-2, 48)/64.0;
         } else {
-            loopupMinUV = vec2(52, 36)/64.0;
-            loopupMaxUV = vec2(56, 48)/64.0;
+            vanillaMinUV = vec2(52, 36)/64.0;
+            vanillaMaxUV = vec2(56, 48)/64.0;
         }
         return;
 
     // ======== Shirt ========
     case 66: //Left Shirt
-        loopupMinUV = vec2(28, 36)/64.0;
-        loopupMaxUV = vec2(32, 48)/64.0;
+        vanillaMinUV = vec2(28, 36)/64.0;
+        vanillaMaxUV = vec2(32, 48)/64.0;
         return;
     case 67: //Right Shirt
-        loopupMinUV = vec2(16, 36)/64.0;
-        loopupMaxUV = vec2(20, 48)/64.0;
+        vanillaMinUV = vec2(16, 36)/64.0;
+        vanillaMaxUV = vec2(20, 48)/64.0;
         return;
     case 68: //Top Shirt
-        loopupMinUV = vec2(20, 32)/64.0;
-        loopupMaxUV = vec2(28, 36)/64.0;
+        vanillaMinUV = vec2(20, 32)/64.0;
+        vanillaMaxUV = vec2(28, 36)/64.0;
         return;
     case 69: //Bottom Shirt
-        loopupMinUV = vec2(28, 32)/64.0;
-        loopupMaxUV = vec2(36, 36)/64.0;
+        vanillaMinUV = vec2(28, 32)/64.0;
+        vanillaMaxUV = vec2(36, 36)/64.0;
         return;
     case 70: //Front Shirt
-        loopupMinUV = vec2(20, 36)/64.0;
-        loopupMaxUV = vec2(28, 48)/64.0;
+        vanillaMinUV = vec2(20, 36)/64.0;
+        vanillaMaxUV = vec2(28, 48)/64.0;
         return;
     case 71: //Back Shirt
-        loopupMinUV = vec2(32, 36)/64.0;
-        loopupMaxUV = vec2(40, 48)/64.0;
+        vanillaMinUV = vec2(32, 36)/64.0;
+        vanillaMaxUV = vec2(40, 48)/64.0;
         return;
     }
 }
