@@ -278,33 +278,33 @@ void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB)
             int asymSpecialMode = dataG & MASK_TTD_asymSpecialMode;
             switch(asymSpecialMode) {
                 case ASYM_SPECIAL_MODE_flipOuter:
-                    asymDelta = -1.0 * pixelSize * AS_FLIP;
+                    asymDelta = 1.0 * pixelSize * AS_FLIP;
                     break;
                 case ASYM_SPECIAL_MODE_flipInner:
                     float backheight = 19.125 * perpLenPixels;
-                    asymDelta = 1.0 * backheight;
+                    asymDelta = -1.0 * backheight;
                     break;
             }
         }
     }
-    NewPosition -= pixelNormal() * asymDelta;
+    NewPosition += pixelNormal() * asymDelta;
 
     // Automatic Clipping
-    bool isXaxis = asymEdge == ASYM_EDGE_bot || asymEdge == ASYM_EDGE_right;
-    float scrollMod = (asymEdge == ASYM_EDGE_bot || asymEdge == ASYM_EDGE_right) ? 1.0 : -1.0;
+    bool isXaxis = asymEdge == ASYM_EDGE_left || asymEdge == ASYM_EDGE_right;
+    float scrollMod = (asymEdge == ASYM_EDGE_bot || asymEdge == ASYM_EDGE_left) ? 1.0 : -1.0;
     if (isAsymSpecial) {
-
         int asymSpecialMode = dataG & MASK_TTD_asymSpecialMode;
+        float asymDeltaAbs = abs(asymDelta);
         float scale = 1.0;
         float scroll = 0.0;
         switch(asymSpecialMode) {
             case ASYM_SPECIAL_MODE_flipOuter:
-                scale = -1.0 * asymDelta * pixelNormalLength() * (0.5 / PIXELFACTOR);
+                scale = asymDeltaAbs * pixelNormalLength() * (0.5 / PIXELFACTOR);
                 scroll = 0.5 * scrollMod * perpLenPixels / 64.0;
                 break;
             case ASYM_SPECIAL_MODE_flipInner:
                 float correctSnap = (perpLenPixels + 2.0 * distanceToOtherLayer) / (perpLenPixels + distanceToOtherLayer);
-                scale = correctSnap * asymDelta * pixelNormalLength() * (0.5 / PIXELFACTOR);
+                scale = correctSnap * asymDeltaAbs * pixelNormalLength() * (0.5 / PIXELFACTOR);
                 scroll = 1.5 * scrollMod * perpLenPixels / 64.0;
                 break;
             default:
@@ -315,7 +315,7 @@ void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB)
             ClipScroll.x -= scroll;
 
             // DEBUG
-            ClipScale.x *= OVERLAYSCALE;
+            ClipScale.y *= OVERLAYSCALE;
         } else {
             ClipScale.y *= scale;
             ClipScroll.y -= scroll;
@@ -323,7 +323,7 @@ void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB)
             // DEBUG
             ClipScale.x *= OVERLAYSCALE;
         }
-        wx_vertexColor = colorFromInt(getPerpendicularLength(faceId, isAlex));
+        wx_vertexColor = colorFromInt(asymEdge);
     }
 }
 void applyUVCrop(bool isAlex, int vertId, int dataR, int dataG, int dataB) {

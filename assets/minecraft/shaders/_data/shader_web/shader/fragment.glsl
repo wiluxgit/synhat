@@ -21,7 +21,7 @@ void main() {
         if (checker == 0.0) {
             discardColor.xyz *= 0.5;
         }
-
+        
         if (texCoord0.x < wx_clipMin.x || texCoord0.x > wx_clipMax.x) {
             fragColor = vec4(0.5, checker, 0.5, 1);
             return;
