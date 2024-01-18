@@ -47,7 +47,7 @@
       </div>
 
       <div id="winFaceSelect">
-        <div id="winFaceSelectFixedResolution">
+        <div class="FaceSelectFixedResolution">
           <canvas id="canvasSkinPreview" width="64" height="64">
           </canvas>
           <div id="winSkinPreviewOverlayGrid">
@@ -209,6 +209,12 @@
                     <input type="reset" x-on:click="item.data.uv_y_max=0">
                     <input type="number" x-model.number="item.data.uv_y_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
                     <input type="range" x-model.number="item.data.uv_y_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                  </div>
+                  <div style="display:block; height: 100%; width: 100%;">
+                    <div class="FaceSelectFixedResolution">
+                      <canvas id="canvasUVSelect" width="64" height="64">
+                      </canvas>
+                    </div>
                   </div>
                 </div>
               </template>

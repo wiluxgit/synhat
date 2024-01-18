@@ -314,8 +314,8 @@ MAIN.writeTransformsAndRender = (id2transform) => {
 MAIN.enums = {
     transform_type:{
         displacement: 0,
-        uv_offset: 1,
-        uv_crop: 2,
+        uv_crop: 1,
+        uv_offset: 2,
         special: 3,
     },
 
@@ -415,10 +415,10 @@ MAIN.transform_parsers[MAIN.enums.transform_type.uv_crop] = (
         .endianess("little")
         .encoderSetOptions({bitEndianess: true})
         .bit6("crop_top")
-        .bit2("crop_bot")
-        .bit6("crop_right")
         .bit2("crop_left_0")
-        .bit6("crop_left_1")
+        .bit6("crop_bot")
+        .bit2("crop_left_1")
+        .bit6("crop_right")
         .bit2("crop_left_2")
         .bit8("next")
 )
@@ -479,13 +479,13 @@ MAIN.MakeExprToCreate3x2BitsTwoWayBinding = (fullvalue, bit01, bit23, bit45) => 
     const lsbyte = 0b00000011
     const bitchange = (value) => {
         if (typeof ${fullvalue} !== 'undefined') {
-            //console.log("updated bitarr=", ${bit01}, ${bit23}, ${bit45})
+            console.log("updated bitarr=", ${bit01}, ${bit23}, ${bit45})
             ${fullvalue} = (${bit01} << 4) | (${bit23} << 2) | (${bit45} << 0)
         }
     }
     $watch(\"${fullvalue}\", (value) => {
         if (typeof ${fullvalue} !== 'undefined') {
-            //console.log("updated fullvalue=", ${fullvalue})
+            console.log("updated fullvalue=", ${fullvalue})
             ${bit01} = lsbyte & (${fullvalue} >> 4)
             ${bit23} = lsbyte & (${fullvalue} >> 2)
             ${bit45} = lsbyte & (${fullvalue} >> 0)

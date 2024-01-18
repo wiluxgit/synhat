@@ -31,6 +31,19 @@ textarea {
   background-color:lightcoral;
 }
 
+.FaceSelectFixedResolution {
+  position: relative;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  height: calc(64 * var(--face-select-scale));
+  width: calc(64 * var(--face-select-scale));
+  background-size: var(--face-select-scale) var(--face-select-scale);
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(to right, #aaaaaa 1px, transparent 1px),
+    linear-gradient(to bottom, #aaaaaa 1px, transparent 1px);
+}
 #winSkinPreviewOverlayGrid {
   height: 100%;
   width: 100%;
@@ -171,19 +184,6 @@ textarea {
   background-color:#666666;
   grid-area: faceselect;
   min-width: 0;
-}
-#winFaceSelectFixedResolution {
-  position: relative;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  height: calc(64 * var(--face-select-scale));
-  width: calc(64 * var(--face-select-scale));
-  background-size: var(--face-select-scale) var(--face-select-scale);
-  background-color: #ffffff;
-  background-image:
-    linear-gradient(to right, #aaaaaa 1px, transparent 1px),
-    linear-gradient(to bottom, #aaaaaa 1px, transparent 1px);
 }
 #canvasSkinPreview {
   height: 100%;

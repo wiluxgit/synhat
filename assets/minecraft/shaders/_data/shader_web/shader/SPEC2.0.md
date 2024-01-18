@@ -156,7 +156,7 @@ case TRANSFROM_TYPE_UV_CROP
 
 char getCropLeft(char r, char g, char b) {
     char mask = 0b11000000;
-    return ((r & mask) >> 6) | ((g & mask) >> 4) | ((b & mask) >> 2)
+    return ((r & mask) >> 2) | ((g & mask) >> 4) | ((b & mask) >> 6);
 }
 void writeCropLeftToRGB(char crop_left, char* r, char* g, char* b) {
     char mask = 0b11000000;

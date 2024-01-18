@@ -1,6 +1,7 @@
-uniform sampler2D Sampler0;
-
+#define in in highp
 #define out out highp
+
+uniform sampler2D Sampler0;
 
 // how long to stretch along normal to simulate 90 deg face
 #define AS_OUTER (32.0)
@@ -68,11 +69,14 @@ vec2 UV0;
 
 // global temp
 vec3 NewPosition;
+vec2 loopupMinUV;
+vec2 loopupMaxUV;
 
 // Custom out variables
 out vec2 texCoord0;
-out vec2 wx_maxUV;
-out vec2 wx_minUV;
+in vec2 wx_clipMin;
+in vec2 wx_clipMax;
+in vec2 wx_clipOffset;
 out vec4 wx_vertexColor;
 out float wx_isEdited;
 
@@ -253,6 +257,31 @@ void applyUVCrop(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
     return;
 }
 void applyUVOffset(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
+    //defaultInitUVBounds(isAlex, vertId);
+
+    int xmax = dataR & 63; // 0b00111111
+    int xmin = dataG & 63;
+    int ymax = dataB & 63;
+    int ymin = extractCombineBits6and7(dataR, dataG, dataB);
+
+    int faceId = getFaceId(vertId);
+    int cornerId = getCornerId(vertId);
+
+    switch(cornerId) {
+        case 0:
+            texCoord0 += vec2(float(xmax), float(ymin)) / 64.0;
+            break;
+        case 1:
+            texCoord0 += vec2(float(xmin), float(ymin)) / 64.0;
+            break;
+        case 2:
+            texCoord0 += vec2(float(xmin), float(ymax)) / 64.0;
+            break;
+        case 3:
+            texCoord0 += vec2(float(xmax), float(ymax)) / 64.0;
+            break;
+    }
+    wx_vertexColor = colorFromInt(cornerId);
     return;
 }
 void applyPostFlags(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
@@ -303,7 +332,7 @@ vec4 getTransformArguments(int activeTransformIndex) {
 // bit data helpers
 int extractCombineBits6and7(int r, int g, int b) {
     int mask = 192; // 0b11000000;
-    return ((r & mask) >> 6) | ((g & mask) >> 4) | ((b & mask) >> 2);
+    return ((r & mask) >> 2) | ((g & mask) >> 4) | ((b & mask) >> 6);
 }
 
 // Debug
@@ -716,208 +745,208 @@ void defaultInitUVBounds(int faceId, bool isAlex){
     switch(faceId){
     // ======== Hat ========
     case 36: //Left Hat
-        wx_minUV = vec2(48, 8)/64.0;
-        wx_maxUV = vec2(56, 16)/64.0;
+        loopupMinUV = vec2(48, 8)/64.0;
+        loopupMaxUV = vec2(56, 16)/64.0;
         return;
     case 37: //Right Hat
-        wx_minUV = vec2(32, 8)/64.0;
-        wx_maxUV = vec2(40, 16)/64.0;
+        loopupMinUV = vec2(32, 8)/64.0;
+        loopupMaxUV = vec2(40, 16)/64.0;
         return;
     case 38: //Top Hat
-        wx_minUV = vec2(40, 0)/64.0;
-        wx_maxUV = vec2(48, 8)/64.0;
+        loopupMinUV = vec2(40, 0)/64.0;
+        loopupMaxUV = vec2(48, 8)/64.0;
         return;
     case 39: //Bottom Hat
-        wx_minUV = vec2(48, 0)/64.0;
-        wx_maxUV = vec2(56, 8)/64.0;
+        loopupMinUV = vec2(48, 0)/64.0;
+        loopupMaxUV = vec2(56, 8)/64.0;
         return;
     case 40: //Front Hat
-        wx_minUV = vec2(40, 8)/64.0;
-        wx_maxUV = vec2(48, 16)/64.0;
+        loopupMinUV = vec2(40, 8)/64.0;
+        loopupMaxUV = vec2(48, 16)/64.0;
         return;
     case 41: //Back Hat
-        wx_minUV = vec2(56, 8)/64.0;
-        wx_maxUV = vec2(64, 16)/64.0;
+        loopupMinUV = vec2(56, 8)/64.0;
+        loopupMaxUV = vec2(64, 16)/64.0;
         return;
 
     // ======== L-pant ========
     case 42: //Left L-Pant
-        wx_minUV = vec2(8, 52)/64.0;
-        wx_maxUV = vec2(12, 64)/64.0;
+        loopupMinUV = vec2(8, 52)/64.0;
+        loopupMaxUV = vec2(12, 64)/64.0;
         return;
     case 43: //Right L-Pant
-        wx_minUV = vec2(0, 52)/64.0;
-        wx_maxUV = vec2(4, 64)/64.0;
+        loopupMinUV = vec2(0, 52)/64.0;
+        loopupMaxUV = vec2(4, 64)/64.0;
         return;
     case 44: //Top L-Pant
-        wx_minUV = vec2(4, 48)/64.0;
-        wx_maxUV = vec2(8, 52)/64.0;
+        loopupMinUV = vec2(4, 48)/64.0;
+        loopupMaxUV = vec2(8, 52)/64.0;
         return;
     case 45: //Bottom L-Pant
-        wx_minUV = vec2(8, 48)/64.0;
-        wx_maxUV = vec2(12, 52)/64.0;
+        loopupMinUV = vec2(8, 48)/64.0;
+        loopupMaxUV = vec2(12, 52)/64.0;
         return;
     case 46: //Front L-Pant
-        wx_minUV = vec2(4, 52)/64.0;
-        wx_maxUV = vec2(8, 64)/64.0;
+        loopupMinUV = vec2(4, 52)/64.0;
+        loopupMaxUV = vec2(8, 64)/64.0;
         return;
     case 47: //Back L-Pant
-        wx_minUV = vec2(12, 52)/64.0;
-        wx_maxUV = vec2(16, 64)/64.0;
+        loopupMinUV = vec2(12, 52)/64.0;
+        loopupMaxUV = vec2(16, 64)/64.0;
         return;
 
     // ======== R-Pant ========
     case 48: //Left R-Pant
-        wx_minUV = vec2(8, 36)/64.0;
-        wx_maxUV = vec2(12, 48)/64.0;
+        loopupMinUV = vec2(8, 36)/64.0;
+        loopupMaxUV = vec2(12, 48)/64.0;
         return;
     case 49: //Right R-Pant
-        wx_minUV = vec2(0, 36)/64.0;
-        wx_maxUV = vec2(4, 48)/64.0;
+        loopupMinUV = vec2(0, 36)/64.0;
+        loopupMaxUV = vec2(4, 48)/64.0;
         return;
     case 50: //Top R-Pant
-        wx_minUV = vec2(4, 32)/64.0;
-        wx_maxUV = vec2(8, 36)/64.0;
+        loopupMinUV = vec2(4, 32)/64.0;
+        loopupMaxUV = vec2(8, 36)/64.0;
         return;
     case 51: //Bottom R-Pant
-        wx_minUV = vec2(8, 32)/64.0;
-        wx_maxUV = vec2(12, 36)/64.0;
+        loopupMinUV = vec2(8, 32)/64.0;
+        loopupMaxUV = vec2(12, 36)/64.0;
         return;
     case 52: //Front R-Pant
-        wx_minUV = vec2(4, 36)/64.0;
-        wx_maxUV = vec2(8, 48)/64.0;
+        loopupMinUV = vec2(4, 36)/64.0;
+        loopupMaxUV = vec2(8, 48)/64.0;
         return;
     case 53: //Back R-Pant
-        wx_minUV = vec2(12, 36)/64.0;
-        wx_maxUV = vec2(16, 48)/64.0;
+        loopupMinUV = vec2(12, 36)/64.0;
+        loopupMaxUV = vec2(16, 48)/64.0;
         return;
 
     // ======== L-Shirt ========
     case 54: //Left L-Shirt
         if(isAlex){
-            wx_minUV = vec2(8+48-1, 52)/64.0;
-            wx_maxUV = vec2(12+48-1, 64)/64.0;
+            loopupMinUV = vec2(8+48-1, 52)/64.0;
+            loopupMaxUV = vec2(12+48-1, 64)/64.0;
         } else {
-            wx_minUV = vec2(8+48, 52)/64.0;
-            wx_maxUV = vec2(12+48, 64)/64.0;
+            loopupMinUV = vec2(8+48, 52)/64.0;
+            loopupMaxUV = vec2(12+48, 64)/64.0;
         }
         return;
     case 55: //Right L-Shirt
-        wx_minUV = vec2(0+48, 52)/64.0;
-        wx_maxUV = vec2(4+48, 64)/64.0;
+        loopupMinUV = vec2(0+48, 52)/64.0;
+        loopupMaxUV = vec2(4+48, 64)/64.0;
         return;
     case 56: //Top L-Shirt
         if(isAlex){
-            wx_minUV = vec2(4+48, 48)/64.0;
-            wx_maxUV = vec2(8+48-1, 52)/64.0;
+            loopupMinUV = vec2(4+48, 48)/64.0;
+            loopupMaxUV = vec2(8+48-1, 52)/64.0;
         } else {
-            wx_minUV = vec2(4+48, 48)/64.0;
-            wx_maxUV = vec2(8+48, 52)/64.0;
+            loopupMinUV = vec2(4+48, 48)/64.0;
+            loopupMaxUV = vec2(8+48, 52)/64.0;
         }
         return;
     case 57: //Bottom L-Shirt
         if(isAlex){
-            wx_minUV = vec2(8+48-1, 48)/64.0;
-            wx_maxUV = vec2(12+48-2, 52)/64.0;
+            loopupMinUV = vec2(8+48-1, 48)/64.0;
+            loopupMaxUV = vec2(12+48-2, 52)/64.0;
         } else {
-            wx_minUV = vec2(8+48, 48)/64.0;
-            wx_maxUV = vec2(12+48, 52)/64.0;
+            loopupMinUV = vec2(8+48, 48)/64.0;
+            loopupMaxUV = vec2(12+48, 52)/64.0;
         }
         return;
     case 58: //Front L-Shirt
         if(isAlex){
-            wx_minUV = vec2(4+48, 52)/64.0;
-            wx_maxUV = vec2(8+48-1, 64)/64.0;
+            loopupMinUV = vec2(4+48, 52)/64.0;
+            loopupMaxUV = vec2(8+48-1, 64)/64.0;
         } else {
-            wx_minUV = vec2(4+48, 52)/64.0;
-            wx_maxUV = vec2(8+48, 64)/64.0;
+            loopupMinUV = vec2(4+48, 52)/64.0;
+            loopupMaxUV = vec2(8+48, 64)/64.0;
         }
         return;
     case 59: //Back L-Shirt
         if(isAlex){
-            wx_minUV = vec2(12+48-1, 52)/64.0;
-            wx_maxUV = vec2(16+48-2, 64)/64.0;
+            loopupMinUV = vec2(12+48-1, 52)/64.0;
+            loopupMaxUV = vec2(16+48-2, 64)/64.0;
         } else {
-            wx_minUV = vec2(12+48, 52)/64.0;
-            wx_maxUV = vec2(16+48, 64)/64.0;
+            loopupMinUV = vec2(12+48, 52)/64.0;
+            loopupMaxUV = vec2(16+48, 64)/64.0;
         }
         return;
 
     // ======== R-Shirt ========
     case 60: //Left R-Shirt
         if(isAlex){
-            wx_minUV = vec2(48-1, 36)/64.0;
-            wx_maxUV = vec2(52-1, 48)/64.0;
+            loopupMinUV = vec2(48-1, 36)/64.0;
+            loopupMaxUV = vec2(52-1, 48)/64.0;
         } else {
-            wx_minUV = vec2(48, 36)/64.0;
-            wx_maxUV = vec2(52, 48)/64.0;
+            loopupMinUV = vec2(48, 36)/64.0;
+            loopupMaxUV = vec2(52, 48)/64.0;
         }
         return;
     case 61: //Right R-Shirt
-        wx_minUV = vec2(40, 36)/64.0;
-        wx_maxUV = vec2(44, 48)/64.0;
+        loopupMinUV = vec2(40, 36)/64.0;
+        loopupMaxUV = vec2(44, 48)/64.0;
         return;
     case 62: //Top R-Shirt
         if(isAlex){
-            wx_minUV = vec2(44, 32)/64.0;
-            wx_maxUV = vec2(48-1, 36)/64.0;
+            loopupMinUV = vec2(44, 32)/64.0;
+            loopupMaxUV = vec2(48-1, 36)/64.0;
         } else {
-            wx_minUV = vec2(44, 32)/64.0;
-            wx_maxUV = vec2(48, 36)/64.0;
+            loopupMinUV = vec2(44, 32)/64.0;
+            loopupMaxUV = vec2(48, 36)/64.0;
         }
         return;
     case 63: //Bottom R-Shirt
         if(isAlex){
-            wx_minUV = vec2(48-1, 32)/64.0;
-            wx_maxUV = vec2(52-2, 36)/64.0;
+            loopupMinUV = vec2(48-1, 32)/64.0;
+            loopupMaxUV = vec2(52-2, 36)/64.0;
         } else {
-            wx_minUV = vec2(48, 32)/64.0;
-            wx_maxUV = vec2(52, 36)/64.0;
+            loopupMinUV = vec2(48, 32)/64.0;
+            loopupMaxUV = vec2(52, 36)/64.0;
         }
         return;
     case 64: //Front R-Shirt
         if(isAlex){
-            wx_minUV = vec2(44, 36)/64.0;
-            wx_minUV = vec2(48-1, 48)/64.0;
+            loopupMinUV = vec2(44, 36)/64.0;
+            loopupMinUV = vec2(48-1, 48)/64.0;
         } else {
-            wx_minUV = vec2(44, 36)/64.0;
-            wx_minUV = vec2(48, 48)/64.0;
+            loopupMinUV = vec2(44, 36)/64.0;
+            loopupMinUV = vec2(48, 48)/64.0;
         }
         return;
     case 65: //Back R-Shirt
         if(isAlex){
-            wx_minUV = vec2(52-1, 36)/64.0;
-            wx_maxUV = vec2(56-2, 48)/64.0;
+            loopupMinUV = vec2(52-1, 36)/64.0;
+            loopupMaxUV = vec2(56-2, 48)/64.0;
         } else {
-            wx_minUV = vec2(52, 36)/64.0;
-            wx_maxUV = vec2(56, 48)/64.0;
+            loopupMinUV = vec2(52, 36)/64.0;
+            loopupMaxUV = vec2(56, 48)/64.0;
         }
         return;
 
     // ======== Shirt ========
     case 66: //Left Shirt
-        wx_minUV = vec2(28, 36)/64.0;
-        wx_maxUV = vec2(32, 48)/64.0;
+        loopupMinUV = vec2(28, 36)/64.0;
+        loopupMaxUV = vec2(32, 48)/64.0;
         return;
     case 67: //Right Shirt
-        wx_minUV = vec2(16, 36)/64.0;
-        wx_maxUV = vec2(20, 48)/64.0;
+        loopupMinUV = vec2(16, 36)/64.0;
+        loopupMaxUV = vec2(20, 48)/64.0;
         return;
     case 68: //Top Shirt
-        wx_minUV = vec2(20, 32)/64.0;
-        wx_maxUV = vec2(28, 36)/64.0;
+        loopupMinUV = vec2(20, 32)/64.0;
+        loopupMaxUV = vec2(28, 36)/64.0;
         return;
     case 69: //Bottom Shirt
-        wx_minUV = vec2(28, 32)/64.0;
-        wx_maxUV = vec2(36, 36)/64.0;
+        loopupMinUV = vec2(28, 32)/64.0;
+        loopupMaxUV = vec2(36, 36)/64.0;
         return;
     case 70: //Front Shirt
-        wx_minUV = vec2(20, 36)/64.0;
-        wx_maxUV = vec2(28, 48)/64.0;
+        loopupMinUV = vec2(20, 36)/64.0;
+        loopupMaxUV = vec2(28, 48)/64.0;
         return;
     case 71: //Back Shirt
-        wx_minUV = vec2(32, 36)/64.0;
-        wx_maxUV = vec2(40, 48)/64.0;
+        loopupMinUV = vec2(32, 36)/64.0;
+        loopupMaxUV = vec2(40, 48)/64.0;
         return;
     }
 }
