@@ -340,16 +340,16 @@ void applyUVOffset(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
 
     switch(cornerId) {
         case 0:
-            texCoord0 += vec2(float(xmax), float(ymin)) / 64.0;
+            NewUV += vec2(float(xmax), float(ymin)) / 64.0;
             break;
         case 1:
-            texCoord0 += vec2(float(xmin), float(ymin)) / 64.0;
+            NewUV += vec2(float(xmin), float(ymin)) / 64.0;
             break;
         case 2:
-            texCoord0 += vec2(float(xmin), float(ymax)) / 64.0;
+            NewUV += vec2(float(xmin), float(ymax)) / 64.0;
             break;
         case 3:
-            texCoord0 += vec2(float(xmax), float(ymax)) / 64.0;
+            NewUV += vec2(float(xmax), float(ymax)) / 64.0;
             break;
     }
 
