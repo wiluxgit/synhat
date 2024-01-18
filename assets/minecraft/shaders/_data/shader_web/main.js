@@ -253,6 +253,8 @@ MAIN.writeTransformsAndRender = (id2transform) => {
 
         // next of last entry is always 0
         let nextSerialized = 0
+
+        // TODO: sort transforms
         for (let faceTransfrom of [...faceTransfroms].reverse()) {
             const ttype = faceTransfrom.type
 
