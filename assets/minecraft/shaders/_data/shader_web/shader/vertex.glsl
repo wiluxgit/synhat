@@ -353,7 +353,7 @@ void applyUVOffset(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
             break;
     }
 
-    NewFaceCenter += (vec2(float(xmax), float(ymax)) / 64.0) + (vec2(float(xmin), float(ymin)) / 64.0) / 2.0;
+    NewFaceCenter += (vec2(float(xmax+xmin), float(ymax+ymin)) / 64.0) / 2.0;
 
     // Debug
     wx_vertexColor = colorFromInt(cornerId);
