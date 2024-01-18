@@ -4,10 +4,11 @@
 uniform sampler2D Sampler0;
 
 // how long to stretch along normal to simulate 90 deg face
-#define AS_OUTER (32.0)
+#define AS_FLIP (32.0)
 
 // How much bigger the second layer is
 #define OVERLAYSCALE (1.125)
+#define PIXELFACTOR (1.125/16.0)
 
 // FACE_OPERATION_ENTRY
 #define MASK_FACE_OPERATION_ENTRY_TRANFORM_ARGUMENT_INDEX (63) // 0b00111111
@@ -32,6 +33,14 @@ uniform sampler2D Sampler0;
 #define ASYM_EDGE_right (3)
 #define ASYM_SPECIAL_MODE_flipOuter (0)
 #define ASYM_SPECIAL_MODE_flipInner (1)
+
+// Util
+#define FLAG_DIR_RIGHT (1)
+#define FLAG_DIR_BOT (2)
+#define DIR_TOPLEFT (0)
+#define DIR_TOPRIGHT (1)
+#define DIR_BOTLEFT (2)
+#define DIR_BOTRIGHT (3)
 
 // Data Reading
 int getMCVertID();
@@ -63,6 +72,7 @@ void applyUVOffset    (bool isAlex, int vertId, int dataR, int dataG, int dataB)
 void applyPostFlags   (bool isAlex, int vertId, int dataR, int dataG, int dataB);
 
 vec3 pixelNormal();
+float pixelNormalLength();
 
 #ifdef BONE_TEXTURE // ThreeJS
 #define BROWSER
@@ -81,13 +91,15 @@ in vec2 UV0;
 
 // global temp
 vec3 NewPosition;
-vec2 FaceCenter;
+vec2 NewFaceCenter;
+vec2 NewUV;
+vec2 ClipScroll;
+vec2 ClipScale;
 
 // Custom out variables
 out vec2 texCoord0;
 out vec4 wx_vertexColor;
 out float wx_isEdited;
-out vec2 wx_clipCenter;
 out vec2 wx_clipMin;
 out vec2 wx_clipMax;
 
@@ -101,8 +113,6 @@ void main() {
     Normal = normal;
     UV0 = vec2(uv.x, 1.0-uv.y); // ThreeJS reverses the UV coordinates AND the texture by default
 #endif
-
-    texCoord0 = UV0;
     int vertId = getMCVertID();
 
     //<DEBUG>
@@ -112,7 +122,10 @@ void main() {
     //</DEBUG>
 
     wx_isEdited = 0.0;
+    NewUV = UV0;
     NewPosition = Position;
+    ClipScroll = vec2(0.0, 0.0);
+    ClipScale = vec2(1.0, 1.0);
 
     if (true) { //(gl_VertexID >= 18*8){ //is second layer
 
@@ -130,24 +143,11 @@ void main() {
 
             int nextFaceOperationEntry = getFaceOperationEntry(faceId);
 
-            // wx_vertexColor = colorFromInt(nextFaceOperationEntry);
-
-            //<DEBUG>
-            // switch(faceId) {
-            //     case 38: // top hat
-            //         nextFaceOperationEntry = 1; //use data block 1
-            //         break;
-            // }
-            //wx_isEdited = 1.0;
-            //wx_vertexColor = getFaceOperationPixel(faceId)/256.0;
-            //wx_vertexColor = colorFromInt(faceId % 4);
-            //</DEBUG>
-
             if (nextFaceOperationEntry != 0) {
                 initVanillaUV(faceId, isAlex);
-                FaceCenter = vanillaCenterUV;
+                NewFaceCenter = vanillaCenterUV;
 
-                while (1==1) {
+                while (true) {
                     int activeTransformIndex = nextFaceOperationEntry & MASK_FACE_OPERATION_ENTRY_TRANFORM_ARGUMENT_INDEX;
                     int activeTransformType = nextFaceOperationEntry & MASK_TRANFORM_TYPE;
 
@@ -182,14 +182,42 @@ void main() {
                 }
             }
 
-            //if (wx_isEdited) {
-            //	writeDeaults()
-            //}
+            // UV crop shenanigans
+            if (wx_isEdited == 1.0) {
+                vec2 center2cornerVec = NewUV - NewFaceCenter;
+                vec2 opposing = NewFaceCenter - center2cornerVec;
+                vec2 uvDimensions = (NewUV - opposing);
+
+                int direction = 0;
+                if (center2cornerVec.x >= 0.0) direction |= FLAG_DIR_RIGHT;
+                if (center2cornerVec.y >= 0.0) direction |= FLAG_DIR_BOT;
+
+                switch (direction) {
+                    case DIR_TOPLEFT:
+                        wx_clipMin = vec2(NewUV.x, NewUV.y);
+                        wx_clipMax = vec2(opposing.x, opposing.y);
+                        break;
+                    case DIR_TOPRIGHT:
+                        wx_clipMin = vec2(opposing.x, NewUV.y);
+                        wx_clipMax = vec2(NewUV.x, opposing.y);
+                        break;
+                    case DIR_BOTLEFT:
+                        wx_clipMin = vec2(NewUV.x, opposing.y);
+                        wx_clipMax = vec2(opposing.x, NewUV.y);
+                        break;
+                    case DIR_BOTRIGHT:
+                        wx_clipMin = vec2(opposing.x, opposing.y);
+                        wx_clipMax = vec2(NewUV.x, NewUV.y);
+                        break;
+                }
+
+                NewUV = NewFaceCenter + (center2cornerVec * ClipScale) + ClipScroll;
+            }
         }
     }
+    texCoord0 = NewUV;
     gl_Position = ProjMat * ModelViewMat * vec4(NewPosition, 1.0);
     return;
-    //normal = ProjMat * ModelViewMat * vec4(Normal, 0.0);
 }
 
 void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
@@ -205,7 +233,7 @@ void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB)
     int cornerId = getCornerId(vertId);
     int dirId = getDirId(vertId);
     bool isSecondary = isSecondaryLayer(vertId);
-    int perpLenPixels = getPerpendicularLength(faceId, isAlex);
+    float perpLenPixels = float(getPerpendicularLength(faceId, isAlex));
 
     float directionMod = 1.0;
     if (isNegativeOffset) {
@@ -220,12 +248,13 @@ void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB)
         pixelSize = OVERLAYSCALE;
     }
 
+    float distanceToOtherLayer = (OVERLAYSCALE - 1.0) * perpLenPixels / 2.0;
     if (isSnap) {
         float snapDirection = 1.0;
         if (isSecondary) {
             snapDirection = -1.0;
         }
-        float layerExtention = snapDirection * (OVERLAYSCALE - 1.0) * float(perpLenPixels) / 2.0;
+        float layerExtention = snapDirection * distanceToOtherLayer;
         NewPosition += pixelNormal() * layerExtention;
     }
     NewPosition += pixelNormal() * offset * pixelSize * directionMod;
@@ -239,23 +268,62 @@ void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB)
 
     // check that at least one of the edge corners is the active vertex
     // otherwise it should not be moved
+    float asymDelta;
     if (cornerId == corner1 || cornerId == corner2) {
         if (!isAsymSpecial) {
             float asymDisplacement = float(dataG & MASK_TTD_asymDisplacement);
-            NewPosition += pixelNormal() * pixelSize * asymDisplacement * asymmetricDirectionMod;
+            asymDelta = pixelSize * asymDisplacement * asymmetricDirectionMod;
 
         } else {
             int asymSpecialMode = dataG & MASK_TTD_asymSpecialMode;
             switch(asymSpecialMode) {
                 case ASYM_SPECIAL_MODE_flipOuter:
-                    NewPosition += pixelNormal() * pixelSize * AS_OUTER * directionMod;
+                    asymDelta = -1.0 * pixelSize * AS_FLIP;
                     break;
                 case ASYM_SPECIAL_MODE_flipInner:
-                    float backheight = 19.125 * float(perpLenPixels);
-                    NewPosition -= pixelNormal() * 1.0 * backheight;
+                    float backheight = 19.125 * perpLenPixels;
+                    asymDelta = 1.0 * backheight;
                     break;
             }
         }
+    }
+    NewPosition -= pixelNormal() * asymDelta;
+
+    // Automatic Clipping
+    bool isXaxis = asymEdge == ASYM_EDGE_bot || asymEdge == ASYM_EDGE_right;
+    float scrollMod = (asymEdge == ASYM_EDGE_bot || asymEdge == ASYM_EDGE_right) ? 1.0 : -1.0;
+    if (isAsymSpecial) {
+
+        int asymSpecialMode = dataG & MASK_TTD_asymSpecialMode;
+        float scale = 1.0;
+        float scroll = 0.0;
+        switch(asymSpecialMode) {
+            case ASYM_SPECIAL_MODE_flipOuter:
+                scale = -1.0 * asymDelta * pixelNormalLength() * (0.5 / PIXELFACTOR);
+                scroll = 0.5 * scrollMod * perpLenPixels / 64.0;
+                break;
+            case ASYM_SPECIAL_MODE_flipInner:
+                float correctSnap = (perpLenPixels + 2.0 * distanceToOtherLayer) / (perpLenPixels + distanceToOtherLayer);
+                scale = correctSnap * asymDelta * pixelNormalLength() * (0.5 / PIXELFACTOR);
+                scroll = 1.5 * scrollMod * perpLenPixels / 64.0;
+                break;
+            default:
+                return; // ERROR
+        }
+        if (isXaxis) {
+            ClipScale.x *= scale;
+            ClipScroll.x -= scroll;
+
+            // DEBUG
+            ClipScale.x *= OVERLAYSCALE;
+        } else {
+            ClipScale.y *= scale;
+            ClipScroll.y -= scroll;
+
+            // DEBUG
+            ClipScale.x *= OVERLAYSCALE;
+        }
+        wx_vertexColor = colorFromInt(getPerpendicularLength(faceId, isAlex));
     }
 }
 void applyUVCrop(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
@@ -285,7 +353,7 @@ void applyUVOffset(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
             break;
     }
 
-    FaceCenter += (vec2(float(xmax), float(ymax)) / 64.0) + (vec2(float(xmin), float(ymin)) / 64.0) / 2.0;
+    NewFaceCenter += (vec2(float(xmax), float(ymax)) / 64.0) + (vec2(float(xmin), float(ymin)) / 64.0) / 2.0;
 
     // Debug
     wx_vertexColor = colorFromInt(cornerId);
@@ -295,7 +363,10 @@ void applyPostFlags(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
     return;
 }
 vec3 pixelNormal() {
-    return Normal * (1.125/16.0);
+    return Normal * PIXELFACTOR;
+}
+float pixelNormalLength() {
+    return length(pixelNormal());
 }
 
 
