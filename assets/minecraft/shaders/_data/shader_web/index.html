@@ -262,12 +262,8 @@
                     $watch("item.data.uv_y_min_2", fixBounds)
                     $watch("selectedId", setTimeout(fixBounds, 100))
                   '>
-                    <input type="reset" x-on:click='
-                      item.data.uv_x_min = 0
-                      item.data.uv_x_max = 0
-                      _uv_y_min = 0
-                      item.data.uv_y_max = 0
-                    '>
+                    <br>
+                    <div>Note that the visual UV editor will not always accurately display mirrored and/or overflowing textures</div>
 
                     <div style="display:block; height: 100%; width: 100%; padding: 1px; background-color: #666666;">
                       <div class="FaceSelectFixedResolution">
@@ -295,6 +291,7 @@
 
                               const scale = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--face-select-scale"))
 
+                              // Override global mousemove events until dragging is finished
                               document.onmousemove = (e) => {
                                 const mvX = 0 | ((e.clientX - _drag_startX) / scale)
                                 const mvY = 0 | ((e.clientY - _drag_startY) / scale)
@@ -313,7 +310,6 @@
                                   newYMax = (newYMax % 64 + 64) % 64
                                 }
 
-                                //console.log({mvX:mvX, mvY:mvY, scale:scale, newXMin:newXMin, newXMax:newXMax, newYMin:newYMin, newYMax:newYMax})
 
                                 if (0 <= newYMin && newYMin <= 64 && 0 <= newXMax && newXMax <= 64) {
                                   item.data.uv_x_min = newXMin
@@ -335,12 +331,20 @@
                               height: 100%;
                               width: 100%;
                               object-fit: contain;
-                              image-rendering: pixelated;
                               transform: scale(${_mirrored_x?-1:1}, ${_mirrored_y?-1:1});
                             `">
                           </div>
                         </div>
                       </div>
+
+                      <input type="reset" style="transform: translate(2px, -100%);"
+                        x-on:click='
+                          item.data.uv_x_min = 0
+                          item.data.uv_x_max = 0
+                          _uv_y_min = 0
+                          item.data.uv_y_max = 0
+                        '
+                      >
                     </div>
                   </div>
                 </div>
