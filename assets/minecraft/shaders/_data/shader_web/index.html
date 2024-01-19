@@ -181,7 +181,7 @@
 
               <!--UV Offset DOM-->
               <template x-if='item.type == MAIN.enums.transform_type.uv_offset'>
-                <div>
+                <div x-data='{_uv_y_min: null}'>
                   <label>UV Offset</label><br>
                   <div class="xslider">
                     <label>X min</label>
@@ -195,7 +195,7 @@
                     <input type="number" x-model.number="item.data.uv_x_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
                     <input type="range" x-model.number="item.data.uv_x_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
                   </div>
-                  <div class="xslider" x-data='{_uv_y_min: null}' x-init='
+                  <div class="xslider" x-init='
                     eval(MAIN.MakeExprToCreate3x2BitsTwoWayBinding(
                       "_uv_y_min", "item.data.uv_y_min_0", "item.data.uv_y_min_1", "item.data.uv_y_min_2"
                     ))
@@ -211,10 +211,82 @@
                     <input type="number" x-model.number="item.data.uv_y_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
                     <input type="range" x-model.number="item.data.uv_y_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
                   </div>
-                  <div style="display:block; height: 100%; width: 100%;">
-                    <div class="FaceSelectFixedResolution">
-                      <canvas id="canvasUVSelect" width="64" height="64">
-                      </canvas>
+
+                  <div x-data="{
+                    _mirrored_x: undefined,
+                    _mirrored_y: undefined,
+                    _left: undefined, _top: undefined, _right: undefined, _bottom: undefined,
+                  }" x-init='
+                    const fixBounds = () => {
+                      let corner1_X = (MAIN.id2uvs[item.face][0][0] + item.data.uv_x_min)
+                      let corner1_Y = (MAIN.id2uvs[item.face][0][1] + _uv_y_min)
+                      let corner2_X = (MAIN.id2uvs[item.face][1][0] + item.data.uv_x_max)
+                      let corner2_Y = (MAIN.id2uvs[item.face][1][1] + item.data.uv_y_max)
+                      if ((corner1_X >= 64 && corner2_X >= 64) || (corner1_X <= 0 && corner2_X <= 0)) {
+                        corner1_X %= 64
+                        corner2_X %= 64
+                      }
+                      if ((corner1_Y >= 64 && corner2_Y >= 64) || (corner1_Y <= 0 && corner2_Y <= 0)) {
+                        corner1_Y %= 64
+                        corner2_Y %= 64
+                      }
+                      if (corner1_X < corner2_X) {
+                        _left = corner1_X
+                        _right = 64 - corner2_X
+                        _mirrored_x = false
+                      } else {
+                        _left = corner2_X
+                        _right = 64 - corner1_X
+                        _mirrored_x = true
+                      }
+                      if (corner1_Y < corner2_Y) {
+                        _top = corner1_Y
+                        _bottom = 64 - corner2_Y
+                        _mirrored_y = false
+                      } else {
+                        _top = corner2_Y
+                        _bottom = 64 - corner1_Y
+                        _mirrored_y = true
+                      }
+                    }
+                    $watch("item.data.uv_x_min", fixBounds)
+                    $watch("item.data.uv_x_max", fixBounds)
+                    $watch("item.data.uv_y_max", fixBounds)
+                    $watch("item.data.uv_y_min_0", fixBounds)
+                    $watch("item.data.uv_y_min_1", fixBounds)
+                    $watch("item.data.uv_y_min_2", fixBounds)
+                    $watch("selectedId", setTimeout(fixBounds, 100))
+                  '>
+                    <input type="reset" x-on:click='
+                      item.data.uv_x_min = 0
+                      item.data.uv_x_max = 0
+                      _uv_y_min = 0
+                      item.data.uv_y_max = 0
+                    '>
+
+                    <div style="display:block; height: 100%; width: 100%; padding: 5px; background-color: #666666;">
+                      <div class="FaceSelectFixedResolution">
+                        <canvas id="canvasUVPreview" width="64" height="64">
+                        </canvas>
+                        <div id="winUVPreviewOverlay">
+                          <div class="UVPreviewOverlayItem" x-bind:style="`
+                            position: absolute;
+                            left:   calc(var(--face-select-scale) * ${_left});
+                            top:    calc(var(--face-select-scale) * ${_top});
+                            right:  calc(var(--face-select-scale) * ${_right});
+                            bottom: calc(var(--face-select-scale) * ${_bottom});
+                          `"
+                          >
+                            <img src="assets/arrow.png" x-bind:style="`
+                              height: 100%;
+                              width: 100%;
+                              object-fit: contain;
+                              image-rendering: pixelated;
+                              transform: scale(${_mirrored_x?-1:1}, ${_mirrored_y?-1:1});
+                            `">
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

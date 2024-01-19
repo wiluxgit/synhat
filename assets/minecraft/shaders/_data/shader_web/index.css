@@ -44,6 +44,13 @@ textarea {
     linear-gradient(to right, #aaaaaa 1px, transparent 1px),
     linear-gradient(to bottom, #aaaaaa 1px, transparent 1px);
 }
+#winUVPreviewOverlay {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  left: 0; top: 0;
+  z-index: 2
+}
 #winSkinPreviewOverlayGrid {
   height: 100%;
   width: 100%;
@@ -156,6 +163,15 @@ textarea {
   outline: 2px solid rgba(222, 255, 222, 1);
 }
 
+.UVPreviewOverlayItem {
+  background-color: rgba(222, 255, 222, 0.5);
+  outline: 2px solid rgba(222, 255, 222, 1);
+}
+.UVPreviewOverlayItem:hover {
+  background-color: rgba(127, 255, 127, 0.5);
+  outline: 2px solid rgba(127, 255, 127, 1);
+}
+
 #winEditorGrid {
   display: grid;
   width: 100%;
@@ -186,6 +202,13 @@ textarea {
   min-width: 0;
 }
 #canvasSkinPreview {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  left: 0; top: 0;
+  z-index: 0;
+}
+#canvasUVPreview {
   height: 100%;
   width: 100%;
   position: absolute;

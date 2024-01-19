@@ -133,6 +133,11 @@ MAIN.renderImageNow = () => {
         gl.RGBA, gl.UNSIGNED_BYTE,
         imageData
     )
+
+    document
+        ?.getElementById("canvasUVPreview")
+        ?.getContext("2d")
+        ?.drawImage(canvasSkinPreview, 0, 0)
 }
 MAIN.newDefaultTransformDictionary = () => {
     const d = {}
