@@ -146,24 +146,28 @@ a_edge:
 ```c
 case TRANSFROM_TYPE_UV_CROP
 |  R7  |  R6  |  R5  |  R4  |  R3  |  R2  |  R1  |  R0  |
-| crop_left_0 |                crop_top                 |
+|         crop_bot          |         crop_top          |
 
 |  G7  |  G6  |  G5  |  G4  |  G3  |  G2  |  G1  |  G0  |
-| crop_left_1 |                crop_bot                 |
+|         crop_right        |         crop_left         |
 
 |  B7  |  B6  |  B5  |  B4  |  B3  |  B2  |  B1  |  B0  |
-| crop_left_2 |               crop_right                |
+|                           |mirr_y|mirr_x|snap_y|snap_x|
+crop_"X":
+    // How many pixels to skip rendering from edge "X"
 
-char getCropLeft(char r, char g, char b) {
-    char mask = 0b11000000;
-    return ((r & mask) >> 2) | ((g & mask) >> 4) | ((b & mask) >> 6);
-}
-void writeCropLeftToRGB(char crop_left, char* r, char* g, char* b) {
-    char mask = 0b11000000;
-    *r |= mask & (crop_left << 6);
-    *g |= mask & (crop_left << 4);
-    *b |= mask & (crop_left << 2);
-}
+snap_:
+    // scales and crops the texture so that pixels are as big as the opposing layers pixels
+    // /!\ For it to allign correctly on primary layer you need a TRANSFROM_TYPE_UV_OFFSET
+    //     that is 2 pixels smaller in the snap direction than the secondary layer
+snap_x: // width
+snap_y: // height
+
+mirr_x:
+    // Mirrors the uv Horisontaly
+mirr_y:
+    // Mirrors the uv Vertically
+
 ```
 ```c
 case TRANSFROM_TYPE_UV_OFFSET
@@ -175,17 +179,24 @@ case TRANSFROM_TYPE_UV_OFFSET
 
 |  B7  |  B6  |  B5  |  B4  |  B3  |  B2  |  B1  |  B0  |
 |  uv_y_min_2 |                uv_y_max                 |
-// to extract uv_y_min you can use the same functions as TRANSFROM_TYPE_UV_CROP
+
+// to extract uv_y_min
+char getCropLeft(char r, char g, char b) {
+    char mask = 0b11000000;
+    return ((r & mask) >> 2) | ((g & mask) >> 4) | ((b & mask) >> 6);
+}
+void writeCropLeftToRGB(char crop_left, char* r, char* g, char* b) {
+    char mask = 0b11000000;
+    *r |= mask & (crop_left << 6);
+    *g |= mask & (crop_left << 4);
+    *b |= mask & (crop_left << 2);
+}
 ```
 
 ```c
 case TRANSFROM_TYPE_SPECIAL
 
-| R0 | top scale & clip uv to other layer
-| R1 | bot scale & clip uv to other layer
-| R2 | right scale & clip uv to other layer
-| R3 | left scale & clip uv to other layer
-| R4 | rainbow
+| R0 | rainbow
 
 other fields are unused
 ```

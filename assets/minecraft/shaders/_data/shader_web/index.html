@@ -9,7 +9,7 @@
       displacement_slider_min: -63,
       uv_offset_slider_max: 63,
       uv_offset_slider_min: 0,
-      uv_crop_slider_max: 63,
+      uv_crop_slider_max: 15,
       uv_crop_slider_min: 0,
     },
     selectedId: 0,
@@ -166,6 +166,7 @@
               <!--Special DOM-->
               <template x-if='item.type == MAIN.enums.transform_type.special'>
                 <div>
+                  Nothig here
                   <label>UV Scale Fix</label><br>
                   <label>Top</label>
                   <input type="checkbox" x-model="item.data.top_snap_clip_uv"><br>
@@ -225,28 +226,36 @@
                   <label>UV Crop</label><br>
                   <div class="xslider">
                     <label>Top</label>
-                    <input type="reset" x-on:click="item.data.top=0">
-                    <input type="number" x-model.number="item.data.top" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
-                    <input type="range" x-model.number="item.data.top" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                    <input type="reset" x-on:click="item.data.crop_top=0">
+                    <input type="number" x-model.number="item.data.crop_top" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                    <input type="range" x-model.number="item.data.crop_top" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
                   </div>
                   <div class="xslider">
                     <label>Bottom</label>
-                    <input type="reset" x-on:click="item.data.bottom=0">
-                    <input type="number" x-model.number="item.data.bottom" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
-                    <input type="range" x-model.number="item.data.bottom" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                    <input type="reset" x-on:click="item.data.crop_bot=0">
+                    <input type="number" x-model.number="item.data.crop_bot" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                    <input type="range" x-model.number="item.data.crop_bot" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
                   </div>
                   <div class="xslider">
                     <label>Right</label>
-                    <input type="reset" x-on:click="item.data.right=0">
-                    <input type="number" x-model.number="item.data.right" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
-                    <input type="range" x-model.number="item.data.right" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                    <input type="reset" x-on:click="item.data.crop_right=0">
+                    <input type="number" x-model.number="item.data.crop_right" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                    <input type="range" x-model.number="item.data.crop_right" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
                   </div>
                   <div class="xslider">
                     <label>Left</label>
-                    <input type="reset" x-on:click="item.data.left=0">
-                    <input type="number" x-model.number="item.data.left" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
-                    <input type="range" x-model.number="item.data.left" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                    <input type="reset" x-on:click="item.data.crop_left=0">
+                    <input type="number" x-model.number="item.data.crop_left" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                    <input type="range" x-model.number="item.data.crop_left" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
                   </div>
+                  <label>Snap X</label>
+                  <input type="checkbox" x-model.number="item.data.snap_x"><br>
+                  <label>Snap Y</label>
+                  <input type="checkbox" x-model.number="item.data.snap_y"><br>
+                  <label>Mirror X</label>
+                  <input type="checkbox" x-model.number="item.data.mirr_x"><br>
+                  <label>Mirror Y</label>
+                  <input type="checkbox" x-model.number="item.data.mirr_y"><br>
                 </div>
               </template>
             </div>

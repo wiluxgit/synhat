@@ -17,11 +17,11 @@ void main() {
         vec4 color = texture2D(Sampler0, texCoord0);
         vec4 discardColor = wx_vertexColor;
 
-        float checker = float(int(floor(texCoord0.x * 64.0) + floor(texCoord0.y * 64.0)) % 2);
+        float checker = float(int(floor(texCoord0.x * 128.0) + floor(texCoord0.y * 128.0)) % 2);
         if (checker == 0.0) {
             discardColor.xyz *= 0.5;
         }
-        
+
         if (texCoord0.x < wx_clipMin.x || texCoord0.x > wx_clipMax.x) {
             fragColor = vec4(0.5, checker, 0.5, 1);
             return;

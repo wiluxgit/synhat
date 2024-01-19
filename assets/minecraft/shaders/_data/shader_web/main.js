@@ -416,21 +416,26 @@ MAIN.transform_parsers[MAIN.enums.transform_type.uv_crop] = (
     new BinaryParser.Parser()
         .endianess("little")
         .encoderSetOptions({bitEndianess: true})
-        .bit6("crop_top")
-        .bit2("crop_left_0")
-        .bit6("crop_bot")
-        .bit2("crop_left_1")
-        .bit6("crop_right")
-        .bit2("crop_left_2")
+        .bit4("crop_top")
+        .bit4("crop_bot")
+        .bit4("crop_right")
+        .bit4("crop_left")
+        .bit1("snap_x")
+        .bit1("snap_y")
+        .bit1("mirr_x")
+        .bit1("mirr_y")
+        .bit4("__filler__")
         .bit8("next")
 )
 MAIN.default_transform[MAIN.enums.transform_type.uv_crop] = {
     crop_top: 0,
     crop_bot: 0,
     crop_right: 0,
-    crop_left_0: 0,
-    crop_left_1: 0,
-    crop_left_2: 0,
+    crop_left: 0,
+    snap_x: 0,
+    snap_y: 0,
+    mirr_x: 0,
+    mirr_y: 0,
 }
 
 // ====================================================
