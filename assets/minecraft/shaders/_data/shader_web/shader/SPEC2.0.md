@@ -152,7 +152,7 @@ case TRANSFROM_TYPE_UV_CROP
 |         crop_right        |         crop_left         |
 
 |  B7  |  B6  |  B5  |  B4  |  B3  |  B2  |  B1  |  B0  |
-|                           |mirr_y|mirr_x|snap_y|snap_x|
+|                                         |snap_y|snap_x|
 crop_"X":
     // How many pixels to skip rendering from edge "X"
 
@@ -162,11 +162,6 @@ snap_:
     //     that is 2 pixels smaller in the snap direction than the secondary layer
 snap_x: // width
 snap_y: // height
-
-mirr_x:
-    // Mirrors the uv Horisontaly
-mirr_y:
-    // Mirrors the uv Vertically
 
 ```
 ```c

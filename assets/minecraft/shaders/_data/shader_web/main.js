@@ -422,9 +422,9 @@ MAIN.transform_parsers[MAIN.enums.transform_type.uv_crop] = (
         .bit4("crop_left")
         .bit1("snap_x")
         .bit1("snap_y")
-        .bit1("mirr_x")
-        .bit1("mirr_y")
-        .bit4("__filler__")
+        .bit1("__filler1__")
+        .bit1("__filler2__")
+        .bit4("__filler3__")
         .bit8("next")
 )
 MAIN.default_transform[MAIN.enums.transform_type.uv_crop] = {
