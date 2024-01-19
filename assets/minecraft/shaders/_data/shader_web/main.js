@@ -217,30 +217,36 @@ MAIN.readtransforms = (id2transformOutput) => {
     }
 
     for (let [faceindex, v] of Object.entries(faceId2typeAndOffset)) {
-        const transformType = v.transform_type
-        const argumentIndex = v.transform_argument_index
-
         id2transformOutput[faceindex] = []
 
-        const [x, y] = getTransformPosition(argumentIndex)
-        const transformOffset = getByteOffset(x,y)
+        let transformType = v.transform_type
+        let argumentIndex = v.transform_argument_index
+        let sortno = 1
+        while (argumentIndex != 0 && argumentIndex <= 44) {
 
-        const transformBuf = new Uint8Array(4)
-        for (let i of [0,1,2,3]) {
-            transformBuf[3-i] = imageData[transformOffset+i] //fixes endianness
+            const [x, y] = getTransformPosition(argumentIndex)
+            const transformOffset = getByteOffset(x,y)
+
+            const transformBuf = new Uint8Array(4)
+            for (let i of [0,1,2,3]) {
+                transformBuf[3-i] = imageData[transformOffset+i] //fixes endianness
+            }
+            const parser = MAIN.transform_parsers[transformType]
+            const parse = parser.parse(transformBuf)
+
+            console.log(`readtransforms> parse[${faceindex}]:`, parse)
+            id2transformOutput[faceindex].push({
+                "face":`${faceindex}`,
+                "id":sortno,
+                "type":transformType,
+                "data":parse
+            })
+
+            console.log(parse.next)
+            transformType = parse.next >> 6;
+            argumentIndex = parse.next & 0b00111111;
+            sortno++;
         }
-        const parser = MAIN.transform_parsers[transformType]
-        const parse = parser.parse(transformBuf)
-
-        console.log("readtransforms> parse:", parse)
-        id2transformOutput[faceindex].push({
-            "face":`${faceindex}`,
-            "id":1,
-            "type":transformType,
-            "data":parse
-        })
-
-        // TODO continued
     }
 }
 MAIN.writeTransformsAndRender = (id2transform) => {
@@ -314,6 +320,10 @@ MAIN.writeTransformsAndRender = (id2transform) => {
             console.log(`T pos=${index} offset=${offset}, x=${x}, y=${y} value=${hexstr}`)
         }
     }
+
+    // Enable
+    imageData[getByteOffset(0,0,0)] = 0xda
+    imageData[getByteOffset(0,0,1)] = 0x67
 
     MAIN.renderImage()
 }

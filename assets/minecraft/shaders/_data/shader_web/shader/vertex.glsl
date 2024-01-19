@@ -43,6 +43,7 @@ uniform sampler2D Sampler0;
 // Util
 #define FLAG_DIR_RIGHT (1)
 #define FLAG_DIR_BOT (2)
+#define MASK_DIR (3)
 #define DIR_TOPLEFT (0)
 #define DIR_TOPRIGHT (1)
 #define DIR_BOTLEFT (2)
@@ -265,6 +266,7 @@ void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB)
     int dirId                   = getDirId(vertId);
     bool isSecondary            = isSecondaryLayer(vertId);
     float perpLenPixels         = float(getPerpendicularLength(faceId, isAlex));
+    int asymSpecialMode         = dataG & MASK_TTD_asymSpecialMode;
 
     float directionMod = 1.0;
     if (isNegativeOffset) {
@@ -288,7 +290,7 @@ void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB)
         float layerExtention = snapDirection * distanceToOtherLayer;
         NewPosition += pixelNormal() * layerExtention;
     }
-    NewPosition += pixelNormal() * offset * pixelSize * directionMod;
+    NewPosition += pixelNormal() * offset * (0.5 * pixelSize) * directionMod;
 
     const int[8] corners1 = int[8](0, 2, 0, 1, 2, 0, 3, 2);
     const int[8] corners2 = int[8](1, 3, 3, 2, 3, 1, 1, 0);
@@ -303,10 +305,9 @@ void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB)
     if (cornerId == corner1 || cornerId == corner2) {
         if (!isAsymSpecial) {
             float asymDisplacement = float(dataG & MASK_TTD_asymDisplacement);
-            asymDelta = pixelSize * asymDisplacement * asymmetricDirectionMod;
+            asymDelta = (0.5 * pixelSize) * asymDisplacement * asymmetricDirectionMod;
 
         } else {
-            int asymSpecialMode = dataG & MASK_TTD_asymSpecialMode;
             switch(asymSpecialMode) {
                 case ASYM_SPECIAL_MODE_flipOuter:
                     asymDelta = 1.0 * pixelSize * AS_FLIP;
@@ -321,13 +322,19 @@ void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB)
     NewPosition += pixelNormal() * asymDelta;
 
     // Automatic Clipping
-    bool isXaxis = asymEdge == ASYM_EDGE_left || asymEdge == ASYM_EDGE_right;
-    float scrollMod = (asymEdge == ASYM_EDGE_bot || asymEdge == ASYM_EDGE_left) ? 1.0 : -1.0;
     if (isAsymSpecial) {
-        int asymSpecialMode = dataG & MASK_TTD_asymSpecialMode;
         float asymDeltaAbs = abs(asymDelta);
         float scale = 1.0;
         float scroll = 0.0;
+
+        bool isXaxis = asymEdge == ASYM_EDGE_left || asymEdge == ASYM_EDGE_right;
+        float scrollMod = (asymEdge == ASYM_EDGE_bot || asymEdge == ASYM_EDGE_left) ? 1.0 : -1.0;
+
+        // If bottom face flip axis
+        if (dirId == 3) {
+            scrollMod *= -1.0;
+        }
+
         switch(asymSpecialMode) {
             case ASYM_SPECIAL_MODE_flipOuter:
                 scale = asymDeltaAbs * pixelNormalLength() * (0.5 / PIXELFACTOR);
@@ -344,15 +351,9 @@ void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB)
         if (isXaxis) {
             ClipScale.x *= scale;
             ClipScroll.x -= scroll;
-
-            // DEBUG
-            SnapY = true;
         } else {
             ClipScale.y *= scale;
             ClipScroll.y -= scroll;
-
-            // DEBUG
-            SnapX = true;
         }
         wx_vertexColor = colorFromInt(asymEdge);
     }
