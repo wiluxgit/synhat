@@ -213,9 +213,14 @@
                   </div>
 
                   <div x-data="{
-                    _mirrored_x: undefined,
-                    _mirrored_y: undefined,
+                    _mirrored_x: undefined, _mirrored_y: undefined,
                     _left: undefined, _top: undefined, _right: undefined, _bottom: undefined,
+                    _drag_startX: undefined,
+                    _drag_startY: undefined,
+                    _drag_start_uv_x_min: undefined,
+                    _drag_start_uv_x_max: undefined,
+                    _drag_start_uv_y_min: undefined,
+                    _drag_start_uv_y_max: undefined,
                   }" x-init='
                     const fixBounds = () => {
                       let corner1_X = (MAIN.id2uvs[item.face][0][0] + item.data.uv_x_min)
@@ -264,18 +269,67 @@
                       item.data.uv_y_max = 0
                     '>
 
-                    <div style="display:block; height: 100%; width: 100%; padding: 5px; background-color: #666666;">
+                    <div style="display:block; height: 100%; width: 100%; padding: 1px; background-color: #666666;">
                       <div class="FaceSelectFixedResolution">
                         <canvas id="canvasUVPreview" width="64" height="64">
                         </canvas>
                         <div id="winUVPreviewOverlay">
-                          <div class="UVPreviewOverlayItem" x-bind:style="`
-                            position: absolute;
-                            left:   calc(var(--face-select-scale) * ${_left});
-                            top:    calc(var(--face-select-scale) * ${_top});
-                            right:  calc(var(--face-select-scale) * ${_right});
-                            bottom: calc(var(--face-select-scale) * ${_bottom});
-                          `"
+                          <div class="UVPreviewOverlayItem"
+                            x-bind:style='`
+                              position: absolute;
+                              left:   calc(var(--face-select-scale) * ${_left});
+                              top:    calc(var(--face-select-scale) * ${_top});
+                              right:  calc(var(--face-select-scale) * ${_right});
+                              bottom: calc(var(--face-select-scale) * ${_bottom});
+                            `'
+                            x-on:mousedown='
+                              const e = $event
+                              e.preventDefault()
+
+                              _drag_startX = e.clientX
+                              _drag_startY = e.clientY
+                              _drag_start_uv_x_min = item.data.uv_x_min
+                              _drag_start_uv_x_max = item.data.uv_x_max
+                              _drag_start_uv_y_min = _uv_y_min
+                              _drag_start_uv_y_max = item.data.uv_y_max
+
+                              const scale = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--face-select-scale"))
+
+                              document.onmousemove = (e) => {
+                                const mvX = 0 | ((e.clientX - _drag_startX) / scale)
+                                const mvY = 0 | ((e.clientY - _drag_startY) / scale)
+
+                                let newXMin = (_drag_start_uv_x_min + mvX);
+                                let newXMax = (_drag_start_uv_x_max + mvX);
+                                let newYMin = (_drag_start_uv_y_min + mvY);
+                                let newYMax = (_drag_start_uv_y_max + mvY);
+
+                                if ((newXMin < 0 && newXMax < 0) || (newXMin > 64 && newXMax > 64)) {
+                                  newXMin = (newXMin % 64 + 64) % 64
+                                  newXMax = (newXMax % 64 + 64) % 64
+                                }
+                                if ((newYMin < 0 && newYMax < 0) || (newYMin > 64 && newYMax > 64)) {
+                                  newYMin = (newYMin % 64 + 64) % 64
+                                  newYMax = (newYMax % 64 + 64) % 64
+                                }
+
+                                //console.log({mvX:mvX, mvY:mvY, scale:scale, newXMin:newXMin, newXMax:newXMax, newYMin:newYMin, newYMax:newYMax})
+
+                                if (0 <= newYMin && newYMin <= 64 && 0 <= newXMax && newXMax <= 64) {
+                                  item.data.uv_x_min = newXMin
+                                  item.data.uv_x_max = newXMax
+                                }
+                                if (0 <= newYMin && newYMin <= 64 && 0 <= newYMax && newYMax <= 64) {
+                                  _uv_y_min = newYMin
+                                  item.data.uv_y_max = newYMax
+                                }
+                              }
+
+                              document.onmouseup = () => {
+                                document.onmousemove = null
+                                document.onmouseup = null
+                              }
+                            '
                           >
                             <img src="assets/arrow.png" x-bind:style="`
                               height: 100%;

@@ -491,13 +491,13 @@ MAIN.MakeExprToCreate3x2BitsTwoWayBinding = (fullvalue, bit01, bit23, bit45) => 
     const lsbyte = 0b00000011
     const bitchange = (value) => {
         if (typeof ${fullvalue} !== 'undefined') {
-            console.log("updated bitarr=", ${bit01}, ${bit23}, ${bit45})
+            //console.log("updated bitarr=", ${bit01}, ${bit23}, ${bit45})
             ${fullvalue} = (${bit01} << 4) | (${bit23} << 2) | (${bit45} << 0)
         }
     }
     $watch(\"${fullvalue}\", (value) => {
         if (typeof ${fullvalue} !== 'undefined') {
-            console.log("updated fullvalue=", ${fullvalue})
+            //console.log("updated fullvalue=", ${fullvalue})
             ${bit01} = lsbyte & (${fullvalue} >> 4)
             ${bit23} = lsbyte & (${fullvalue} >> 2)
             ${bit45} = lsbyte & (${fullvalue} >> 0)
