@@ -196,6 +196,9 @@ MAIN.downloadCanvas = () => {
 }
 
 MAIN.readtransforms = (id2transformOutput) => {
+    // Wipe all transforms
+    [...Array(72).keys()].map((i) => id2transformOutput[i] = [])
+    
     faceId2typeAndOffset = {}
     // read lookup tables
     for (const index of [...Array(72).keys()]) {
@@ -242,7 +245,6 @@ MAIN.readtransforms = (id2transformOutput) => {
                 "data":parse
             })
 
-            console.log(parse.next)
             transformType = parse.next >> 6;
             argumentIndex = parse.next & 0b00111111;
             sortno++;

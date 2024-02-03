@@ -4,7 +4,8 @@
 uniform sampler2D Sampler0;
 
 // how long to stretch along normal to simulate 90 deg face
-#define AS_FLIP (32.0)
+#define AS_FLIP (128.0)
+
 
 // How much bigger the second layer is
 #define OVERLAYSCALE (1.125)
