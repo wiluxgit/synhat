@@ -1,13 +1,19 @@
 import json
 from sort_table import xsort
-import sys
+
+from uuid import UUID
+import requests
 import re
 
 def run():
     inPath = "__master_models_table.json"
 
-    trusted = extractUUIDFromRankdump(open("temp/trusted.txt").read(), "T")
-    devoted = extractUUIDFromRankdump(open("temp/devoted.txt").read(), "D")
+    trusted = NEWextractUUIDFromRankdump(open("temp/NEW-trusted.txt").read(), "T")
+    devoted = NEWextractUUIDFromRankdump(open("temp/NEW-devoted.txt").read(), "D")
+    #trusted = extractUUIDFromRankdump(open("temp/trusted.txt").read(), "T")
+    #devoted = extractUUIDFromRankdump(open("temp/devoted.txt").read(), "D")
+
+    raise NotImplementedError
     dumpUUIDs = trusted | devoted
 
     with open(inPath,"r") as inFile:
@@ -47,6 +53,19 @@ def run():
 
     xsort(file = outPath)
 
+def NEWextractUUIDFromRankdump(filecontent, rank):
+    matches = re.findall(r"(?<=> )(\S+)", filecontent, flags=re.MULTILINE)
+    uuids = {}
+    for username in matches:
+        try:
+            req = requests.get(f"https://api.mojang.com/users/profiles/minecraft/{username}")
+            response = json.loads(req.content)
+            uuid = str(UUID(hex=response["id"]))
+        except Exception as e:
+            print(f"User {username} not found on mojang servers: GOT {req} ({response})")
+            continue
+        uuids[uuid] = {"rank":rank, "name":username}
+    return uuids
 
 def extractUUIDFromRankdump(str, rank):
     mx = re.split(r"\[.*\]    ", str)
