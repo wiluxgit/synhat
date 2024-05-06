@@ -5,32 +5,33 @@ This is the github for the synhat resource pack
 This installation guide is for the vanilla launcher but this will work for any launcher as long as you find the JMV arguments.
 
 **1**
-Download `synhat.jar` <https://cdn.discordapp.com/attachments/514367258244415488/917842669126971452/synhat.jar>
+Download `synhat.jar` <https://mega.nz/file/9QBUhKha#qj4CSHmR2Dt6nGZZEXAhIsCpoD5YVpVbxFTOvJpBfQ0>
 
 **2**
 Go into the minecraft launcher*, select the installation(s) you want synhat for and open its location
-![enter image description here](https://cdn.discordapp.com/attachments/519088004812505088/917835683685609523/unknown.png)
+![image](https://github.com/wiluxgit/synhat/assets/70565775/9b3e210d-0212-4b0d-8dc2-b1a149970a01)
 
 **3**
 Paste `synhat.jar` in the folder
-![enter image description here](https://media.discordapp.net/attachments/519088004812505088/917836352450621450/unknown.png)
+![image](https://github.com/wiluxgit/synhat/assets/70565775/2220a1b4-363c-4a9f-b7b5-dc3337b836cd)
 
 **4**
 Edit the installation(s) you want synhat on
-![enter image description here](https://cdn.discordapp.com/attachments/519088004812505088/917836609997664286/unknown.png)
+![image](https://github.com/wiluxgit/synhat/assets/70565775/10f4c1e8-c75b-4daa-8e5a-bb4eebe5dcc3)
 
 **5**
 Open the `More Options` tab
-![enter image description here](https://media.discordapp.net/attachments/519088004812505088/917837115025391636/unknown.png)
+![image](https://github.com/wiluxgit/synhat/assets/70565775/8aa02756-d1e0-44da-9ad5-8b8491d580d7)
 
 **6**
 Edit the `JVM arguments` field and add ` -javaagent:synhat.jar` at the end it (don't forget the space)
-![enter image description here](https://media.discordapp.net/attachments/519088004812505088/917837559059591229/unknown.png)
+![image](https://github.com/wiluxgit/synhat/assets/70565775/e802c950-b8ca-4c4d-aade-d94af5e39b44)
 
 **7**
 Start **THAT MINECRAFT INSTALLATION** (in this case snap), a synhat window should then appear and download the latest version
-![enter image description here](https://cdn.discordapp.com/attachments/519088004812505088/917837993295880213/unknown.png)
+![image](https://github.com/wiluxgit/synhat/assets/70565775/48414b0c-c96a-4a34-8cdb-1b27bc661064)
 
 **8**
 Wait until minecraft started, synhat should now be in the resourcepack list
-![enter image description here](https://cdn.discordapp.com/attachments/458986139769110539/1147950570993369149/image.png)
+![image](https://github.com/wiluxgit/synhat/assets/70565775/1b4b3ce2-82f3-48d7-a8dc-0a05d3d4d0a2)
+
