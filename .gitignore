@@ -1,4 +1,5 @@
 *.zip
 **/__pycache__/*
-assets/minecraft/shaders/_data/shader_web/node_modules/*
+.vscode/settings.json
+assets/minecraft/shaders/_data/shader_web/node_modules
 .github/workflows/scripts/temp/*
