@@ -1,7 +1,15 @@
 <head>
+  <meta property="og:title" content="Your Fancy Link Title Here" />
+  <meta property="og:description" content="A short description of what the link is about." />
+  <meta property="og:image" content="https://example.com/your-image.jpg" />
+  <meta property="og:url" content="https://example.com/your-page-url" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Your Website Name" />
+
   <title>Look at this  graph</title>
   <link rel="stylesheet" href="web_editor.css">
 </head>
+
 <body>
   <div x-data='{
     CONST:{
@@ -13,7 +21,8 @@
       uv_crop_slider_min: 0,
     },
     selectedId: 0,
-    id2transform: MAIN.newDefaultTransformDictionary()
+    id2transform: MAIN.newDefaultTransformDictionary(),
+    showDebugInformation: true
   }'
   x-init='
     $watch("id2transform",
@@ -21,25 +30,42 @@
     )
   '>
     <div id="winEditorGrid">
+      <div id="winHeader">
+        Synhat Extmodel Generator
+      </div>
+
       <div id="winGlobal">
-        <input type="file" id="uploadInputImage" name="uploadInputImage" accept="image/*"
+        <label for="uploadInputImage" class="button">
+          Upload Skin
+        </label>
+        <input type="file" class="hidden" id="uploadInputImage" name="uploadInputImage" accept="image/*"
           x-on:change='(e) => MAIN.changedUploadImage(id2transform, e)'
           x-init='MAIN.loadImage(id2transform)'>
         </input>
-        <br><button type="button" x-on:click='MAIN.downloadCanvas()'>Download Skin</button>
         <br>
-        <br><button type="button" x-on:click='alert("TODO")'>Upload Model Json</button>
-        <br><button type="button" x-on:click='alert("TODO")'>Download Model Json</button>
+        <label for="uploadInputImage" class="button">
+          Upload Extmodel Replacement To Active Texture
+        </label>
         <br>
-        <br><button type="button" x-on:click='
+        <label for="uploadInputImage" class="button">
+          Upload Texture Replacement To Active Extmodel
+        </label>
+
+        <br><br>
+        <button type="button" x-on:click='MAIN.downloadCanvas()'>Download Extmodel Skin</button>
+
+        <br><br>
+        <button type="button" x-on:click='
           selectedId = 0
           id2transform = MAIN.newDefaultTransformDictionary()
           MAIN.loadImage(id2transform)
         '>Reset</button>
-      </div>
 
-      <div id="winHeader">
-        Header
+        <br><br>
+        <label for="showDebugInformationCjeckbox">
+          <input type="checkbox" id="showDebugInformationCjeckbox" x-model="showDebugInformation">
+          Show debug information
+        </label>
       </div>
 
       <div id="winCamera">
@@ -109,8 +135,10 @@
               </div>
 
               <br>
-              <textarea class="debug" x-html='JSON.stringify(item, null, 2)'></textarea>
-              <br><br>
+              <template x-if="showDebugInformation">
+                <textarea class="debug" x-html='JSON.stringify(item, null, 2)'></textarea>
+                <br><br>
+              </template>
 
               <!--Displacement DOM-->
               <template x-if='item.type == MAIN.enums.transform_type.displacement'>
@@ -387,7 +415,9 @@
             </div>
           </template>
 
-          <textarea class="debug" x-html='JSON.stringify(id2transform, null, 2)'></textarea>
+          <template x-if="showDebugInformation">
+            <textarea class="debug" x-html='JSON.stringify(id2transform, null, 2)'></textarea>
+          </template>
         </div>
       </div>
     </div>
