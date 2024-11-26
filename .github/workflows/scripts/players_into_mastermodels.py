@@ -15,20 +15,18 @@ def run():
         plushies = [x for x in fileData["models"] if x["data"]>0 and x["item"] == "minecraft:clock"]
 
         nextAvailableData = max([x["data"] for x in plushies])+1
-        olduuids = [x["uuid"] for x in plushies]
 
         for puuid,newData in dumpUUIDs.items():
             newRank = newData["rank"]
-            newName = newData["name"]
 
             maybeOldData = [x for x in plushies if x["uuid"] == puuid]
             if len(maybeOldData) == 0:
-                print(f"New    {newName} {newRank}")
+                print(f"New    {puuid} {newRank}")
                 newP = {
                     "item": "minecraft:clock",
                     "data": nextAvailableData,
                     "model": f"synhat/player/player/{puuid}",
-                    "displayName": f"{newName}",
+                    "displayName": f"",
                     "uuid": f"{puuid}",
                     "playerRank": f"{newRank}"
                 }
@@ -38,7 +36,7 @@ def run():
                 oldData = maybeOldData[0]
                 oldRank = oldData["playerRank"]
                 if oldRank != newRank:
-                    print(f"Rankup {newName} {oldRank} -> {newRank}")
+                    print(f"Rankup {puuid} {oldRank} -> {newRank}")
                     oldData["playerRank"] = newRank
 
     outPath = inPath #"temp/new_model_.json"
@@ -49,14 +47,12 @@ def run():
 
 
 def extractUUIDFromRankdump(str, rank):
-    mx = re.split(r"\[.*\]    ", str)
     uuids = {}
-    for x in mx:
-        match = re.search(r"([0-9a-f\-]{36,}\/.*)", x)
+    for match in re.finditer(r"([0-9a-f\-]{36,})", str):
         try:
             mtch = match.group(0)
-            [uuid, name] = mtch.split("/")
-            uuids[uuid] = {"rank":rank, "name":name}
+            uuid = mtch
+            uuids[uuid] = {"rank":rank}
         except:""
     return uuids
 

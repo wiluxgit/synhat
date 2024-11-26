@@ -9,7 +9,7 @@ from sort_table import xsort
 
 import sys
 
-actuallyDoRealRequests = False
+actuallyDoRealRequests = True
 
 def run(minData = 0, maxData = 1):
     fpath = "__master_models_table.json"
@@ -92,6 +92,7 @@ def getProfileData(uuid):
     return(userName, skinUrl, skinType)
 
 def downloadSite(url):
+    print(f"begin download \"{url}\"")
     if not actuallyDoRealRequests:
         return """{
   "id" : "133f9bff47f54277af2741e5eaab5902",
@@ -109,6 +110,7 @@ def downloadSite(url):
         allow_redirects=True,
         headers=headers,
     )
+    print(f"finish download \"{url}\"")
     return get.content
 
 def fixImage(img):
