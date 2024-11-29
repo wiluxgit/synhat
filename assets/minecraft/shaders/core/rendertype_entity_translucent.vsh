@@ -4,6 +4,8 @@
 #define out out highp
 #else // Minecraft
 #extension GL_EXT_gpu_shader4 : enable
+#moj_import <light.glsl>
+#moj_import <fog.glsl>
 #endif
 
 // how long to stretch along normal to simulate 90 deg face
@@ -127,10 +129,27 @@ uniform int FogShape;
 
 uniform vec3 Light0_Direction;
 uniform vec3 Light1_Direction;
+
+// Fake Shading
+out vec3 wx_passLight0_Direction;
+out vec3 wx_passLight1_Direction;
+out vec3 wx_passModelViewPos;
+out vec4 wx_passVertexColor;
+out vec3 wx_invMatrix0;
+out vec3 wx_invMatrix1;
+out vec3 wx_invMatrix2;
+
+// Vanilla output
+out float vertexDistance;
+out vec4 vertexColor;
+out vec4 lightMapColor;
+out vec4 overlayColor;
+out vec2 texCoord0;
+out vec4 normal;
 #endif
 
 // Custom out variables
-out vec2 texCoord0;
+//out vec2 texCoord0;
 out vec4 wx_vertexColor;
 out float wx_isEdited;
 out vec2 wx_clipMin;
@@ -155,7 +174,7 @@ void main() {
     wx_vertexColor = colorFromInt(vertId);
     //</DEBUG>
 
-    wx_isEdited = 1.0;
+    wx_isEdited = 0.0;
     NewUV = UV0;
     NewPosition = Position;
     ClipScroll = vec2(0.0, 0.0);
@@ -266,6 +285,27 @@ void main() {
             }
         }
     }
+
+    // Directional Lighting Hack
+#ifdef BONE_TEXTURE // ThreeJS
+#else // Minecraft
+    mat3 invMatrix = inverse(mat3(ProjMat)) * inverse(mat3(ModelViewMat));
+    wx_passLight0_Direction = Light0_Direction;
+    wx_passLight1_Direction = Light1_Direction;
+    wx_passModelViewPos = (ModelViewMat * vec4(NewPosition, 1.0)).xyz;
+    wx_passVertexColor = Color;
+    wx_invMatrix0 = invMatrix[0];
+    wx_invMatrix1 = invMatrix[1];
+    wx_invMatrix2 = invMatrix[2];
+
+    vertexDistance = fog_distance(ModelViewMat, IViewRotMat * Position, FogShape);
+    vertexColor = minecraft_mix_light(Light0_Direction, Light1_Direction, Normal, Color);
+    lightMapColor = texelFetch(Sampler2, UV2 / 16, 0);
+    overlayColor = texelFetch(Sampler1, UV1, 0);
+    texCoord0 = UV0;
+    normal = ProjMat * ModelViewMat * vec4(Normal, 0.0);
+#endif
+
     texCoord0 = NewUV;
     gl_Position = ProjMat * ModelViewMat * vec4(NewPosition, 1.0);
     return;
