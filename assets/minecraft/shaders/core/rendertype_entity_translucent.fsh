@@ -32,23 +32,24 @@ void main() {
         }
 
         if (texCoord0.x < wx_clipMin.x || texCoord0.x > wx_clipMax.x) {
-            discard;
+            //discard;
             fragColor = vec4(0.5, 0.5, 0.5, 1.0) - vec4(checkerSmall, checkerSmall, checkerSmall, 0) / 3.0 ;
-            return;
+            //return;
         }
         if (texCoord0.y < wx_clipMin.y || texCoord0.y > wx_clipMax.y) {
-            discard;
+            //discard;
             fragColor = vec4(0.66, 0.66, 0.66, 1.0) - vec4(checkerSmall, checkerSmall, checkerSmall, 0) / 3.0;
-            return;
+            //return;
         }
 
         if (color.a < 0.1) {
-            discard;
+            //discard;
             fragColor = discardColor;
         } else {
             fragColor = color;
             //fragColor = (discardColor + color) / 2.0;
         }
+        fragColor = discardColor;
     } else {
         vec4 color = texture2D(Sampler0, texCoord0);
         if (color.a < 0.1) {

@@ -2,7 +2,7 @@
 #ifdef BONE_TEXTURE // ThreeJS
 #define in in highp
 #define out out highp
-#else
+#else // Minecraft
 #extension GL_EXT_gpu_shader4 : enable
 #endif
 
@@ -61,14 +61,11 @@ int getFaceOperationEntry(int faceId);
 vec4 getFaceOperationPixel(int faceId);
 vec4 getTransformArguments(int activeTransformIndex);
 
-// hard coded face properties
+// hard coded model properties
 int getPerpendicularLength(int faceId, bool isAlex);
 bool isSecondaryLayer(int vertId);
 void initVanillaUV(int faceId, bool isAlex);
 void initVanillaUV2(int faceId, bool isAlex);
-vec2 vanillaMinUV;
-vec2 vanillaMaxUV;
-vec2 vanillaCenterUV;
 
 // bit data helpers
 int extractCombineBits6and7(int r, int g, int b);
@@ -76,16 +73,36 @@ int extractCombineBits6and7(int r, int g, int b);
 //DEBUG
 vec4 colorFromInt(int i);
 
+// Apply user transforms
 void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB);
 void applyUVCrop      (bool isAlex, int vertId, int dataR, int dataG, int dataB);
 void applyUVOffset    (bool isAlex, int vertId, int dataR, int dataG, int dataB);
 void applyPostFlags   (bool isAlex, int vertId, int dataR, int dataG, int dataB);
 
+// Retrieving positions
 vec3 pixelNormal();
 float pixelNormalLength();
 
+// global temp
+vec3 NewPosition;
+vec2 NewFaceCenter;
+vec2 NewUV;
+vec2 ClipScroll;
+vec2 ClipScale;
+float CropEdgeTop;
+float CropEdgeBot;
+float CropEdgeLeft;
+float CropEdgeRight;
+bool SnapX;
+bool SnapY;
+bool MirrorX;
+bool MirrorY;
+vec2 vanillaMinUV;
+vec2 vanillaMaxUV;
+vec2 vanillaCenterUV;
+
+// inputs
 #ifdef BONE_TEXTURE // ThreeJS
-#define BROWSER
 mat4 ModelViewMat;
 mat4 ProjMat;
 vec3 Position;
@@ -112,21 +129,6 @@ uniform vec3 Light0_Direction;
 uniform vec3 Light1_Direction;
 #endif
 
-// global temp
-vec3 NewPosition;
-vec2 NewFaceCenter;
-vec2 NewUV;
-vec2 ClipScroll;
-vec2 ClipScale;
-float CropEdgeTop;
-float CropEdgeBot;
-float CropEdgeLeft;
-float CropEdgeRight;
-bool SnapX;
-bool SnapY;
-bool MirrorX;
-bool MirrorY;
-
 // Custom out variables
 out vec2 texCoord0;
 out vec4 wx_vertexColor;
@@ -136,7 +138,7 @@ out vec2 wx_clipMax;
 
 void main() {
 
-#ifdef BROWSER
+#ifdef BONE_TEXTURE // ThreeJS
     // ThreeJS fix to convert all names to the same as minecraft
     ModelViewMat = viewMatrix;
     ProjMat = projectionMatrix;
@@ -150,9 +152,10 @@ void main() {
     float vertIdx = float(vertId)/400.0;
     float vertIdy = float((vertId/4)%6)/6.0;
     wx_vertexColor = vec4(vertIdx, vertIdy, 0, 1);
+    wx_vertexColor = colorFromInt(vertId);
     //</DEBUG>
 
-    wx_isEdited = 0.0;
+    wx_isEdited = 1.0;
     NewUV = UV0;
     NewPosition = Position;
     ClipScroll = vec2(0.0, 0.0);
@@ -268,6 +271,12 @@ void main() {
     return;
 }
 
+// ---------------------------------------------------------------------------------
+// abstract: applyDisplacement
+// writes:
+//  NewPosition
+//  ClipScale (for asym special)
+// ---------------------------------------------------------------------------------
 void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
     bool isNegativeOffset 		= (dataR & FLAG_TTD_sign) != 0;
     bool isSnap				    = (dataR & FLAG_TTD_snap) != 0;
@@ -374,6 +383,19 @@ void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB)
         wx_vertexColor = colorFromInt(asymEdge);
     }
 }
+
+// ---------------------------------------------------------------------------------
+// abstract: applyUVCrop
+// writes:
+//  CropEdgeTop
+//  CropEdgeBot
+//  CropEdgeLeft
+//  CropEdgeRight
+//  SnapX
+//  SnapY
+//  MirrorX
+//  MirrorY
+// ---------------------------------------------------------------------------------
 void applyUVCrop(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
     CropEdgeTop += float(dataR & 15); // 0b00001111
     CropEdgeBot += float(dataR >> 4);
@@ -385,6 +407,13 @@ void applyUVCrop(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
     MirrorY = (dataB & FLAG_TUC_MIRROR_Y) != 0;
     return;
 }
+
+// ---------------------------------------------------------------------------------
+// abstract: applyUVOffset
+// writes:
+//  NewUV
+//  NewFaceCenter
+// ---------------------------------------------------------------------------------
 void applyUVOffset(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
     int xmax = dataR & 63; // 0b00111111
     int xmin = dataG & 63;
@@ -412,12 +441,22 @@ void applyUVOffset(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
     NewFaceCenter += (vec2(float(xmax+xmin), float(ymax+ymin)) / 64.0) / 2.0;
 
     // Debug
-    wx_vertexColor = colorFromInt(cornerId);
+    //wx_vertexColor = colorFromInt(cornerId);
     return;
 }
+
+// ---------------------------------------------------------------------------------
+// abstract: apply post flags
+// ---------------------------------------------------------------------------------
 void applyPostFlags(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
     return;
 }
+
+// ---------------------------------------------------------------------------------
+// abstract:
+//  Calculate the magnitude and direction for a 1pixel vector towards the
+//  normal of the active face
+// ---------------------------------------------------------------------------------
 vec3 pixelNormal() {
     return Normal * PIXELFACTOR;
 }
@@ -425,7 +464,9 @@ float pixelNormalLength() {
     return length(pixelNormal());
 }
 
-
+// ---------------------------------------------------------------------------------
+// abstract: various utilities for understanding properties of vertex ids
+// ---------------------------------------------------------------------------------
 bool isSecondaryLayer(int vertId) {
     return vertId >= 36*4;
 }
@@ -438,6 +479,10 @@ int getDirId(int vertId) {
 int getCornerId(int vertId) {
     return vertId % 4;
 }
+
+// ---------------------------------------------------------------------------------
+// abstract: get the index for the transform parameters
+// ---------------------------------------------------------------------------------
 vec4 getFaceOperationPixel(int faceId) {
     int F_index = faceId / 4;
     int temp = 2 + F_index;
@@ -456,6 +501,10 @@ int getFaceOperationEntry(int faceId) {
         case 3: return int(rgba.a+0.1);
     }
 }
+
+// ---------------------------------------------------------------------------------
+// abstract: get the transform parameters as a vec4
+// ---------------------------------------------------------------------------------
 vec4 getTransformArguments(int activeTransformIndex) {
     int temp = (8*2+4) + activeTransformIndex;
     int x = temp % 8;
@@ -463,31 +512,38 @@ vec4 getTransformArguments(int activeTransformIndex) {
     return texelFetch(Sampler0, ivec2(x, y), 0)*256.0;
 }
 
-// bit data helpers
+// ---------------------------------------------------------------------------------
+// abstract: bit data helper
+// ---------------------------------------------------------------------------------
 int extractCombineBits6and7(int r, int g, int b) {
     int mask = 192; // 0b11000000;
     return ((r & mask) >> 2) | ((g & mask) >> 4) | ((b & mask) >> 6);
 }
 
-// Debug
+// ---------------------------------------------------------------------------------
+// abstract: assigns the modulus of a number to a color
+// ---------------------------------------------------------------------------------
 vec4 colorFromInt(int i) {
     if (i<0) {
-        return vec4(0.2,0.2,0.2,1);
+        return vec4(0.2,0.2,0.2,1); // dark gray
     }
 
     switch (i%8) {
-        case 0: return vec4(1,0,0,1);
-        case 1: return vec4(0,1,0,1);
-        case 2: return vec4(0,0,1,1);
-        case 3: return vec4(1,1,0,1);
-        case 4: return vec4(0,1,1,1);
-        case 5: return vec4(1,0,1,1);
-        case 6: return vec4(1,1,1,1);
-        case 7: return vec4(0,0,0,1);
+        case 0: return vec4(1,0,0,1); // red
+        case 1: return vec4(0,1,0,1); // green
+        case 2: return vec4(0,0,1,1); // blue
+        case 3: return vec4(1,1,0,1); // yellow
+        case 4: return vec4(0,1,1,1); // cyan
+        case 5: return vec4(1,0,1,1); // magenta
+        case 6: return vec4(1,1,1,1); // white
+        case 7: return vec4(0,0,0,1); // black
     }
 }
 
-// retuns the length (in pixels) to the back face for a given face
+// ---------------------------------------------------------------------------------
+// abstract:
+//  retuns the length (in pixels) to the back face for a given face
+// ---------------------------------------------------------------------------------
 int getPerpendicularLength(int faceId, bool isAlex) {
     int facetype = faceId/6;
     int faceAxis = faceId%6;
@@ -526,354 +582,14 @@ int getPerpendicularLength(int faceId, bool isAlex) {
     }
 }
 
-int faceIdLookup(int dirid, int uvu, int uvv);
-int getMCVertID() {
-    int dirid;
-    int corner;
-
-    switch(gl_VertexID % 6){
-    case 0:
-    case 3:
-        corner = 0;
-        break;
-    case 2:
-    case 4:
-        corner = 2;
-        break;
-    case 1:
-        corner = 1;
-        break;
-    case 5:
-        corner = 3;
-        break;
-    }
-
-    if (Normal.x > 0.1 && Normal.y == 0.0 && Normal.z == 0.0) {
-        dirid = 0;
-    } else if (Normal.x < -0.1 && Normal.y == 0.0 && Normal.z == 0.0) {
-        dirid = 1;
-    } else if (Normal.x == 0.0 && Normal.y > 0.1 && Normal.z == 0.0) {
-        dirid = 2;
-    } else if (Normal.x == 0.0 && Normal.y < -0.1 && Normal.z == 0.0) {
-        dirid = 3;
-    } else if (Normal.x == 0.0 && Normal.y == 0.0 && Normal.z > 0.1) {
-        dirid = 4;
-    } else if (Normal.x == 0.0 && Normal.y == 0.0 && Normal.z < -0.1) {
-        dirid = 5;
-    }
-
-    int uvu = int(UV0.x*64.0 + 0.1);
-    int uvv = int(UV0.y*64.0 + 0.1);
-    int faceId = faceIdLookup(dirid, uvu, uvv);
-    return faceId*4 + corner;
-}
-
-int faceIdLookup(int dirid, int uvu, int uvv) {
-    switch(dirid){
-    case 0:
-        if ((uvu == 24) && (uvv == 8)) return 0;
-        if ((uvu == 16) && (uvv == 8)) return 0;
-        if ((uvu == 16) && (uvv == 16)) return 0;
-        if ((uvu == 24) && (uvv == 16)) return 0;
-        if ((uvu == 32) && (uvv == 20)) return 6;
-        if ((uvu == 28) && (uvv == 20)) return 6;
-        if ((uvu == 28) && (uvv == 32)) return 6;
-        if ((uvu == 32) && (uvv == 32)) return 6;
-        if ((uvu == 44) && (uvv == 52)) return 12;
-        if ((uvu == 40) && (uvv == 52)) return 12;
-        if ((uvu == 40) && (uvv == 64)) return 12;
-        if ((uvu == 44) && (uvv == 64)) return 12;
-        if ((uvu == 52) && (uvv == 20)) return 18;
-        if ((uvu == 48) && (uvv == 20)) return 18;
-        if ((uvu == 48) && (uvv == 32)) return 18;
-        if ((uvu == 52) && (uvv == 32)) return 18;
-        if ((uvu == 28) && (uvv == 52)) return 24;
-        if ((uvu == 24) && (uvv == 52)) return 24;
-        if ((uvu == 24) && (uvv == 64)) return 24;
-        if ((uvu == 28) && (uvv == 64)) return 24;
-        if ((uvu == 12) && (uvv == 20)) return 30;
-        if ((uvu == 8) && (uvv == 20)) return 30;
-        if ((uvu == 8) && (uvv == 32)) return 30;
-        if ((uvu == 12) && (uvv == 32)) return 30;
-        if ((uvu == 56) && (uvv == 8)) return 36;
-        if ((uvu == 48) && (uvv == 8)) return 36;
-        if ((uvu == 48) && (uvv == 16)) return 36;
-        if ((uvu == 56) && (uvv == 16)) return 36;
-        if ((uvu == 12) && (uvv == 36)) return 42;
-        if ((uvu == 8) && (uvv == 36)) return 42;
-        if ((uvu == 8) && (uvv == 48)) return 42;
-        if ((uvu == 12) && (uvv == 48)) return 42;
-        if ((uvu == 12) && (uvv == 52)) return 48;
-        if ((uvu == 8) && (uvv == 52)) return 48;
-        if ((uvu == 8) && (uvv == 64)) return 48;
-        if ((uvu == 12) && (uvv == 64)) return 48;
-        if ((uvu == 60) && (uvv == 52)) return 54;
-        if ((uvu == 56) && (uvv == 52)) return 54;
-        if ((uvu == 56) && (uvv == 64)) return 54;
-        if ((uvu == 60) && (uvv == 64)) return 54;
-        if ((uvu == 52) && (uvv == 36)) return 60;
-        if ((uvu == 48) && (uvv == 36)) return 60;
-        if ((uvu == 48) && (uvv == 48)) return 60;
-        if ((uvu == 52) && (uvv == 48)) return 60;
-        if ((uvu == 32) && (uvv == 36)) return 66;
-        if ((uvu == 28) && (uvv == 36)) return 66;
-        if ((uvu == 28) && (uvv == 48)) return 66;
-        if ((uvu == 32) && (uvv == 48)) return 66;
-        return -1;
-    case 1:
-        if ((uvu == 8) && (uvv == 8)) return 1;
-        if ((uvu == 0) && (uvv == 8)) return 1;
-        if ((uvu == 0) && (uvv == 16)) return 1;
-        if ((uvu == 8) && (uvv == 16)) return 1;
-        if ((uvu == 20) && (uvv == 20)) return 7;
-        if ((uvu == 16) && (uvv == 20)) return 7;
-        if ((uvu == 16) && (uvv == 32)) return 7;
-        if ((uvu == 20) && (uvv == 32)) return 7;
-        if ((uvu == 36) && (uvv == 52)) return 13;
-        if ((uvu == 32) && (uvv == 52)) return 13;
-        if ((uvu == 32) && (uvv == 64)) return 13;
-        if ((uvu == 36) && (uvv == 64)) return 13;
-        if ((uvu == 44) && (uvv == 20)) return 19;
-        if ((uvu == 40) && (uvv == 20)) return 19;
-        if ((uvu == 40) && (uvv == 32)) return 19;
-        if ((uvu == 44) && (uvv == 32)) return 19;
-        if ((uvu == 20) && (uvv == 52)) return 25;
-        if ((uvu == 16) && (uvv == 52)) return 25;
-        if ((uvu == 16) && (uvv == 64)) return 25;
-        if ((uvu == 20) && (uvv == 64)) return 25;
-        if ((uvu == 4) && (uvv == 20)) return 31;
-        if ((uvu == 0) && (uvv == 20)) return 31;
-        if ((uvu == 0) && (uvv == 32)) return 31;
-        if ((uvu == 4) && (uvv == 32)) return 31;
-        if ((uvu == 40) && (uvv == 8)) return 37;
-        if ((uvu == 32) && (uvv == 8)) return 37;
-        if ((uvu == 32) && (uvv == 16)) return 37;
-        if ((uvu == 40) && (uvv == 16)) return 37;
-        if ((uvu == 4) && (uvv == 36)) return 43;
-        if ((uvu == 0) && (uvv == 36)) return 43;
-        if ((uvu == 0) && (uvv == 48)) return 43;
-        if ((uvu == 4) && (uvv == 48)) return 43;
-        if ((uvu == 4) && (uvv == 52)) return 49;
-        if ((uvu == 0) && (uvv == 52)) return 49;
-        if ((uvu == 0) && (uvv == 64)) return 49;
-        if ((uvu == 4) && (uvv == 64)) return 49;
-        if ((uvu == 52) && (uvv == 52)) return 55;
-        if ((uvu == 48) && (uvv == 52)) return 55;
-        if ((uvu == 48) && (uvv == 64)) return 55;
-        if ((uvu == 52) && (uvv == 64)) return 55;
-        if ((uvu == 44) && (uvv == 36)) return 61;
-        if ((uvu == 40) && (uvv == 36)) return 61;
-        if ((uvu == 40) && (uvv == 48)) return 61;
-        if ((uvu == 44) && (uvv == 48)) return 61;
-        if ((uvu == 20) && (uvv == 36)) return 67;
-        if ((uvu == 16) && (uvv == 36)) return 67;
-        if ((uvu == 16) && (uvv == 48)) return 67;
-        if ((uvu == 20) && (uvv == 48)) return 67;
-        return -1;
-    case 2:
-        if ((uvu == 16) && (uvv == 0)) return 2;
-        if ((uvu == 8) && (uvv == 0)) return 2;
-        if ((uvu == 8) && (uvv == 8)) return 2;
-        if ((uvu == 16) && (uvv == 8)) return 2;
-        if ((uvu == 28) && (uvv == 16)) return 8;
-        if ((uvu == 20) && (uvv == 16)) return 8;
-        if ((uvu == 20) && (uvv == 20)) return 8;
-        if ((uvu == 28) && (uvv == 20)) return 8;
-        if ((uvu == 40) && (uvv == 48)) return 14;
-        if ((uvu == 36) && (uvv == 48)) return 14;
-        if ((uvu == 36) && (uvv == 52)) return 14;
-        if ((uvu == 40) && (uvv == 52)) return 14;
-        if ((uvu == 48) && (uvv == 16)) return 20;
-        if ((uvu == 44) && (uvv == 16)) return 20;
-        if ((uvu == 44) && (uvv == 20)) return 20;
-        if ((uvu == 48) && (uvv == 20)) return 20;
-        if ((uvu == 24) && (uvv == 48)) return 26;
-        if ((uvu == 20) && (uvv == 48)) return 26;
-        if ((uvu == 20) && (uvv == 52)) return 26;
-        if ((uvu == 24) && (uvv == 52)) return 26;
-        if ((uvu == 8) && (uvv == 16)) return 32;
-        if ((uvu == 4) && (uvv == 16)) return 32;
-        if ((uvu == 4) && (uvv == 20)) return 32;
-        if ((uvu == 8) && (uvv == 20)) return 32;
-        if ((uvu == 48) && (uvv == 0)) return 38;
-        if ((uvu == 40) && (uvv == 0)) return 38;
-        if ((uvu == 40) && (uvv == 8)) return 38;
-        if ((uvu == 48) && (uvv == 8)) return 38;
-        if ((uvu == 8) && (uvv == 32)) return 44;
-        if ((uvu == 4) && (uvv == 32)) return 44;
-        if ((uvu == 4) && (uvv == 36)) return 44;
-        if ((uvu == 8) && (uvv == 36)) return 44;
-        if ((uvu == 8) && (uvv == 48)) return 50;
-        if ((uvu == 4) && (uvv == 48)) return 50;
-        if ((uvu == 4) && (uvv == 52)) return 50;
-        if ((uvu == 8) && (uvv == 52)) return 50;
-        if ((uvu == 56) && (uvv == 48)) return 56;
-        if ((uvu == 52) && (uvv == 48)) return 56;
-        if ((uvu == 52) && (uvv == 52)) return 56;
-        if ((uvu == 56) && (uvv == 52)) return 56;
-        if ((uvu == 48) && (uvv == 32)) return 62;
-        if ((uvu == 44) && (uvv == 32)) return 62;
-        if ((uvu == 44) && (uvv == 36)) return 62;
-        if ((uvu == 48) && (uvv == 36)) return 62;
-        if ((uvu == 28) && (uvv == 32)) return 68;
-        if ((uvu == 20) && (uvv == 32)) return 68;
-        if ((uvu == 20) && (uvv == 36)) return 68;
-        if ((uvu == 28) && (uvv == 36)) return 68;
-        return -1;
-    case 3:
-        if ((uvu == 24) && (uvv == 8)) return 3;
-        if ((uvu == 16) && (uvv == 8)) return 3;
-        if ((uvu == 16) && (uvv == 0)) return 3;
-        if ((uvu == 24) && (uvv == 0)) return 3;
-        if ((uvu == 32) && (uvv == 20)) return 9;
-        if ((uvu == 28) && (uvv == 20)) return 9;
-        if ((uvu == 28) && (uvv == 16)) return 9;
-        if ((uvu == 36) && (uvv == 16)) return 9;
-        if ((uvu == 44) && (uvv == 52)) return 15;
-        if ((uvu == 40) && (uvv == 52)) return 15;
-        if ((uvu == 40) && (uvv == 48)) return 15;
-        if ((uvu == 44) && (uvv == 48)) return 15;
-        if ((uvu == 52) && (uvv == 20)) return 21;
-        if ((uvu == 48) && (uvv == 20)) return 21;
-        if ((uvu == 48) && (uvv == 16)) return 21;
-        if ((uvu == 52) && (uvv == 16)) return 21;
-        if ((uvu == 28) && (uvv == 52)) return 27;
-        if ((uvu == 24) && (uvv == 52)) return 27;
-        if ((uvu == 24) && (uvv == 48)) return 27;
-        if ((uvu == 28) && (uvv == 48)) return 27;
-        if ((uvu == 12) && (uvv == 20)) return 33;
-        if ((uvu == 8) && (uvv == 20)) return 33;
-        if ((uvu == 8) && (uvv == 16)) return 33;
-        if ((uvu == 12) && (uvv == 16)) return 33;
-        if ((uvu == 56) && (uvv == 8)) return 39;
-        if ((uvu == 48) && (uvv == 8)) return 39;
-        if ((uvu == 48) && (uvv == 0)) return 39;
-        if ((uvu == 56) && (uvv == 0)) return 39;
-        if ((uvu == 12) && (uvv == 36)) return 45;
-        if ((uvu == 8) && (uvv == 36)) return 45;
-        if ((uvu == 8) && (uvv == 32)) return 45;
-        if ((uvu == 12) && (uvv == 32)) return 45;
-        if ((uvu == 12) && (uvv == 52)) return 51;
-        if ((uvu == 8) && (uvv == 52)) return 51;
-        if ((uvu == 8) && (uvv == 48)) return 51;
-        if ((uvu == 12) && (uvv == 48)) return 51;
-        if ((uvu == 60) && (uvv == 52)) return 57;
-        if ((uvu == 56) && (uvv == 52)) return 57;
-        if ((uvu == 56) && (uvv == 48)) return 57;
-        if ((uvu == 60) && (uvv == 48)) return 57;
-        if ((uvu == 52) && (uvv == 36)) return 63;
-        if ((uvu == 48) && (uvv == 36)) return 63;
-        if ((uvu == 48) && (uvv == 32)) return 63;
-        if ((uvu == 52) && (uvv == 32)) return 63;
-        if ((uvu == 32) && (uvv == 36)) return 69;
-        if ((uvu == 28) && (uvv == 36)) return 69;
-        if ((uvu == 28) && (uvv == 32)) return 69;
-        if ((uvu == 36) && (uvv == 32)) return 69;
-        return -1;
-    case 4:
-        if ((uvu == 16) && (uvv == 8)) return 4;
-        if ((uvu == 8) && (uvv == 8)) return 4;
-        if ((uvu == 8) && (uvv == 16)) return 4;
-        if ((uvu == 16) && (uvv == 16)) return 4;
-        if ((uvu == 28) && (uvv == 20)) return 10;
-        if ((uvu == 20) && (uvv == 20)) return 10;
-        if ((uvu == 20) && (uvv == 32)) return 10;
-        if ((uvu == 28) && (uvv == 32)) return 10;
-        if ((uvu == 40) && (uvv == 52)) return 16;
-        if ((uvu == 36) && (uvv == 52)) return 16;
-        if ((uvu == 36) && (uvv == 64)) return 16;
-        if ((uvu == 40) && (uvv == 64)) return 16;
-        if ((uvu == 48) && (uvv == 20)) return 22;
-        if ((uvu == 44) && (uvv == 20)) return 22;
-        if ((uvu == 44) && (uvv == 32)) return 22;
-        if ((uvu == 48) && (uvv == 32)) return 22;
-        if ((uvu == 24) && (uvv == 52)) return 28;
-        if ((uvu == 20) && (uvv == 52)) return 28;
-        if ((uvu == 20) && (uvv == 64)) return 28;
-        if ((uvu == 24) && (uvv == 64)) return 28;
-        if ((uvu == 8) && (uvv == 20)) return 34;
-        if ((uvu == 4) && (uvv == 20)) return 34;
-        if ((uvu == 4) && (uvv == 32)) return 34;
-        if ((uvu == 8) && (uvv == 32)) return 34;
-        if ((uvu == 48) && (uvv == 8)) return 40;
-        if ((uvu == 40) && (uvv == 8)) return 40;
-        if ((uvu == 40) && (uvv == 16)) return 40;
-        if ((uvu == 48) && (uvv == 16)) return 40;
-        if ((uvu == 8) && (uvv == 36)) return 46;
-        if ((uvu == 4) && (uvv == 36)) return 46;
-        if ((uvu == 4) && (uvv == 48)) return 46;
-        if ((uvu == 8) && (uvv == 48)) return 46;
-        if ((uvu == 8) && (uvv == 52)) return 52;
-        if ((uvu == 4) && (uvv == 52)) return 52;
-        if ((uvu == 4) && (uvv == 64)) return 52;
-        if ((uvu == 8) && (uvv == 64)) return 52;
-        if ((uvu == 56) && (uvv == 52)) return 58;
-        if ((uvu == 52) && (uvv == 52)) return 58;
-        if ((uvu == 52) && (uvv == 64)) return 58;
-        if ((uvu == 56) && (uvv == 64)) return 58;
-        if ((uvu == 48) && (uvv == 36)) return 64;
-        if ((uvu == 44) && (uvv == 36)) return 64;
-        if ((uvu == 44) && (uvv == 48)) return 64;
-        if ((uvu == 48) && (uvv == 48)) return 64;
-        if ((uvu == 28) && (uvv == 36)) return 70;
-        if ((uvu == 20) && (uvv == 36)) return 70;
-        if ((uvu == 20) && (uvv == 48)) return 70;
-        if ((uvu == 28) && (uvv == 48)) return 70;
-        return -1;
-    case 5:
-        if ((uvu == 32) && (uvv == 8)) return 5;
-        if ((uvu == 24) && (uvv == 8)) return 5;
-        if ((uvu == 24) && (uvv == 16)) return 5;
-        if ((uvu == 32) && (uvv == 16)) return 5;
-        if ((uvu == 40) && (uvv == 20)) return 11;
-        if ((uvu == 32) && (uvv == 20)) return 11;
-        if ((uvu == 32) && (uvv == 32)) return 11;
-        if ((uvu == 40) && (uvv == 32)) return 11;
-        if ((uvu == 48) && (uvv == 52)) return 17;
-        if ((uvu == 44) && (uvv == 52)) return 17;
-        if ((uvu == 44) && (uvv == 64)) return 17;
-        if ((uvu == 48) && (uvv == 64)) return 17;
-        if ((uvu == 56) && (uvv == 20)) return 23;
-        if ((uvu == 52) && (uvv == 20)) return 23;
-        if ((uvu == 52) && (uvv == 32)) return 23;
-        if ((uvu == 56) && (uvv == 32)) return 23;
-        if ((uvu == 32) && (uvv == 52)) return 29;
-        if ((uvu == 28) && (uvv == 52)) return 29;
-        if ((uvu == 28) && (uvv == 64)) return 29;
-        if ((uvu == 32) && (uvv == 64)) return 29;
-        if ((uvu == 16) && (uvv == 20)) return 35;
-        if ((uvu == 12) && (uvv == 20)) return 35;
-        if ((uvu == 12) && (uvv == 32)) return 35;
-        if ((uvu == 16) && (uvv == 32)) return 35;
-        if ((uvu == 64) && (uvv == 8)) return 41;
-        if ((uvu == 56) && (uvv == 8)) return 41;
-        if ((uvu == 56) && (uvv == 16)) return 41;
-        if ((uvu == 64) && (uvv == 16)) return 41;
-        if ((uvu == 16) && (uvv == 36)) return 47;
-        if ((uvu == 12) && (uvv == 36)) return 47;
-        if ((uvu == 12) && (uvv == 48)) return 47;
-        if ((uvu == 16) && (uvv == 48)) return 47;
-        if ((uvu == 16) && (uvv == 52)) return 53;
-        if ((uvu == 12) && (uvv == 52)) return 53;
-        if ((uvu == 12) && (uvv == 64)) return 53;
-        if ((uvu == 16) && (uvv == 64)) return 53;
-        if ((uvu == 64) && (uvv == 52)) return 59;
-        if ((uvu == 60) && (uvv == 52)) return 59;
-        if ((uvu == 60) && (uvv == 64)) return 59;
-        if ((uvu == 64) && (uvv == 64)) return 59;
-        if ((uvu == 56) && (uvv == 36)) return 65;
-        if ((uvu == 52) && (uvv == 36)) return 65;
-        if ((uvu == 52) && (uvv == 48)) return 65;
-        if ((uvu == 56) && (uvv == 48)) return 65;
-        if ((uvu == 40) && (uvv == 36)) return 71;
-        if ((uvu == 32) && (uvv == 36)) return 71;
-        if ((uvu == 32) && (uvv == 48)) return 71;
-        if ((uvu == 40) && (uvv == 48)) return 71;
-        return -1;
-    }
-    return -1;
-}
-
+// ---------------------------------------------------------------------------------
+// abstract:
+//  alex aware
+// writes:
+//  vanillaCenterUV
+//  vanillaMaxUV
+//  vanillaMaxUV
+// ---------------------------------------------------------------------------------
 void initVanillaUV(int faceId, bool isAlex){
     initVanillaUV2(faceId, isAlex);
     vanillaCenterUV = (vanillaMinUV + vanillaMaxUV) / 2.0;
@@ -1301,3 +1017,362 @@ void initVanillaUV2(int faceId, bool isAlex){
             return;
     }
 }
+
+// ---------------------------------------------------------------------------------
+// abstract:
+//  The vertex id is unique number for each vertex, all players have identical order
+// return:
+//  the id
+// ---------------------------------------------------------------------------------
+#ifdef BONE_TEXTURE // ThreeJS
+int faceIdLookup(int dirid, int uvu, int uvv);
+int getMCVertID() {
+    int dirid;
+    int corner;
+    switch(gl_VertexID % 6){
+    case 0:
+    case 3:
+        cornerId = 0;
+        break;
+    case 2:
+    case 4:
+        cornerId = 2;
+        break;
+    case 1:
+        cornerId = 1;
+        break;
+    case 5:
+        cornerId = 3;
+        break;
+    }
+
+    if (Normal.x > 0.1 && Normal.y == 0.0 && Normal.z == 0.0) {
+        dirid = 0;
+    } else if (Normal.x < -0.1 && Normal.y == 0.0 && Normal.z == 0.0) {
+        dirid = 1;
+    } else if (Normal.x == 0.0 && Normal.y > 0.1 && Normal.z == 0.0) {
+        dirid = 2;
+    } else if (Normal.x == 0.0 && Normal.y < -0.1 && Normal.z == 0.0) {
+        dirid = 3;
+    } else if (Normal.x == 0.0 && Normal.y == 0.0 && Normal.z > 0.1) {
+        dirid = 4;
+    } else if (Normal.x == 0.0 && Normal.y == 0.0 && Normal.z < -0.1) {
+        dirid = 5;
+    }
+
+    int uvu = int(UV0.x*64.0 + 0.1);
+    int uvv = int(UV0.y*64.0 + 0.1);
+    int faceId = faceIdLookup(dirid, uvu, uvv);
+    return faceId*4 + cornerId;
+}
+
+int faceIdLookup(int dirid, int uvu, int uvv) {
+    switch(dirid){
+    case 0:
+        if ((uvu == 24) && (uvv == 8)) return 0;
+        if ((uvu == 16) && (uvv == 8)) return 0;
+        if ((uvu == 16) && (uvv == 16)) return 0;
+        if ((uvu == 24) && (uvv == 16)) return 0;
+        if ((uvu == 32) && (uvv == 20)) return 6;
+        if ((uvu == 28) && (uvv == 20)) return 6;
+        if ((uvu == 28) && (uvv == 32)) return 6;
+        if ((uvu == 32) && (uvv == 32)) return 6;
+        if ((uvu == 44) && (uvv == 52)) return 12;
+        if ((uvu == 40) && (uvv == 52)) return 12;
+        if ((uvu == 40) && (uvv == 64)) return 12;
+        if ((uvu == 44) && (uvv == 64)) return 12;
+        if ((uvu == 52) && (uvv == 20)) return 18;
+        if ((uvu == 48) && (uvv == 20)) return 18;
+        if ((uvu == 48) && (uvv == 32)) return 18;
+        if ((uvu == 52) && (uvv == 32)) return 18;
+        if ((uvu == 28) && (uvv == 52)) return 24;
+        if ((uvu == 24) && (uvv == 52)) return 24;
+        if ((uvu == 24) && (uvv == 64)) return 24;
+        if ((uvu == 28) && (uvv == 64)) return 24;
+        if ((uvu == 12) && (uvv == 20)) return 30;
+        if ((uvu == 8) && (uvv == 20)) return 30;
+        if ((uvu == 8) && (uvv == 32)) return 30;
+        if ((uvu == 12) && (uvv == 32)) return 30;
+        if ((uvu == 56) && (uvv == 8)) return 36;
+        if ((uvu == 48) && (uvv == 8)) return 36;
+        if ((uvu == 48) && (uvv == 16)) return 36;
+        if ((uvu == 56) && (uvv == 16)) return 36;
+        if ((uvu == 12) && (uvv == 36)) return 42;
+        if ((uvu == 8) && (uvv == 36)) return 42;
+        if ((uvu == 8) && (uvv == 48)) return 42;
+        if ((uvu == 12) && (uvv == 48)) return 42;
+        if ((uvu == 12) && (uvv == 52)) return 48;
+        if ((uvu == 8) && (uvv == 52)) return 48;
+        if ((uvu == 8) && (uvv == 64)) return 48;
+        if ((uvu == 12) && (uvv == 64)) return 48;
+        if ((uvu == 60) && (uvv == 52)) return 54;
+        if ((uvu == 56) && (uvv == 52)) return 54;
+        if ((uvu == 56) && (uvv == 64)) return 54;
+        if ((uvu == 60) && (uvv == 64)) return 54;
+        if ((uvu == 52) && (uvv == 36)) return 60;
+        if ((uvu == 48) && (uvv == 36)) return 60;
+        if ((uvu == 48) && (uvv == 48)) return 60;
+        if ((uvu == 52) && (uvv == 48)) return 60;
+        if ((uvu == 32) && (uvv == 36)) return 66;
+        if ((uvu == 28) && (uvv == 36)) return 66;
+        if ((uvu == 28) && (uvv == 48)) return 66;
+        if ((uvu == 32) && (uvv == 48)) return 66;
+        return -1;
+    case 1:
+        if ((uvu == 8) && (uvv == 8)) return 1;
+        if ((uvu == 0) && (uvv == 8)) return 1;
+        if ((uvu == 0) && (uvv == 16)) return 1;
+        if ((uvu == 8) && (uvv == 16)) return 1;
+        if ((uvu == 20) && (uvv == 20)) return 7;
+        if ((uvu == 16) && (uvv == 20)) return 7;
+        if ((uvu == 16) && (uvv == 32)) return 7;
+        if ((uvu == 20) && (uvv == 32)) return 7;
+        if ((uvu == 36) && (uvv == 52)) return 13;
+        if ((uvu == 32) && (uvv == 52)) return 13;
+        if ((uvu == 32) && (uvv == 64)) return 13;
+        if ((uvu == 36) && (uvv == 64)) return 13;
+        if ((uvu == 44) && (uvv == 20)) return 19;
+        if ((uvu == 40) && (uvv == 20)) return 19;
+        if ((uvu == 40) && (uvv == 32)) return 19;
+        if ((uvu == 44) && (uvv == 32)) return 19;
+        if ((uvu == 20) && (uvv == 52)) return 25;
+        if ((uvu == 16) && (uvv == 52)) return 25;
+        if ((uvu == 16) && (uvv == 64)) return 25;
+        if ((uvu == 20) && (uvv == 64)) return 25;
+        if ((uvu == 4) && (uvv == 20)) return 31;
+        if ((uvu == 0) && (uvv == 20)) return 31;
+        if ((uvu == 0) && (uvv == 32)) return 31;
+        if ((uvu == 4) && (uvv == 32)) return 31;
+        if ((uvu == 40) && (uvv == 8)) return 37;
+        if ((uvu == 32) && (uvv == 8)) return 37;
+        if ((uvu == 32) && (uvv == 16)) return 37;
+        if ((uvu == 40) && (uvv == 16)) return 37;
+        if ((uvu == 4) && (uvv == 36)) return 43;
+        if ((uvu == 0) && (uvv == 36)) return 43;
+        if ((uvu == 0) && (uvv == 48)) return 43;
+        if ((uvu == 4) && (uvv == 48)) return 43;
+        if ((uvu == 4) && (uvv == 52)) return 49;
+        if ((uvu == 0) && (uvv == 52)) return 49;
+        if ((uvu == 0) && (uvv == 64)) return 49;
+        if ((uvu == 4) && (uvv == 64)) return 49;
+        if ((uvu == 52) && (uvv == 52)) return 55;
+        if ((uvu == 48) && (uvv == 52)) return 55;
+        if ((uvu == 48) && (uvv == 64)) return 55;
+        if ((uvu == 52) && (uvv == 64)) return 55;
+        if ((uvu == 44) && (uvv == 36)) return 61;
+        if ((uvu == 40) && (uvv == 36)) return 61;
+        if ((uvu == 40) && (uvv == 48)) return 61;
+        if ((uvu == 44) && (uvv == 48)) return 61;
+        if ((uvu == 20) && (uvv == 36)) return 67;
+        if ((uvu == 16) && (uvv == 36)) return 67;
+        if ((uvu == 16) && (uvv == 48)) return 67;
+        if ((uvu == 20) && (uvv == 48)) return 67;
+        return -1;
+    case 2:
+        if ((uvu == 16) && (uvv == 0)) return 2;
+        if ((uvu == 8) && (uvv == 0)) return 2;
+        if ((uvu == 8) && (uvv == 8)) return 2;
+        if ((uvu == 16) && (uvv == 8)) return 2;
+        if ((uvu == 28) && (uvv == 16)) return 8;
+        if ((uvu == 20) && (uvv == 16)) return 8;
+        if ((uvu == 20) && (uvv == 20)) return 8;
+        if ((uvu == 28) && (uvv == 20)) return 8;
+        if ((uvu == 40) && (uvv == 48)) return 14;
+        if ((uvu == 36) && (uvv == 48)) return 14;
+        if ((uvu == 36) && (uvv == 52)) return 14;
+        if ((uvu == 40) && (uvv == 52)) return 14;
+        if ((uvu == 48) && (uvv == 16)) return 20;
+        if ((uvu == 44) && (uvv == 16)) return 20;
+        if ((uvu == 44) && (uvv == 20)) return 20;
+        if ((uvu == 48) && (uvv == 20)) return 20;
+        if ((uvu == 24) && (uvv == 48)) return 26;
+        if ((uvu == 20) && (uvv == 48)) return 26;
+        if ((uvu == 20) && (uvv == 52)) return 26;
+        if ((uvu == 24) && (uvv == 52)) return 26;
+        if ((uvu == 8) && (uvv == 16)) return 32;
+        if ((uvu == 4) && (uvv == 16)) return 32;
+        if ((uvu == 4) && (uvv == 20)) return 32;
+        if ((uvu == 8) && (uvv == 20)) return 32;
+        if ((uvu == 48) && (uvv == 0)) return 38;
+        if ((uvu == 40) && (uvv == 0)) return 38;
+        if ((uvu == 40) && (uvv == 8)) return 38;
+        if ((uvu == 48) && (uvv == 8)) return 38;
+        if ((uvu == 8) && (uvv == 32)) return 44;
+        if ((uvu == 4) && (uvv == 32)) return 44;
+        if ((uvu == 4) && (uvv == 36)) return 44;
+        if ((uvu == 8) && (uvv == 36)) return 44;
+        if ((uvu == 8) && (uvv == 48)) return 50;
+        if ((uvu == 4) && (uvv == 48)) return 50;
+        if ((uvu == 4) && (uvv == 52)) return 50;
+        if ((uvu == 8) && (uvv == 52)) return 50;
+        if ((uvu == 56) && (uvv == 48)) return 56;
+        if ((uvu == 52) && (uvv == 48)) return 56;
+        if ((uvu == 52) && (uvv == 52)) return 56;
+        if ((uvu == 56) && (uvv == 52)) return 56;
+        if ((uvu == 48) && (uvv == 32)) return 62;
+        if ((uvu == 44) && (uvv == 32)) return 62;
+        if ((uvu == 44) && (uvv == 36)) return 62;
+        if ((uvu == 48) && (uvv == 36)) return 62;
+        if ((uvu == 28) && (uvv == 32)) return 68;
+        if ((uvu == 20) && (uvv == 32)) return 68;
+        if ((uvu == 20) && (uvv == 36)) return 68;
+        if ((uvu == 28) && (uvv == 36)) return 68;
+        return -1;
+    case 3:
+        if ((uvu == 24) && (uvv == 8)) return 3;
+        if ((uvu == 16) && (uvv == 8)) return 3;
+        if ((uvu == 16) && (uvv == 0)) return 3;
+        if ((uvu == 24) && (uvv == 0)) return 3;
+        if ((uvu == 32) && (uvv == 20)) return 9;
+        if ((uvu == 28) && (uvv == 20)) return 9;
+        if ((uvu == 28) && (uvv == 16)) return 9;
+        if ((uvu == 36) && (uvv == 16)) return 9;
+        if ((uvu == 44) && (uvv == 52)) return 15;
+        if ((uvu == 40) && (uvv == 52)) return 15;
+        if ((uvu == 40) && (uvv == 48)) return 15;
+        if ((uvu == 44) && (uvv == 48)) return 15;
+        if ((uvu == 52) && (uvv == 20)) return 21;
+        if ((uvu == 48) && (uvv == 20)) return 21;
+        if ((uvu == 48) && (uvv == 16)) return 21;
+        if ((uvu == 52) && (uvv == 16)) return 21;
+        if ((uvu == 28) && (uvv == 52)) return 27;
+        if ((uvu == 24) && (uvv == 52)) return 27;
+        if ((uvu == 24) && (uvv == 48)) return 27;
+        if ((uvu == 28) && (uvv == 48)) return 27;
+        if ((uvu == 12) && (uvv == 20)) return 33;
+        if ((uvu == 8) && (uvv == 20)) return 33;
+        if ((uvu == 8) && (uvv == 16)) return 33;
+        if ((uvu == 12) && (uvv == 16)) return 33;
+        if ((uvu == 56) && (uvv == 8)) return 39;
+        if ((uvu == 48) && (uvv == 8)) return 39;
+        if ((uvu == 48) && (uvv == 0)) return 39;
+        if ((uvu == 56) && (uvv == 0)) return 39;
+        if ((uvu == 12) && (uvv == 36)) return 45;
+        if ((uvu == 8) && (uvv == 36)) return 45;
+        if ((uvu == 8) && (uvv == 32)) return 45;
+        if ((uvu == 12) && (uvv == 32)) return 45;
+        if ((uvu == 12) && (uvv == 52)) return 51;
+        if ((uvu == 8) && (uvv == 52)) return 51;
+        if ((uvu == 8) && (uvv == 48)) return 51;
+        if ((uvu == 12) && (uvv == 48)) return 51;
+        if ((uvu == 60) && (uvv == 52)) return 57;
+        if ((uvu == 56) && (uvv == 52)) return 57;
+        if ((uvu == 56) && (uvv == 48)) return 57;
+        if ((uvu == 60) && (uvv == 48)) return 57;
+        if ((uvu == 52) && (uvv == 36)) return 63;
+        if ((uvu == 48) && (uvv == 36)) return 63;
+        if ((uvu == 48) && (uvv == 32)) return 63;
+        if ((uvu == 52) && (uvv == 32)) return 63;
+        if ((uvu == 32) && (uvv == 36)) return 69;
+        if ((uvu == 28) && (uvv == 36)) return 69;
+        if ((uvu == 28) && (uvv == 32)) return 69;
+        if ((uvu == 36) && (uvv == 32)) return 69;
+        return -1;
+    case 4:
+        if ((uvu == 16) && (uvv == 8)) return 4;
+        if ((uvu == 8) && (uvv == 8)) return 4;
+        if ((uvu == 8) && (uvv == 16)) return 4;
+        if ((uvu == 16) && (uvv == 16)) return 4;
+        if ((uvu == 28) && (uvv == 20)) return 10;
+        if ((uvu == 20) && (uvv == 20)) return 10;
+        if ((uvu == 20) && (uvv == 32)) return 10;
+        if ((uvu == 28) && (uvv == 32)) return 10;
+        if ((uvu == 40) && (uvv == 52)) return 16;
+        if ((uvu == 36) && (uvv == 52)) return 16;
+        if ((uvu == 36) && (uvv == 64)) return 16;
+        if ((uvu == 40) && (uvv == 64)) return 16;
+        if ((uvu == 48) && (uvv == 20)) return 22;
+        if ((uvu == 44) && (uvv == 20)) return 22;
+        if ((uvu == 44) && (uvv == 32)) return 22;
+        if ((uvu == 48) && (uvv == 32)) return 22;
+        if ((uvu == 24) && (uvv == 52)) return 28;
+        if ((uvu == 20) && (uvv == 52)) return 28;
+        if ((uvu == 20) && (uvv == 64)) return 28;
+        if ((uvu == 24) && (uvv == 64)) return 28;
+        if ((uvu == 8) && (uvv == 20)) return 34;
+        if ((uvu == 4) && (uvv == 20)) return 34;
+        if ((uvu == 4) && (uvv == 32)) return 34;
+        if ((uvu == 8) && (uvv == 32)) return 34;
+        if ((uvu == 48) && (uvv == 8)) return 40;
+        if ((uvu == 40) && (uvv == 8)) return 40;
+        if ((uvu == 40) && (uvv == 16)) return 40;
+        if ((uvu == 48) && (uvv == 16)) return 40;
+        if ((uvu == 8) && (uvv == 36)) return 46;
+        if ((uvu == 4) && (uvv == 36)) return 46;
+        if ((uvu == 4) && (uvv == 48)) return 46;
+        if ((uvu == 8) && (uvv == 48)) return 46;
+        if ((uvu == 8) && (uvv == 52)) return 52;
+        if ((uvu == 4) && (uvv == 52)) return 52;
+        if ((uvu == 4) && (uvv == 64)) return 52;
+        if ((uvu == 8) && (uvv == 64)) return 52;
+        if ((uvu == 56) && (uvv == 52)) return 58;
+        if ((uvu == 52) && (uvv == 52)) return 58;
+        if ((uvu == 52) && (uvv == 64)) return 58;
+        if ((uvu == 56) && (uvv == 64)) return 58;
+        if ((uvu == 48) && (uvv == 36)) return 64;
+        if ((uvu == 44) && (uvv == 36)) return 64;
+        if ((uvu == 44) && (uvv == 48)) return 64;
+        if ((uvu == 48) && (uvv == 48)) return 64;
+        if ((uvu == 28) && (uvv == 36)) return 70;
+        if ((uvu == 20) && (uvv == 36)) return 70;
+        if ((uvu == 20) && (uvv == 48)) return 70;
+        if ((uvu == 28) && (uvv == 48)) return 70;
+        return -1;
+    case 5:
+        if ((uvu == 32) && (uvv == 8)) return 5;
+        if ((uvu == 24) && (uvv == 8)) return 5;
+        if ((uvu == 24) && (uvv == 16)) return 5;
+        if ((uvu == 32) && (uvv == 16)) return 5;
+        if ((uvu == 40) && (uvv == 20)) return 11;
+        if ((uvu == 32) && (uvv == 20)) return 11;
+        if ((uvu == 32) && (uvv == 32)) return 11;
+        if ((uvu == 40) && (uvv == 32)) return 11;
+        if ((uvu == 48) && (uvv == 52)) return 17;
+        if ((uvu == 44) && (uvv == 52)) return 17;
+        if ((uvu == 44) && (uvv == 64)) return 17;
+        if ((uvu == 48) && (uvv == 64)) return 17;
+        if ((uvu == 56) && (uvv == 20)) return 23;
+        if ((uvu == 52) && (uvv == 20)) return 23;
+        if ((uvu == 52) && (uvv == 32)) return 23;
+        if ((uvu == 56) && (uvv == 32)) return 23;
+        if ((uvu == 32) && (uvv == 52)) return 29;
+        if ((uvu == 28) && (uvv == 52)) return 29;
+        if ((uvu == 28) && (uvv == 64)) return 29;
+        if ((uvu == 32) && (uvv == 64)) return 29;
+        if ((uvu == 16) && (uvv == 20)) return 35;
+        if ((uvu == 12) && (uvv == 20)) return 35;
+        if ((uvu == 12) && (uvv == 32)) return 35;
+        if ((uvu == 16) && (uvv == 32)) return 35;
+        if ((uvu == 64) && (uvv == 8)) return 41;
+        if ((uvu == 56) && (uvv == 8)) return 41;
+        if ((uvu == 56) && (uvv == 16)) return 41;
+        if ((uvu == 64) && (uvv == 16)) return 41;
+        if ((uvu == 16) && (uvv == 36)) return 47;
+        if ((uvu == 12) && (uvv == 36)) return 47;
+        if ((uvu == 12) && (uvv == 48)) return 47;
+        if ((uvu == 16) && (uvv == 48)) return 47;
+        if ((uvu == 16) && (uvv == 52)) return 53;
+        if ((uvu == 12) && (uvv == 52)) return 53;
+        if ((uvu == 12) && (uvv == 64)) return 53;
+        if ((uvu == 16) && (uvv == 64)) return 53;
+        if ((uvu == 64) && (uvv == 52)) return 59;
+        if ((uvu == 60) && (uvv == 52)) return 59;
+        if ((uvu == 60) && (uvv == 64)) return 59;
+        if ((uvu == 64) && (uvv == 64)) return 59;
+        if ((uvu == 56) && (uvv == 36)) return 65;
+        if ((uvu == 52) && (uvv == 36)) return 65;
+        if ((uvu == 52) && (uvv == 48)) return 65;
+        if ((uvu == 56) && (uvv == 48)) return 65;
+        if ((uvu == 40) && (uvv == 36)) return 71;
+        if ((uvu == 32) && (uvv == 36)) return 71;
+        if ((uvu == 32) && (uvv == 48)) return 71;
+        if ((uvu == 40) && (uvv == 48)) return 71;
+        return -1;
+    }
+    return -1;
+}
+#else // Minecraft
+int getMCVertID() {
+    return gl_VertexID;
+}
+#endif
