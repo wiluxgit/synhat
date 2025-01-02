@@ -46,12 +46,18 @@ in vec4 wx_passVertexColor;
 in vec3 wx_invMatrix0;
 in vec3 wx_invMatrix1;
 in vec3 wx_invMatrix2;
+
+// ---------------------------------------------------------------------------------
+// abstract:
+//  calculate the directional color relative to worldspace
+//  I no longer remember why this work, all i know is that it took a long time to figure out
+// ---------------------------------------------------------------------------------
 vec4 getDirectionalColor(){
-    vec3 hackProjectedNormal = normalize(cross(dFdx(wx_passModelViewPos), dFdy(wx_passModelViewPos)));
-    hackProjectedNormal.z *= -1;
+    vec3 normalInScreenSpace = normalize(cross(dFdx(wx_passModelViewPos), dFdy(wx_passModelViewPos)));
+    normalInScreenSpace.z *= -1;
     
     mat3 wx_invMatrix = mat3(wx_invMatrix0, wx_invMatrix1, wx_invMatrix2);
-    vec3 normalInVertexShaderWorld = normalize(wx_invMatrix * hackProjectedNormal);
+    vec3 normalInVertexShaderWorld = normalize(wx_invMatrix * normalInScreenSpace);
     return minecraft_mix_light(wx_passLight0_Direction, wx_passLight1_Direction, normalInVertexShaderWorld, wx_passVertexColor);
 }
 #endif

@@ -1,6 +1,0 @@
-{"parent": "minecraft:item/generated", "textures": {"layer0": "minecraft:item/leather_horse_armor"}, "overrides": [
-	{"predicate": {"custom_model_data": 1}, "model": "synhat/old/hat/dyed/dyed_cap"},
-	{"predicate": {"custom_model_data": 2}, "model": "synhat/old/hat/dyed/dyed_block"},
-	{"predicate": {"custom_model_data": 3}, "model": "synhat/old/hat/dyed/dyed_fortress_warrior"},
-	{"predicate": {"custom_model_data": 4}, "model": "synhat/old/hat/dyed/dyed_pewdiepie_headphones"},
-	{"predicate": {"custom_model_data": 5}, "model": "synhat/old/hat/dyed/dyed_headphones"}]}

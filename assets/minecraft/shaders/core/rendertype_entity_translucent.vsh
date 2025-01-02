@@ -191,7 +191,7 @@ void main() {
     //
     wx_isEdited = 1.0;
     int faceId = getFaceId(vertId);
-    wx_vertexColor = getFaceOperationPixel(faceId)/256.0;
+    wx_vertexColor = getFaceOperationPixel(faceId);
 
     if (false) {//(gl_VertexID >= 18*8){ //is second layer
 
@@ -533,10 +533,10 @@ vec4 getFaceOperationPixel(int faceId) {
     int x = temp % 8;
     int y = temp / 8;
 
-    return texelFetch(Sampler0, ivec2(x, y), 0)*256.0;
+    return texelFetch(Sampler0, ivec2(x, y), 0);
 }
 int getFaceOperationEntry(int faceId) {
-    vec4 rgba = getFaceOperationPixel(faceId);
+    vec4 rgba = getFaceOperationPixel(faceId)*256.0;
 
     switch (faceId % 4) {
         case 0: return int(rgba.r+0.1);
