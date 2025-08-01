@@ -9,7 +9,7 @@ async function main() {
   const modelCanvas = document.getElementById("camera");
   const previewCanvas = document.getElementById("canvasSkinPreview")
 
-  const modelRenderer = new THREE.WebGLRenderer({canvas: modelCanvas});
+  const modelRenderer = new THREE.WebGLRenderer({ canvas: modelCanvas });
 
   const glModel = modelRenderer.getContext("webgl2")
   const glPreview = previewCanvas.getContext("webgl2")
@@ -21,9 +21,9 @@ async function main() {
 
   // Init textures
   {
-    var raw = new Uint8ClampedArray(64*64*4)
+    var raw = new Uint8ClampedArray(64 * 64 * 4)
     raw.fill(200)
-    const imageData = new ImageData(raw, 64,64)
+    const imageData = new ImageData(raw, 64, 64)
     createImageBitmap(imageData).then((imageBitmap) => {
       // Preview view
       const vs = `
@@ -136,7 +136,7 @@ async function main() {
   }
 
   // https://stackoverflow.com/questions/29325906/can-you-use-raw-webgl-textures-with-three-js
-  const forceTextureInitialization = function() {
+  const forceTextureInitialization = function () {
     const material = new THREE.MeshBasicMaterial();
     const geometry = new THREE.PlaneBufferGeometry();
     const scene = new THREE.Scene();
@@ -152,11 +152,11 @@ async function main() {
   {
     const objLoader = new OBJLoader();
 
-    objLoader.load( 'assets/steve.obj', (root) => {
+    objLoader.load('assets/steve.obj', (root) => {
       scene.add(root);
 
-      root.traverse( async (child) => {
-        if ( child.isMesh ) {
+      root.traverse(async (child) => {
+        if (child.isMesh) {
           // Hack to force in webgl texture in three
           // https://stackoverflow.com/questions/29325906/can-you-use-raw-webgl-textures-with-three-js
           const texture = new THREE.Texture();
@@ -164,12 +164,29 @@ async function main() {
           const texProps = modelRenderer.properties.get(texture);
           texProps.__webglTexture = glModelTexture;
 
+          async function loadShaderReplaceVersion(url) {
+            const source = await fetch(url, { credentials: 'same-origin' }).then(res => res.text());
+            if (/^\s*#version\s+.*$/m.test(source)) {
+              // THREEJS will prepend its own #version directive at the begining of the shader
+              // Because the shader must operate in minecraft (which requires the version diretive)
+              // we must replace the existing #version line with #define BROWSER instead
+              return source.replace(/^(\s*#version\s+\d+)$/m, '#define BROWSER');
+            } else {
+              throw new Error(`Shader at "${url}" does not contain a #version directive.`);
+            }
+          }
+
+          const [vertexShader, fragmentShader] = await Promise.all([
+            loadShaderReplaceVersion("../assets/minecraft/shaders/core/rendertype_entity_translucent.vsh"),
+            loadShaderReplaceVersion("../assets/minecraft/shaders/core/rendertype_entity_translucent.fsh"),
+          ]);
+
           const material = new THREE.ShaderMaterial({
             uniforms: {
               Sampler0: { type: "t", value: texture }
             },
-            vertexShader: await fetch("../assets/minecraft/shaders/core/rendertype_entity_translucent.vsh", {credentials: 'same-origin'}).then((response) => response.text()),
-            fragmentShader: await fetch("../assets/minecraft/shaders/core/rendertype_entity_translucent.fsh", {credentials: 'same-origin'}).then((response) => response.text()),
+            vertexShader: vertexShader,
+            fragmentShader: fragmentShader,
             glslVersion: THREE.GLSL3,
             side: THREE.DoubleSide,
           });

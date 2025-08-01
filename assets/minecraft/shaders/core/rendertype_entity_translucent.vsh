@@ -1,12 +1,13 @@
-#ifdef BONE_TEXTURE // ThreeJS
-#define BROWSER
-#endif
+#version 330
 
-#ifdef BROWSER
+#ifdef BROWSER // ThreeJS
 #define in in highp
 #define out out highp
-uniform sampler2D Sampler0;
 #endif
+
+//=================================================================================
+// Macros
+//=================================================================================
 
 // how long to stretch along normal to simulate 90 deg face
 #define AS_FLIP (128.0)
@@ -55,6 +56,9 @@ uniform sampler2D Sampler0;
 #define DIR_BOTLEFT (2)
 #define DIR_BOTRIGHT (3)
 
+//=================================================================================
+// Helper Functios
+//=================================================================================
 // Data Reading
 int getMCVertID();
 int getfaceId(int vertId);
@@ -87,21 +91,68 @@ void applyPostFlags   (bool isAlex, int vertId, int dataR, int dataG, int dataB)
 vec3 pixelNormal();
 float pixelNormalLength();
 
+//=================================================================================
+// INPUTS
+//=================================================================================
 #ifdef BROWSER // ThreeJS
-    mat4 ModelViewMat;
-    mat4 ProjMat;
-    vec3 Position;
-    vec3 Normal;
-    vec2 UV0;
-#elif // Minecraft
-    in mat4 ModelViewMat;
-    in mat4 ProjMat;
-    in vec3 Position;
-    in vec3 Normal;
-    in vec2 UV0;
+mat4 ModelViewMat;
+mat4 ProjMat;
+vec3 Position;
+vec3 Normal;
+vec2 UV0;
+uniform sampler2D Sampler0;
+#else // Minecraft
+in vec3 Position;
+in vec4 Color;
+in vec2 UV0;
+in ivec2 UV1;
+in ivec2 UV2;
+in vec3 Normal;
+
+uniform sampler2D Sampler0;
+uniform sampler2D Sampler1;
+uniform sampler2D Sampler2;
+
+uniform mat4 ModelViewMat;
+uniform mat4 ProjMat;
+uniform mat3 IViewRotMat;
+uniform int FogShape;
+
+uniform vec3 Light0_Direction;
+uniform vec3 Light1_Direction;
 #endif
 
-// global temp
+//=================================================================================
+// OUTPUTS
+//=================================================================================
+
+// Vanilla
+out float vertexDistance;
+out vec4 vertexColor;
+out vec4 lightMapColor;
+out vec4 overlayColor;
+out vec2 texCoord0;
+
+// extmodel custom outputs
+out vec4 wx_vertexColor;
+out float wx_isEdited;
+out vec2 wx_clipMin;
+out vec2 wx_clipMax;
+
+#ifdef BROWSER // ThreeJS
+#else // Minecraft
+out vec3 wx_passLight0_Direction;
+out vec3 wx_passLight1_Direction;
+out vec3 wx_passModelViewPos;
+out vec4 wx_passVertexColor;
+out vec3 wx_invMatrix0;
+out vec3 wx_invMatrix1;
+out vec3 wx_invMatrix2;
+#endif
+
+//=================================================================================
+// GLOBAL TEMP DATA
+//=================================================================================
 vec3 NewPosition;
 vec2 NewFaceCenter;
 vec2 NewUV;
@@ -115,13 +166,6 @@ bool SnapX;
 bool SnapY;
 bool MirrorX;
 bool MirrorY;
-
-// Custom out variables
-out vec2 texCoord0;
-out vec4 wx_vertexColor;
-out float wx_isEdited;
-out vec2 wx_clipMin;
-out vec2 wx_clipMax;
 
 void main() {
 
@@ -252,6 +296,26 @@ void main() {
             }
         }
     }
+
+    // Directional Lighting Hack
+#ifdef BROWSER // ThreeJS
+#else // Minecraft
+    mat3 invMatrix = inverse(mat3(ProjMat)) * inverse(mat3(ModelViewMat));
+    wx_passLight0_Direction = Light0_Direction;
+    wx_passLight1_Direction = Light1_Direction;
+    wx_passModelViewPos = (ModelViewMat * vec4(NewPosition, 1.0)).xyz;
+    wx_passVertexColor = Color;
+    wx_invMatrix0 = invMatrix[0];
+    wx_invMatrix1 = invMatrix[1];
+    wx_invMatrix2 = invMatrix[2];
+
+    vertexDistance = fog_distance(ModelViewMat, IViewRotMat * Position, FogShape);
+    vertexColor = minecraft_mix_light(Light0_Direction, Light1_Direction, Normal, Color);
+    lightMapColor = texelFetch(Sampler2, UV2 / 16, 0);
+    overlayColor = texelFetch(Sampler1, UV1, 0);
+    texCoord0 = UV0;
+    normal = ProjMat * ModelViewMat * vec4(Normal, 0.0);
+#endif
     texCoord0 = NewUV;
     gl_Position = ProjMat * ModelViewMat * vec4(NewPosition, 1.0);
     return;
