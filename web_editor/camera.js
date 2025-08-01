@@ -168,8 +168,8 @@ async function main() {
             uniforms: {
               Sampler0: { type: "t", value: texture }
             },
-            vertexShader: await fetch("shader/vertex.glsl", {credentials: 'same-origin'}).then((response) => response.text()),
-            fragmentShader: await fetch("shader/fragment.glsl", {credentials: 'same-origin'}).then((response) => response.text()),
+            vertexShader: await fetch("../assets/minecraft/shaders/core/rendertype_entity_translucent.vsh", {credentials: 'same-origin'}).then((response) => response.text()),
+            fragmentShader: await fetch("../assets/minecraft/shaders/core/rendertype_entity_translucent.fsh", {credentials: 'same-origin'}).then((response) => response.text()),
             glslVersion: THREE.GLSL3,
             side: THREE.DoubleSide,
           });
