@@ -1,25 +1,31 @@
-
 # Structure
+The extmodel format is encoded as RGBA of specific pixels on a minecraft 64x64 skin .png image.
+More specifically the data is encoded in the top left 8x8 pixels.
+
+Each pixel is decoded into 4 bytes which is used for different purposes.
+
+
+### What data exists at what pixel coordinates:
 ```
-pixel coordinate
-  01234567
-  ________
-0|G-FFFFFF
-1|FFFFFFFF
-2|FFFFTTTT
-3|TTTTTTTT
-4|TTTTTTTT
-5|TTTTTTTT
-6|TTTTTTTT
-7|TTTTTTTT
+ X 01234567
+Y  ________
+0 |G FFFFFF
+1 |FFFFFFFF
+2 |FFFFTTTT
+3 |TTTTTTTT
+4 |TTTTTTTT
+5 |TTTTTTTT
+6 |TTTTTTTT
+7 |TTTTTTTT
 
 G: Global Flags
-F: Face Operation[]
-T: Transforms[]
+F: Face Operation
+T: Transform Data
 ```
-## Global Flags
+
+# G (Global Flags)
+Global flags describe extmodel properties that apply to the whole model
 ```c
-G = Global Flags
 | R | G | B | A |
 |   e   | t | - |
 e = Enabled
@@ -29,74 +35,75 @@ t = skin type
 Wide (Steve): 0x00
 Slim (Alex): 0x01
 
-enabled Steve: #DA670000
-enabled Alex: #DA670100
+enabled Steve: #DA6700FF
+enabled Alex: #DA6701FF
 ```
-## Face Operation
+# F (Face Operation)
+Face operation describe which (if any) transform should be applied to that face.
+Each byte correspongs to one face.
+
 ```c
-char[72]
+           |         Face operation        |
+       bit | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+explnation |F_type |        F_index        |
+```
 
-F =
-|  R  |  G  |  B  |  A  |  R  |  G  |  B  |  A  | ....
-| f_0 | f_1 | f_2 | f_3 | f_4 | f_5 | f_6 | f_7 | ....
+## F_type (Transform type)
+```c
+switch(T_type) {
+    case 0: TRANSFROM_TYPE_displacement;
+    case 1: TRANSFROM_TYPE_uv_crop;
+    case 2: TRANSFROM_TYPE_uv_offset;
+    case 3: TRANSFROM_TYPE_special;
+}
+```
+## F_index (Transform index)
+`F_index == 0` ⇒ This face has no transforms
+`F_index >= 44` ⇒ Invalid
 
-char getFaceOperationEntry(char faceid) {
-    int rgba_index = faceId % 4;
-    int F_index = faceId / 4;
-    int temp = 2 + F_index
-    int x = temp % 8;
-    int y = temp / 8;
+### Reference C code for getting finding the correct byte given the face ID:
+```c
+uint8_t getFaceOperationEntry(uint8_t faceid) {
+    uint32_t rgba_index = faceId % 4;
+    uint32_t F_index = faceId / 4;
+    uint32_t x = (F_index + 2) % 8;
+    uint32_t y = (F_index + 2) / 8;
     return PIXEL_FETCH(x, y)[rgba_index];
 }
-
-One f =
-| Bit 7 | Bit 6 | Bit 5 | Bit 4 | Bit 3 | Bit 2 | Bit 1 | Bit 0 |
-| transform_type |            transform_arugment_index           |
 ```
-### transform_type
+
+# T (Transforms)
+Transforms constists of `F_type` specific modifier data (T_argument) as well as optional Face operation that should also be applied to the face afterwards.
+
+Each transform uses all 4 bytes of a pixel.
+
 ```c
-switch(transform_type) {
-    case 0:
-        return TRANSFROM_TYPE_displacement;
-    case 1:
-        return TRANSFROM_TYPE_uv_crop;
-    case 2:
-        return TRANSFROM_TYPE_uv_offset;
-    case 3:
-        return TRANSFROM_TYPE_special;
-}
+           |       Transform        |
+      byte |  R  |  G  |  B  |  A   |
+explanation|    T_argument   |T_next|
 ```
-### transform_arugment_index
-`transform_arugment_index == 0` ⇒ This Face Is Disabled *(Has No Transform)*
-`transform_arugment_index >= 44` ⇒ Invalid
 
-## Transforms
-A Linked List of `(Transform Type, Memory Index Of Transform Arguments)`
+### Reference C code for getting finding the correct RGBA bytes given a F_index
 ```c
-uint32[44]
-
-T[0] =
-|  R  |  G  |  B  |  A   |
-|    arguments    | next |
-
-int getFaceOperation(char transform_arugment_index) {
-    int temp = (8*2+4) + transform_arugment_index;
-    int x = temp % 8;
-    int y = temp / 8;
+uint32_t getFaceOperation(uint8_t F_index) {
+    uint32_t temp = (8*2+4) + F_index;
+    uint32_t x = temp % 8;
+    uint32_t y = temp / 8;
     return PIXEL_FETCH(x, y);
 }
 ```
-arguments
+
+## T_arguments
+### TRANSFROM_TYPE_DISPLACEMENT
 ```c
-case TRANSFROM_TYPE_DISPLACEMENT
-|  R7  |  R6  |  R5  |  R4  |  R3  |  R2  |  R1  |  R0  |
-| sign | snap |           global_displacement           |
+        bit |  R7  |  R6  |  R5  |  R4  |  R3  |  R2  |  R1  |  R0  |
+explanation | sign | snap |           global_displacement           |
 
-|  G7  |  G6  |  G5  |  G4  |  G3  |  G2  |  G1  |  G0  |
-|a_sign|a_spec|      a_displacement/a_special_mode      |
+        bit |  G7  |  G6  |  G5  |  G4  |  G3  |  G2  |  G1  |  G0  |
+explanation |a_sign|a_spec|      a_displacement/a_special_mode      |
 
-|  B7  |  B6  |  B5  |  B4  |  B3  |  B2  |  B1  |  B0  |
-|                                         |   a_edge    |
+        bit |  B7  |  B6  |  B5  |  B4  |  B3  |  B2  |  B1  |  B0  |
+explanation |                                         |   a_edge    |
 
 
 sign:
@@ -105,7 +112,7 @@ sign:
     case 1: negative
 
 global_displacement:
-    // size, (in pixels*) of displacement
+    // size, (in half pixels) of displacement
 
 snap:
     // if displacement should snap to opposing layer before apply transform
@@ -130,7 +137,7 @@ a_spec:
     case 1: enable
 
 a_displacement:
-    // size, (in pixels*) of displacement
+    // size, (in half pixels) of displacement
 
 a_special_mode:
     case 0: ASYMETRIC_SPECIAL_FLIP_OUTER
@@ -143,53 +150,55 @@ a_edge:
     case 2: right
     case 3: left
 ```
+### TRANSFROM_TYPE_UV_CROP
 ```c
-case TRANSFROM_TYPE_UV_CROP
-|  R7  |  R6  |  R5  |  R4  |  R3  |  R2  |  R1  |  R0  |
-|         crop_bot          |         crop_top          |
+        bit |  R7  |  R6  |  R5  |  R4  |  R3  |  R2  |  R1  |  R0  |
+explanation |         crop_bot          |         crop_top          |
 
-|  G7  |  G6  |  G5  |  G4  |  G3  |  G2  |  G1  |  G0  |
-|         crop_right        |         crop_left         |
+        bit |  G7  |  G6  |  G5  |  G4  |  G3  |  G2  |  G1  |  G0  |
+explanation |         crop_right        |         crop_left         |
 
-|  B7  |  B6  |  B5  |  B4  |  B3  |  B2  |  B1  |  B0  |
-|                                         |snap_y|snap_x|
-crop_"X":
-    // How many pixels to skip rendering from edge "X"
+        bit |  B7  |  B6  |  B5  |  B4  |  B3  |  B2  |  B1  |  B0  |
+explanation |                                         |snap_y|snap_x|
 
-snap_:
-    // scales and crops the texture so that pixels are as big as the opposing layers pixels
-    // /!\ For it to allign correctly on primary layer you need a TRANSFROM_TYPE_UV_OFFSET
-    //     that is 2 pixels smaller in the snap direction than the secondary layer
-snap_x: // width
-snap_y: // height
+crop_bot / crop_top / crop_right / crop_left:
+    // How many pixels to skip rendering that edge
+
+snap_x:
+    // Scales and crops the texture width-wise so that pixels are as big as the opposing layers pixels
+    // If snapping the primary layer to the secondary this will crop away the left & right most pixels
+snap_y:
+    // same as snap_x but for height
 
 ```
+### TRANSFROM_TYPE_UV_OFFSET
 ```c
-case TRANSFROM_TYPE_UV_OFFSET
-|  R7  |  R6  |  R5  |  R4  |  R3  |  R2  |  R1  |  R0  |
-|  uv_y_min_0 |                uv_x_max                 |
+        bit |  R7  |  R6  |  R5  |  R4  |  R3  |  R2  |  R1  |  R0  |
+explanation |  uv_y_min_0 |                uv_x_max                 |
 
-|  G7  |  G6  |  G5  |  G4  |  G3  |  G2  |  G1  |  G0  |
-|  uv_y_min_1 |                uv_x_min                 |
+        bit |  G7  |  G6  |  G5  |  G4  |  G3  |  G2  |  G1  |  G0  |
+explanation |  uv_y_min_1 |                uv_x_min                 |
 
-|  B7  |  B6  |  B5  |  B4  |  B3  |  B2  |  B1  |  B0  |
-|  uv_y_min_2 |                uv_y_max                 |
+        bit |  B7  |  B6  |  B5  |  B4  |  B3  |  B2  |  B1  |  B0  |
+explanation |  uv_y_min_2 |                uv_y_max                 |
+```
 
-// to extract uv_y_min
-char getCropLeft(char r, char g, char b) {
-    char mask = 0b11000000;
+Reference C code to read/write `uv_y_min`
+```c
+uint8_t getCropLeft(uint8_t r, uint8_t g, uint8_t b) {
+    uint8_t mask = 0b11000000;
     return ((r & mask) >> 2) | ((g & mask) >> 4) | ((b & mask) >> 6);
 }
-void writeCropLeftToRGB(char crop_left, char* r, char* g, char* b) {
-    char mask = 0b11000000;
+void writeCropLeftToRGB(uint8_t cropLeft, uint8_t* r, uint8_t* g, uint8_t* b) {
+    uint8_t mask = 0b11000000;
     *r |= mask & (crop_left << 6);
     *g |= mask & (crop_left << 4);
     *b |= mask & (crop_left << 2);
 }
 ```
 
+### TRANSFROM_TYPE_SPECIAL
 ```c
-case TRANSFROM_TYPE_SPECIAL
 
 | R0 | rainbow
 
