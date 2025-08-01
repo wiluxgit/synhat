@@ -69,8 +69,9 @@ vec4 getDirectionalColor() {
 // main()
 //---------------------------------------------------------------------------------
 void main() {
+    vec4 color;
     if (wx_isEdited != 0.0) {
-        vec4 color = texture2D(Sampler0, texCoord0);
+        color = texture2D(Sampler0, texCoord0);
         vec4 discardColor = wx_vertexColor;
 
         float checker = float(int(floor(texCoord0.x * 128.0) + floor(texCoord0.y * 128.0)) % 2);
@@ -81,12 +82,12 @@ void main() {
         }
 
         if (texCoord0.x < wx_clipMin.x || texCoord0.x > wx_clipMax.x) {
-            discard;
+            //discard;
             fragColor = vec4(0.5, 0.5, 0.5, 1.0) - vec4(checkerSmall, checkerSmall, checkerSmall, 0) / 3.0 ;
             return;
         }
         if (texCoord0.y < wx_clipMin.y || texCoord0.y > wx_clipMax.y) {
-            discard;
+            //discard;
             fragColor = vec4(0.66, 0.66, 0.66, 1.0) - vec4(checkerSmall, checkerSmall, checkerSmall, 0) / 3.0;
             return;
         }
@@ -100,17 +101,18 @@ void main() {
         }
     } else {
         // Vanilla behaviour
-        vec4 color = texture2D(Sampler0, texCoord0);
-        if (color.a < 0.1) {
-            discard;
-        }
-#ifdef BROWSER
-        fragColor = color;
-#else
-        color *= vertexColor * ColorModulator;
-        color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
-        color *= lightMapColor;
-        fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
-#endif
+        color = texture2D(Sampler0, texCoord0);
     }
+    if (color.a < 0.1) {
+        discard;
+    }
+#ifdef BROWSER
+    fragColor = color;
+#else
+    color *= vertexColor * ColorModulator;
+    color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
+    color *= lightMapColor;
+    fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
+#endif
+    fragColor = wx_vertexColor;
 }

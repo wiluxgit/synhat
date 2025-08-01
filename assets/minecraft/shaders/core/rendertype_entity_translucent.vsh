@@ -65,7 +65,7 @@
 //=================================================================================
 // Data Reading
 int getMCVertID();
-int getfaceId(int vertId);
+int getFaceId(int vertId);
 int getCornerId(int vertId);
 int getDirId(int vertId);
 int getFaceOperationEntry(int faceId);
@@ -188,6 +188,7 @@ void main() {
     float vertIdx = float(vertId)/400.0;
     float vertIdy = float((vertId/4)%6)/6.0;
     wx_vertexColor = vec4(vertIdx, vertIdy, 0, 1);
+    wx_vertexColor = colorFromInt(getFaceId(vertId));
     //</DEBUG>
 
     wx_isEdited = 0.0;
@@ -204,7 +205,7 @@ void main() {
     CropEdgeLeft = 0.0;
     CropEdgeRight = 0.0;
 
-    if (true) { //(gl_VertexID >= 18*8){ //is second layer
+    if (false) { //(gl_VertexID >= 18*8){ //is second layer
 
         // Get header pixel
         vec4 topRightPixel = texelFetch(Sampler0, ivec2(0, 0), 0)*256.0;
@@ -215,7 +216,7 @@ void main() {
         if (headerR == 0xda && headerG == 0x67) {
             bool isAlex = (headerB == 1);
 
-            int faceId = getfaceId(vertId);
+            int faceId = getFaceId(vertId);
             int cornerId = getCornerId(vertId);
 
             int nextFaceOperationEntry = getFaceOperationEntry(faceId);
@@ -302,9 +303,9 @@ void main() {
         }
     }
 
-    // Directional Lighting Hack
 #ifdef BROWSER // ThreeJS
 #else // Minecraft
+    // Directional Lighting Hack
     mat3 invMatrix = inverse(mat3(ProjMat)) * inverse(mat3(ModelViewMat));
     wx_passLight0_Direction = Light0_Direction;
     wx_passLight1_Direction = Light1_Direction;
@@ -336,7 +337,7 @@ void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB)
     float offset				= float(dataR & MASK_TTD_globalDisplacement);
     int asymEdge 		        = dataB & MASK_TTD_asymEdge;
 
-    int faceId                  = getfaceId(vertId);
+    int faceId                  = getFaceId(vertId);
     int cornerId                = getCornerId(vertId);
     int dirId                   = getDirId(vertId);
     bool isSecondary            = isSecondaryLayer(vertId);
@@ -450,7 +451,7 @@ void applyUVOffset(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
     int ymax = dataB & 63;
     int ymin = extractCombineBits6and7(dataR, dataG, dataB);
 
-    int faceId = getfaceId(vertId);
+    int faceId = getFaceId(vertId);
     int cornerId = getCornerId(vertId);
 
     switch(cornerId) {
@@ -488,7 +489,7 @@ float pixelNormalLength() {
 bool isSecondaryLayer(int vertId) {
     return vertId >= 36*4;
 }
-int getfaceId(int vertId) {
+int getFaceId(int vertId) {
     return (vertId / 4);
 }
 int getDirId(int vertId) {
@@ -535,12 +536,12 @@ vec4 colorFromInt(int i) {
     }
 
     switch (i%8) {
-        case 0: return vec4(1,0,0,1);
-        case 1: return vec4(0,1,0,1);
-        case 2: return vec4(0,0,1,1);
-        case 3: return vec4(1,1,0,1);
-        case 4: return vec4(0,1,1,1);
-        case 5: return vec4(1,0,1,1);
+        case 0: return vec4(1,0,0,1); // R
+        case 1: return vec4(0,1,0,1); // G
+        case 2: return vec4(0,0,1,1); // B
+        case 3: return vec4(1,1,0,1); // YELLOW
+        case 4: return vec4(0,1,1,1); // CYAN
+        case 5: return vec4(1,0,1,1); // MAGENTA
         case 6: return vec4(1,1,1,1);
         case 7: return vec4(0,0,0,1);
     }
@@ -585,6 +586,16 @@ int getPerpendicularLength(int faceId, bool isAlex) {
     }
 }
 
+// ---------------------------------------------------------------------------------
+// getMCVertID():
+//  Returns the The vertex id is unique number for each vertex, all players have identical order
+//  For ThreeJS all polygons are drawn independantly
+// ---------------------------------------------------------------------------------
+#ifndef BROWSER // Minecraft
+int getMCVertID() {
+    return gl_VertexID;
+}
+#else // ThreeJS
 int faceIdLookup(int dirid, int uvu, int uvv);
 int getMCVertID() {
     int dirid;
@@ -932,6 +943,7 @@ int faceIdLookup(int dirid, int uvu, int uvv) {
     }
     return -1;
 }
+#endif
 
 void initVanillaUV(int faceId, bool isAlex){
     initVanillaUV2(faceId, isAlex);
