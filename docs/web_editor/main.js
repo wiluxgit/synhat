@@ -105,7 +105,7 @@ async function glRetry(func, maxtires=10, retryDelayMs=500) {
     errNames[gl.INVALID_FRAMEBUFFER_OPERATION] = "gl.INVALID_FRAMEBUFFER_OPERATION"
     errNames[gl.OUT_OF_MEMORY] = "gl.OUT_OF_MEMORY"
     errNames[gl.CONTEXT_LOST_WEBGL] = "gl.CONTEXT_LOST_WEBGL"
-    const errstr = `glRetry> Unsolveable WEBGL error: ${err} (${errNames[err]}). ${attempts} where made.`
+    const errstr = `glRetry> Unsolveable WEBGL error: ${err} (${errNames[err]}). ${attempts} where made. Try reloading the tab`
     console.error(errstr)
     alert(errstr)
 }
