@@ -1,0 +1,417 @@
+<head>
+  <title>Look at this  graph</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <div x-data='{
+    CONST:{
+      displacement_slider_max: 63,
+      displacement_slider_min: -63,
+      uv_offset_slider_max: 63,
+      uv_offset_slider_min: 0,
+      uv_crop_slider_max: 15,
+      uv_crop_slider_min: 0,
+    },
+    selectedId: 0,
+    id2transform: MAIN.newDefaultTransformDictionary()
+  }'
+  x-init='
+    $watch("id2transform",
+      MAIN.debounce(() => MAIN.writeTransformsAndRender(id2transform))
+    )
+  '>
+    <div id="winEditorGrid">
+      <div id="winGlobal">
+        <input type="file" id="uploadInputImage" name="uploadInputImage" accept="image/*"
+          x-on:change='(e) => MAIN.changedUploadImage(id2transform, e)'
+          x-init='MAIN.loadImage(id2transform)'>
+        </input>
+        <br><button type="button" x-on:click='MAIN.downloadCanvas()'>Download Skin</button>
+        <br>
+        <br><button type="button" x-on:click='alert("TODO")'>Upload Model Json</button>
+        <br><button type="button" x-on:click='alert("TODO")'>Download Model Json</button>
+        <br>
+        <br><button type="button" x-on:click='
+          selectedId = 0
+          id2transform = MAIN.newDefaultTransformDictionary()
+          MAIN.loadImage(id2transform)
+        '>Reset</button>
+      </div>
+
+      <div id="winHeader">
+        Header
+      </div>
+
+      <div id="winCamera">
+        <canvas id="camera"></canvas>
+      </div>
+
+      <div id="winFaceSelect">
+        <div class="FaceSelectFixedResolution">
+          <canvas id="canvasSkinPreview" width="64" height="64">
+          </canvas>
+          <div id="winSkinPreviewOverlayGrid">
+            <template x-for="[faceid, arrs] in Object.entries(MAIN.id2uvs)">
+              <label class="SkinPreviewOverlayItemWrapper" x-bind:style='`grid-area: fi${String(faceid).padStart(2,"0")};`'>
+                <input type="radio"
+                  x-bind:value='faceid'
+                  x-model="selectedId"
+                ></input>
+                <span class="SkinPreviewOverlayItemVisual"></span>
+              </label>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <div id="winFaceTransformSettings">
+        <div id="setting" class="PixelSettings">
+          <!--Add New Transform DOM-->
+          <div class="PixelSettingsItem">
+            <div x-html='`Face[${[selectedId]}] Transforms`'></div>
+            <button type="button" x-on:click='
+              ids = id2transform[selectedId].map((x) => x.id);
+              max = Math.max(0, ...ids);
+              id2transform[selectedId].push({
+                face: selectedId,
+                id: max+1,
+                type: MAIN.enums.transform_type.displacement,
+                data: JSON.parse(JSON.stringify(
+                  MAIN.default_transform[MAIN.enums.transform_type.displacement]
+                ))
+              })
+            '>Add</button>
+            <button type="button" x-on:click='alert("copy all")'>Copy All</button>
+            <button type="button" x-on:click='alert("paste all")'>Paste All</button>
+            <button type="button" x-on:click='id2transform[selectedId]=[]'>Delete All</button>
+            <button type="button" x-on:click='MAIN.writeTransformsAndRender(id2transform[selectedId])'>Debug</button>
+          </div>
+
+          <template x-if="id2transform[selectedId].length == 0">
+            <div class="PixelSettingsItem" style="background-color: lightgray;" x-html="`<i>Face #${selectedId} has no transforms</i>`"></div>
+          </template>
+
+          <template x-for="(item, index) in id2transform[selectedId]" :key="item.id">
+            <div class="PixelSettingsItem">
+
+              <!-- Universal Transform Header (Type / Delete)-->
+              <div>
+                <select x-model.number="item.type" x-on:change='
+                  item.data = JSON.parse(JSON.stringify(MAIN.default_transform[item.type]));
+                '>
+                  <template x-for="[k, v] in Object.entries(MAIN.enums.transform_type)">
+                    <option x-html="k" x-bind:value="v"></option>
+                  </template>
+                </select>
+                <button type="button" x-on:click="alert('copy')">Copy</button>
+                <button type="button" x-on:click="alert('paste')">Paste</button>
+                <button type="button" x-on:click='id2transform[selectedId].splice(index, 1)'>Delete</button>
+              </div>
+
+              <br>
+              <textarea class="debug" x-html='JSON.stringify(item, null, 2)'></textarea>
+              <br><br>
+
+              <!--Displacement DOM-->
+              <template x-if='item.type == MAIN.enums.transform_type.displacement'>
+                <div>
+                  <label>Snap to opposing layer</label>
+                  <input type="checkbox" x-model.number="item.data.snap"><br><br>
+
+                  <label>Displacement in half pixels (between 0 and 63):</label>
+                  <div class="xslider" x-data='{_asSigned: null}' x-init='
+                    eval(MAIN.MakeExprToCreateSignedTwoWayBinding(
+                      "_asSigned", "item.data.global_displacement", "item.data.sign"
+                    ))
+                  '>
+                    <input type="reset" x-on:click="_asSigned=0">
+                    <input type="number" x-model.number="_asSigned" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
+                    <input type="range" x-model.number="_asSigned" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
+                  </div><br>
+
+                  <label>Assymetric Direction:</label>
+                  <select x-model.number="item.data.asym_edge">
+                    <template x-for="[k, v] in Object.entries(MAIN.enums.asym_edge)">
+                      <option x-html="k" x-bind:value="v"></option>
+                    </template>
+                  </select><br><br>
+
+                  <label>Use Special Assymetric Displacement Transform </label>
+                  <input type="checkbox" x-model.number="item.data.asym_spec"><br><br>
+
+                  <div x-show='!item.data.asym_spec'>
+                    <label>Assymetric Displacement in half pixels (between -63 and 63):</label>
+                    <div class="xslider" x-data='{_asSigned: null}' x-init='
+                      eval(MAIN.MakeExprToCreateSignedTwoWayBinding(
+                        "_asSigned", "item.data.asym_displacement", "item.data.asym_sign"
+                      ))
+                    '>
+                      <input type="reset" x-on:click="_asSigned=0">
+                      <input type="number" x-model.number="_asSigned" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
+                      <input type="range" x-model.number="_asSigned" x-bind:min="CONST.displacement_slider_min" x-bind:max="CONST.displacement_slider_max">
+                    </div>
+                  </div>
+
+                  <div x-show='!!item.data.asym_spec'>
+                    <label>Assymetric Special Mode</label>
+                    <select x-model="item.data.asym_displacement">
+                      <template x-for="[k, v] in Object.entries(MAIN.enums.asym_special_mode)">
+                        <option x-html="k" x-bind:value="v"></option>
+                      </template>
+                    </select>
+                  </div>
+                </div>
+              </template>
+
+              <!--Special DOM-->
+              <template x-if='item.type == MAIN.enums.transform_type.special'>
+                <div>
+                  Nothig here
+                  <label>UV Scale Fix</label><br>
+                  <label>Top</label>
+                  <input type="checkbox" x-model="item.data.top_snap_clip_uv"><br>
+                  <label>Bottom</label>
+                  <input type="checkbox" x-model="item.data.bot_snap_clip_uv"><br>
+                  <label>Left</label>
+                  <input type="checkbox" x-model="item.data.left_snap_clip_uv"><br>
+                  <label>Right</label>
+                  <input type="checkbox" x-model="item.data.right_snap_clip_uv"><br>
+                </div>
+              </template>
+
+              <!--UV Offset DOM-->
+              <template x-if='item.type == MAIN.enums.transform_type.uv_offset'>
+                <div x-data='{_uv_y_min: null}'>
+                  <label>UV Offset</label><br>
+                  <div class="xslider">
+                    <label>X min</label>
+                    <input type="reset" x-on:click="item.data.uv_x_min=0">
+                    <input type="number" x-model.number="item.data.uv_x_min" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                    <input type="range" x-model.number="item.data.uv_x_min" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                  </div>
+                  <div class="xslider">
+                    <label>X max</label>
+                    <input type="reset" x-on:click="item.data.uv_x_max=0">
+                    <input type="number" x-model.number="item.data.uv_x_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                    <input type="range" x-model.number="item.data.uv_x_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                  </div>
+                  <div class="xslider" x-init='
+                    eval(MAIN.MakeExprToCreate3x2BitsTwoWayBinding(
+                      "_uv_y_min", "item.data.uv_y_min_0", "item.data.uv_y_min_1", "item.data.uv_y_min_2"
+                    ))
+                  '>
+                    <label>Y min</label>
+                    <input type="reset" x-on:click="_uv_y_min=0">
+                    <input type="number" x-model.number="_uv_y_min" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                    <input type="range" x-model.number="_uv_y_min" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                  </div>
+                  <div class="xslider">
+                    <label>Y max</label>
+                    <input type="reset" x-on:click="item.data.uv_y_max=0">
+                    <input type="number" x-model.number="item.data.uv_y_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                    <input type="range" x-model.number="item.data.uv_y_max" x-bind:min="CONST.uv_offset_slider_min" x-bind:max="CONST.uv_offset_slider_max">
+                  </div>
+
+                  <div x-data="{
+                    _mirrored_x: undefined, _mirrored_y: undefined,
+                    _left: undefined, _top: undefined, _right: undefined, _bottom: undefined,
+                    _drag_startX: undefined,
+                    _drag_startY: undefined,
+                    _drag_start_uv_x_min: undefined,
+                    _drag_start_uv_x_max: undefined,
+                    _drag_start_uv_y_min: undefined,
+                    _drag_start_uv_y_max: undefined,
+                  }" x-init='
+                    const fixBounds = () => {
+                      let corner1_X = (MAIN.id2uvs[item.face][0][0] + item.data.uv_x_min)
+                      let corner1_Y = (MAIN.id2uvs[item.face][0][1] + _uv_y_min)
+                      let corner2_X = (MAIN.id2uvs[item.face][1][0] + item.data.uv_x_max)
+                      let corner2_Y = (MAIN.id2uvs[item.face][1][1] + item.data.uv_y_max)
+                      if ((corner1_X >= 64 && corner2_X >= 64) || (corner1_X <= 0 && corner2_X <= 0)) {
+                        corner1_X %= 64
+                        corner2_X %= 64
+                      }
+                      if ((corner1_Y >= 64 && corner2_Y >= 64) || (corner1_Y <= 0 && corner2_Y <= 0)) {
+                        corner1_Y %= 64
+                        corner2_Y %= 64
+                      }
+                      if (corner1_X < corner2_X) {
+                        _left = corner1_X
+                        _right = 64 - corner2_X
+                        _mirrored_x = false
+                      } else {
+                        _left = corner2_X
+                        _right = 64 - corner1_X
+                        _mirrored_x = true
+                      }
+                      if (corner1_Y < corner2_Y) {
+                        _top = corner1_Y
+                        _bottom = 64 - corner2_Y
+                        _mirrored_y = false
+                      } else {
+                        _top = corner2_Y
+                        _bottom = 64 - corner1_Y
+                        _mirrored_y = true
+                      }
+                    }
+                    $watch("item.data.uv_x_min", fixBounds)
+                    $watch("item.data.uv_x_max", fixBounds)
+                    $watch("item.data.uv_y_max", fixBounds)
+                    $watch("item.data.uv_y_min_0", fixBounds)
+                    $watch("item.data.uv_y_min_1", fixBounds)
+                    $watch("item.data.uv_y_min_2", fixBounds)
+                    $watch("selectedId", setTimeout(fixBounds, 100))
+                  '>
+                    <br>
+                    <div>Note that the visual UV editor will not always accurately display mirrored and/or overflowing textures</div>
+
+                    <div style="display:block; height: 100%; width: 100%; padding: 1px; background-color: #666666;">
+                      <div class="FaceSelectFixedResolution">
+                        <canvas id="canvasUVPreview" width="64" height="64">
+                        </canvas>
+                        <div id="winUVPreviewOverlay">
+                          <div class="UVPreviewOverlayItem"
+                            x-bind:style='`
+                              position: absolute;
+                              left:   calc(var(--face-select-scale) * ${_left});
+                              top:    calc(var(--face-select-scale) * ${_top});
+                              right:  calc(var(--face-select-scale) * ${_right});
+                              bottom: calc(var(--face-select-scale) * ${_bottom});
+                            `'
+                            x-on:mousedown='
+                              const e = $event
+                              e.preventDefault()
+
+                              _drag_startX = e.clientX
+                              _drag_startY = e.clientY
+                              _drag_start_uv_x_min = item.data.uv_x_min
+                              _drag_start_uv_x_max = item.data.uv_x_max
+                              _drag_start_uv_y_min = _uv_y_min
+                              _drag_start_uv_y_max = item.data.uv_y_max
+
+                              const scale = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--face-select-scale"))
+
+                              // Override global mousemove events until dragging is finished
+                              document.onmousemove = (e) => {
+                                const mvX = 0 | ((e.clientX - _drag_startX) / scale)
+                                const mvY = 0 | ((e.clientY - _drag_startY) / scale)
+
+                                let newXMin = (_drag_start_uv_x_min + mvX);
+                                let newXMax = (_drag_start_uv_x_max + mvX);
+                                let newYMin = (_drag_start_uv_y_min + mvY);
+                                let newYMax = (_drag_start_uv_y_max + mvY);
+
+                                if ((newXMin < 0 && newXMax < 0) || (newXMin > 64 && newXMax > 64)) {
+                                  newXMin = (newXMin % 64 + 64) % 64
+                                  newXMax = (newXMax % 64 + 64) % 64
+                                }
+                                if ((newYMin < 0 && newYMax < 0) || (newYMin > 64 && newYMax > 64)) {
+                                  newYMin = (newYMin % 64 + 64) % 64
+                                  newYMax = (newYMax % 64 + 64) % 64
+                                }
+
+
+                                if (0 <= newYMin && newYMin <= 64 && 0 <= newXMax && newXMax <= 64) {
+                                  item.data.uv_x_min = newXMin
+                                  item.data.uv_x_max = newXMax
+                                }
+                                if (0 <= newYMin && newYMin <= 64 && 0 <= newYMax && newYMax <= 64) {
+                                  _uv_y_min = newYMin
+                                  item.data.uv_y_max = newYMax
+                                }
+                              }
+
+                              document.onmouseup = () => {
+                                document.onmousemove = null
+                                document.onmouseup = null
+                              }
+                            '
+                          >
+                            <img src="assets/arrow.png" x-bind:style="`
+                              height: 100%;
+                              width: 100%;
+                              object-fit: contain;
+                              transform: scale(${_mirrored_x?-1:1}, ${_mirrored_y?-1:1});
+                            `">
+                          </div>
+                        </div>
+                      </div>
+
+                      <input type="reset" style="transform: translate(2px, -100%);"
+                        x-on:click='
+                          item.data.uv_x_min = 0
+                          item.data.uv_x_max = 0
+                          _uv_y_min = 0
+                          item.data.uv_y_max = 0
+                        '
+                      >
+                    </div>
+                  </div>
+                </div>
+              </template>
+
+              <!--UV Crop DOM-->
+              <template x-if='item.type == MAIN.enums.transform_type.uv_crop'>
+                <div>
+                  <label>UV Crop</label><br>
+                  <div class="xslider">
+                    <label>Top</label>
+                    <input type="reset" x-on:click="item.data.crop_top=0">
+                    <input type="number" x-model.number="item.data.crop_top" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                    <input type="range" x-model.number="item.data.crop_top" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                  </div>
+                  <div class="xslider">
+                    <label>Bottom</label>
+                    <input type="reset" x-on:click="item.data.crop_bot=0">
+                    <input type="number" x-model.number="item.data.crop_bot" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                    <input type="range" x-model.number="item.data.crop_bot" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                  </div>
+                  <div class="xslider">
+                    <label>Right</label>
+                    <input type="reset" x-on:click="item.data.crop_right=0">
+                    <input type="number" x-model.number="item.data.crop_right" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                    <input type="range" x-model.number="item.data.crop_right" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                  </div>
+                  <div class="xslider">
+                    <label>Left</label>
+                    <input type="reset" x-on:click="item.data.crop_left=0">
+                    <input type="number" x-model.number="item.data.crop_left" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                    <input type="range" x-model.number="item.data.crop_left" x-bind:min="CONST.uv_crop_slider_min" x-bind:max="CONST.uv_crop_slider_max">
+                  </div>
+                  <label>Snap X</label>
+                  <input type="checkbox" x-model.number="item.data.snap_x"><br>
+                  <label>Snap Y</label>
+                  <input type="checkbox" x-model.number="item.data.snap_y"><br>
+                </div>
+              </template>
+            </div>
+          </template>
+
+          <textarea class="debug" x-html='JSON.stringify(id2transform, null, 2)'></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script-->
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.127/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.127/examples/jsm/",
+        "twgl": "https://twgljs.org/dist/4.x/twgl-full.module.js"
+      }
+    }
+  </script>
+
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="dependencies/binparser.js"></script>
+  <script src="dependencies/pngjs.js"></script>
+  <script src="dependencies/filesaver.js"></script>
+
+  <script type="module" src="camera.js"></script>
+  <script src="main.js"></script>
+
+  <!--script type="module" src="parser.js"></script-->
+</body>
