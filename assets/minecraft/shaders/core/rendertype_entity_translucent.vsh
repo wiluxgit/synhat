@@ -3,6 +3,10 @@
 #ifdef BROWSER // ThreeJS
 #define in in highp
 #define out out highp
+#else // Minecraft
+#extension GL_EXT_gpu_shader4 : enable
+#moj_import <light.glsl>
+#moj_import <fog.glsl>
 #endif
 
 //=================================================================================
@@ -148,6 +152,7 @@ out vec4 wx_passVertexColor;
 out vec3 wx_invMatrix0;
 out vec3 wx_invMatrix1;
 out vec3 wx_invMatrix2;
+out vec4 normal;
 #endif
 
 //=================================================================================
@@ -309,7 +314,8 @@ void main() {
     wx_invMatrix1 = invMatrix[1];
     wx_invMatrix2 = invMatrix[2];
 
-    vertexDistance = fog_distance(ModelViewMat, IViewRotMat * Position, FogShape);
+    // Vanilla entity.vsh
+    vertexDistance = fog_distance(Position, FogShape); // TODO, Use NewPosition instead?
     vertexColor = minecraft_mix_light(Light0_Direction, Light1_Direction, Normal, Color);
     lightMapColor = texelFetch(Sampler2, UV2 / 16, 0);
     overlayColor = texelFetch(Sampler1, UV1, 0);
