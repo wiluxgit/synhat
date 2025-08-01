@@ -1,7 +1,12 @@
+#ifdef BONE_TEXTURE // ThreeJS
+#define BROWSER
+#endif
+
+#ifdef BROWSER
 #define in in highp
 #define out out highp
-
 uniform sampler2D Sampler0;
+#endif
 
 // how long to stretch along normal to simulate 90 deg face
 #define AS_FLIP (128.0)
@@ -82,19 +87,18 @@ void applyPostFlags   (bool isAlex, int vertId, int dataR, int dataG, int dataB)
 vec3 pixelNormal();
 float pixelNormalLength();
 
-#ifdef BONE_TEXTURE // ThreeJS
-#define BROWSER
-mat4 ModelViewMat;
-mat4 ProjMat;
-vec3 Position;
-vec3 Normal;
-vec2 UV0;
+#ifdef BROWSER // ThreeJS
+    mat4 ModelViewMat;
+    mat4 ProjMat;
+    vec3 Position;
+    vec3 Normal;
+    vec2 UV0;
 #elif // Minecraft
-in mat4 ModelViewMat;
-in mat4 ProjMat;
-in vec3 Position;
-in vec3 Normal;
-in vec2 UV0;
+    in mat4 ModelViewMat;
+    in mat4 ProjMat;
+    in vec3 Position;
+    in vec3 Normal;
+    in vec2 UV0;
 #endif
 
 // global temp
