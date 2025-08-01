@@ -1,6 +1,0 @@
-{
-    "parent": "synhat/old/_parent/wolf",
-    "textures": {
-        "0": "synhat/old/hat/misc/dog"
-    }
-}

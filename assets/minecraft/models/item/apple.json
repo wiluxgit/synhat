@@ -1,4 +1,0 @@
-{"parent": "minecraft:item/generated", "textures": {"layer0": "minecraft:item/apple"}, "overrides": [
-	{"predicate": {"custom_model_data": 1}, "model": "synhat/old/held/food/jam_apple"},
-	{"predicate": {"custom_model_data": 2}, "model": "synhat/old/held/food/jam_fruity"},
-	{"predicate": {"custom_model_data": 3}, "model": "synhat/old/held/food/juice_apple"}]}

@@ -1,6 +1,0 @@
-{
-    "parent": "synhat/wilux/boardgame/standard_card/parent/13",
-    "textures": {
-		"2": "synhat/wilux/boardgame/standard_card/hearts"
-    }
-}

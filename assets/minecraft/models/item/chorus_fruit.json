@@ -1,5 +1,0 @@
-{"parent": "minecraft:item/generated", "textures": {"layer0": "minecraft:item/chorus_fruit"}, "overrides": [
-	{"predicate": {"custom_model_data": 1}, "model": "synhat/old/held/food/jam_chorus"},
-	{"predicate": {"custom_model_data": 2}, "model": "synhat/old/held/food/jam_exotic"},
-	{"predicate": {"custom_model_data": 3}, "model": "synhat/old/held/food/jam_supreme"},
-	{"predicate": {"custom_model_data": 4}, "model": "synhat/old/held/food/juice_chorus"}]}

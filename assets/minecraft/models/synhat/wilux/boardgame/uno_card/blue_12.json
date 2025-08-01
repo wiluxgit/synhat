@@ -1,6 +1,0 @@
-{
-    "parent": "synhat/wilux/boardgame/uno_card/parent/12",
-    "textures": {
-		"1": "synhat/wilux/boardgame/uno_card/blue"
-    }
-}

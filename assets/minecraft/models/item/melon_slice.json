@@ -1,5 +1,0 @@
-{"parent": "minecraft:item/generated", "textures": {"layer0": "minecraft:item/melon_slice"}, "overrides": [
-	{"predicate": {"custom_model_data": 1}, "model": "synhat/old/held/food/cheese_jam_platter"},
-	{"predicate": {"custom_model_data": 2}, "model": "synhat/old/held/food/cheese_executive_platter"},
-	{"predicate": {"custom_model_data": 3}, "model": "synhat/old/held/food/jam_melon"},
-	{"predicate": {"custom_model_data": 4}, "model": "synhat/old/held/food/juice_melon"}]}

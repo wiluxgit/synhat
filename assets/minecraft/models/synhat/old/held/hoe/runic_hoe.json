@@ -1,6 +1,0 @@
-{
-    "parent": "item/handheld",
-    "textures": {
-        "layer0": "synhat/old/held/hoe/runic_hoe"
-    }
-}
