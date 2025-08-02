@@ -328,6 +328,11 @@ MAIN.writeTransformsAndRender = (id2transform) => {
     const serializedIndexs = new Uint8Array(72).fill(0xFF);
     let maxIndex = 0
 
+    // For basic compression, if two transforms are identical reuse them
+    // contains lists RRGGBBAA|RRGGBBAA
+    const mashMap = new Map();
+    const keyify = (arr) => arr.join(',');
+
     // fill serializedIndexs, serializedTransforms
     for ([faceId, faceTransfroms] of Object.entries(id2transform)){
         if (faceTransfroms.length === 0) {
@@ -346,16 +351,28 @@ MAIN.writeTransformsAndRender = (id2transform) => {
                 "T_size": 1,
                 "T_type": T_type,
             })
-            nextIndex = maxIndex; // remember my index for next iteration
 
             // Create Data
             const data = MAIN.transform_parsers[T_type].encode(tfJson["data"]);
 
-            // Serialize
-            serializedTransforms[maxIndex] = serialize3BytesToRGBA(header)
-            maxIndex++;
-            serializedTransforms[maxIndex] = serialize3BytesToRGBA(data)
-            maxIndex++;
+            const key = keyify([header, data])
+            const prev = mashMap.get(key)
+            if (prev != undefined) {
+                // this exact HEADER + DATA has been written before, reuse that rather than using up space
+                nextIndex = prev;
+            } else {
+                // Brand new transform
+                mashMap.set(key, maxIndex)
+
+                // remember my index for next iteration
+                nextIndex = maxIndex;
+
+                // Serialize
+                serializedTransforms[maxIndex] = serialize3BytesToRGBA(header)
+                maxIndex++;
+                serializedTransforms[maxIndex] = serialize3BytesToRGBA(data)
+                maxIndex++;
+            }
 
             logHexAndBin(data, tfJson);
         }
