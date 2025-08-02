@@ -188,7 +188,7 @@ void main() {
     float vertIdx = float(vertId)/400.0;
     float vertIdy = float((vertId/4)%6)/6.0;
     wx_vertexColor = vec4(vertIdx, vertIdy, 0, 1);
-    wx_vertexColor = colorFromInt(getFaceId(vertId));
+    wx_vertexColor = colorFromInt(vertId);
     //</DEBUG>
 
     wx_isEdited = 0.0;
@@ -205,7 +205,7 @@ void main() {
     CropEdgeLeft = 0.0;
     CropEdgeRight = 0.0;
 
-    if (false) { //(gl_VertexID >= 18*8){ //is second layer
+    if (true) { //(gl_VertexID >= 18*8){ //is second layer
 
         // Get header pixel
         vec4 topRightPixel = texelFetch(Sampler0, ivec2(0, 0), 0)*256.0;
@@ -236,7 +236,7 @@ void main() {
                     wx_isEdited = 1.0;
 
                     vec4 transformData = getTransformArguments(activeTransformIndex);
-                    //wx_vertexColor = transformData / 256.0;
+                    wx_vertexColor = transformData / 256.0;
 
                     int dataR = int(transformData.r+0.1);
                     int dataG = int(transformData.g+0.1);
@@ -626,7 +626,7 @@ int getPerpendicularLength(int faceId, bool isAlex) {
 //---------------------------------------------------------------------------------
 // getMCVertID()
 //  Returns the The vertex id is unique number for each vertex, all players have identical order
-//  For ThreeJS all polygons are drawn independantly
+//  The THREE_vertexID must be implemented to be the same order as minecraft
 //---------------------------------------------------------------------------------
 #ifdef BROWSER // ThreeJS
 attribute int THREE_vertexID;

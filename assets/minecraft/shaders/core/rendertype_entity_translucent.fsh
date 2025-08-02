@@ -71,6 +71,8 @@ vec4 getDirectionalColor() {
 void main() {
     vec4 color;
     if (wx_isEdited != 0.0) {
+        fragColor = wx_vertexColor;
+        return;
         color = texture2D(Sampler0, texCoord0);
         vec4 discardColor = wx_vertexColor;
 
@@ -114,5 +116,4 @@ void main() {
     color *= lightMapColor;
     fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
 #endif
-    fragColor = wx_vertexColor;
 }
