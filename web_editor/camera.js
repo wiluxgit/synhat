@@ -162,7 +162,7 @@ async function main() {
           const geometry = child.geometry;
           const count = geometry.attributes.position.count;
           const ids = new Int32Array(count);
-          for (let faceId = 0; faceId < count; faceId += 1) {
+          for (let faceId = 0; faceId < count; faceId++) {
             const offset = faceId*4;
             // each face consists of 2 triangles, 3 verts each
             const trisIx = faceId*6;

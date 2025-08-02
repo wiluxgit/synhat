@@ -188,7 +188,7 @@ void main() {
     float vertIdx = float(vertId)/400.0;
     float vertIdy = float((vertId/4)%6)/6.0;
     wx_vertexColor = vec4(vertIdx, vertIdy, 0, 1);
-    wx_vertexColor = colorFromInt(vertId);
+    wx_vertexColor = colorFromInt(getFaceId(vertId) + 5*getCornerId(vertId));
     //</DEBUG>
 
     wx_isEdited = 0.0;

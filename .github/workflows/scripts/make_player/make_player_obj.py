@@ -1,4 +1,6 @@
+from typing import Generator
 import numpy as np
+from numpy.typing import NDArray
 
 partname_head = "Head"
 partname_body = "Body"
@@ -45,12 +47,12 @@ def run():
 # order: [head, body, rarm, larm, rleg, lleg, ohead, olleg, orleg, orarm, olarm, obody]
 #
     ordfaces = [
-        (4,0,3,7),
-        (1,5,6,2),
-        (4,5,1,0),
-        (3,2,6,7),
-        (0,1,2,3),
-        (5,4,7,6),
+        (4,5,1,0), # top
+        (3,2,6,7), # bottom
+        (1,5,6,2), # right
+        (0,1,2,3), # front
+        (4,0,3,7), # left
+        (5,4,7,6), # back
     ]
 
     pix1 = np.array([
@@ -103,13 +105,13 @@ def run():
     parts = [
         (partname_head, head, origin_head),
         (partname_body, body, origin_body),
-        (partname_rarm, rarm, origin_rarm),
         (partname_larm, larm, origin_larm),
-        (partname_rleg, rleg, origin_rleg),
+        (partname_rarm, rarm, origin_rarm),
         (partname_lleg, lleg, origin_lleg),
+        (partname_rleg, rleg, origin_rleg),
         (partname_ohead, ohead, origin_ohead),
-        (partname_olleg, olleg, origin_olleg),
         (partname_orleg, orleg, origin_orleg),
+        (partname_olleg, olleg, origin_olleg),
         (partname_orarm, orarm, origin_orarm),
         (partname_olarm, olarm, origin_olarm),
         (partname_obody, obody, origin_obody),
@@ -117,14 +119,14 @@ def run():
     generateUV2FaceidCode(parts)
     generateAreaToFaceCode(parts)
 
-    with open("steve.obj", "w+") as f:
+    with open("C:/Users/wilux/AppData/Roaming/.minecraft/resourcepacks/synhat-dev/web_editor/assets/steve.obj", "w+") as f:
         f.write("# Made by Wilux\n")
         f.write("mtllib steve.mtl\n\n")
 
         _vid, _vtid, _vnid, _fid = (1,1,1,1)
 
         for (name, cube, texorigin) in parts:
-            f.write(f"o {name}\n")
+            #f.write(f"o {name}\n")
             _vid, _vtid, _vnid, _fid = writeCube(f, ordfaces,
                 cube=cube, texOrg=texorigin, partName=name,
                 vid=_vid, vtid=_vtid, vnid=_vnid, fid=_fid
@@ -180,20 +182,22 @@ def writeCube(f, ordfaces, cube, texOrg, partName, vid, vtid, vnid, fid):
         #f.write(f"fv {vcoord[0]} {vcoord[1]} {vcoord[2]}\n")
         #f.write(f"fv {vcoord[0]} {vcoord[2]} {vcoord[3]}\n")
 
-def counterClockwiseCornerUVIds(faceid, offset):
+def counterClockwiseCornerUVIds(faceid, offset) -> Generator[int, None, None]:
     i = faceid
     if i == 0:
-        return (offset + i for i in (6,5,10,11))
+        return (offset + i for i in (1,0,4,5)) # top
     elif i == 1:
-        return (offset + i for i in (4,3,8,9))
+        return (offset + i for i in (6,5,1,2)) # bottom
     elif i == 2:
-        return (offset + i for i in (1,0,4,5))
+        return (offset + i for i in (4,3,8,9)) # right
     elif i == 3:
-        return (offset + i for i in (6,5,1,2))
+        return (offset + i for i in (5,4,9,10)) # front
     elif i == 4:
-        return (offset + i for i in (5,4,9,10))
+        return (offset + i for i in (6,5,10,11)) # left
     elif i == 5:
-        return (offset + i for i in (7,6,11,12))
+        return (offset + i for i in (7,6,11,12)) # back
+    else:
+        raise Exception(f"{faceid=}")
 
 def corverUvs(texOrigin, partname):
     size = cubeSizeInPixels(partname)
@@ -230,21 +234,20 @@ def cubeSizeInPixels(partname):
         return np.array([4,12,4])
     raise ValueError(f"{partname} is not a known part")
 
-def faceNormal(faceid):
-
+def faceNormal(faceid) -> NDArray[np.floating]:
     match faceid:
         case 0:
-            ret = np.array([1,0,0])
+            ret = np.array([0,1,0]) # top
         case 1:
-            ret = np.array([-1,0,0])
+            ret = np.array([0,-1,0]) # bottom
         case 2:
-            ret = np.array([0,1,0])
+            ret = np.array([-1,0,0]) # right
         case 3:
-            ret = np.array([0,-1,0])
+            ret = np.array([0,0,1]) # front
         case 4:
-            ret = np.array([0,0,1])
+            ret = np.array([1,0,0]) # left
         case 5:
-            ret = np.array([0,0,-1])
+            ret = np.array([0,0,-1]) # back
     return ret*0.444
 
 def mulin(arr, scales):
