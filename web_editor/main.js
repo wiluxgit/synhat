@@ -78,6 +78,17 @@ function loadPngfilebuf(buf) {
         }
     ))
 }
+
+/**
+ * Runs a synchronous WebGL function repeatedly until it succeeds without errors.
+ * There does not appear to exist a way to hook errors so i must poll for them
+ *
+ * @param {() => void} func - The WebGL function to execute that may produce errors.
+ * @param {number} [maxtires=10] - Maximum number of retry attempts before giving up.
+ * @param {number} [retryDelayMs=500] - Delay in milliseconds between retry attempts.
+ * @returns {Promise<void>} Resolves when the function executes without a WebGL error,
+ * or rejects after exhausting retries (alerts user on failure).
+ */
 async function glRetry(func, maxtires=10, retryDelayMs=500) {
     let attempts = 0
     let err = undefined
@@ -172,7 +183,7 @@ function getByteOffset_transform(transformIndex) {
 /**
  * @param {number} x  x coord (from top left)
  * @param {number} y  y coord (from top left)
- * @param {number?} c color
+ * @param {number} [c=0] color
  * @returns {number} Offset in the imdageData matrix
  */
 function getByteOffset(x, y, c=0) {

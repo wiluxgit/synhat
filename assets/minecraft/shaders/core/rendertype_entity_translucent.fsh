@@ -82,12 +82,12 @@ void main() {
         }
 
         if (texCoord0.x < wx_clipMin.x || texCoord0.x > wx_clipMax.x) {
-            //discard;
+            discard;
             fragColor = vec4(0.5, 0.5, 0.5, 1.0) - vec4(checkerSmall, checkerSmall, checkerSmall, 0) / 3.0 ;
             return;
         }
         if (texCoord0.y < wx_clipMin.y || texCoord0.y > wx_clipMax.y) {
-            //discard;
+            discard;
             fragColor = vec4(0.66, 0.66, 0.66, 1.0) - vec4(checkerSmall, checkerSmall, checkerSmall, 0) / 3.0;
             return;
         }

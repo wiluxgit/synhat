@@ -248,7 +248,7 @@ def faceNormal(faceid) -> NDArray[np.floating]:
             ret = np.array([1,0,0]) # left
         case 5:
             ret = np.array([0,0,-1]) # back
-    return ret*0.444
+    return ret*0.555
 
 def mulin(arr, scales):
     return np.array([(row * scales) for row in arr])
