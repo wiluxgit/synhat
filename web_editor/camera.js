@@ -157,6 +157,24 @@ async function main() {
 
       root.traverse(async (child) => {
         if (child.isMesh) {
+          // Add vertexID attribute in the same order as minecraft does
+          // see gl_VertexID.png
+          const geometry = child.geometry;
+          const count = geometry.attributes.position.count;
+          const ids = new Int32Array(count);
+          for (let faceId = 0; faceId < count; faceId += 1) {
+            const offset = faceId*4;
+            // each face consists of 2 triangles, 3 verts each
+            const trisIx = faceId*6;
+            ids[trisIx+0] = offset + 0; //    top left  poly: TOP RIGHT
+            ids[trisIx+1] = offset + 1; //    top left  poly: TOP LEFT
+            ids[trisIx+2] = offset + 2; //    top left  poly: BOTTOM LEFT
+            ids[trisIx+3] = offset + 0; // bottom right poly: TOP RIGHT
+            ids[trisIx+4] = offset + 2; // bottom right poly: BOTTOM LEFT
+            ids[trisIx+5] = offset + 3; // bottom right poly: BOTTOM RIGHT
+          }
+          geometry.setAttribute('THREE_vertexID', new THREE.BufferAttribute(ids, 1));
+
           // Hack to force in webgl texture in three
           // https://stackoverflow.com/questions/29325906/can-you-use-raw-webgl-textures-with-three-js
           const texture = new THREE.Texture();
@@ -167,8 +185,8 @@ async function main() {
           async function loadShaderReplaceVersion(url) {
             const source = await fetch(url, { credentials: 'same-origin' }).then(res => res.text());
             if (/^\s*#version\s+.*$/m.test(source)) {
-              // THREEJS will prepend its own #version directive at the begining of the shader
-              // Because the shader must operate in minecraft (which requires the version diretive)
+              // THREEJS will prepend its own #version directive at the begining of the shader.
+              // But because the shader must operate in minecraft (which requires the version diretive)
               // we must replace the existing #version line with #define BROWSER instead
               return source.replace(/^(\s*#version\s+\d+)$/m, '#define BROWSER');
             } else {
