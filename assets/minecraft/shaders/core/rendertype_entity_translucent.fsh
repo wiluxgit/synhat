@@ -71,8 +71,6 @@ vec4 getDirectionalColor() {
 void main() {
     vec4 color;
     if (wx_isEdited != 0.0) {
-        fragColor = wx_vertexColor;
-        return;
         color = texture2D(Sampler0, texCoord0);
         vec4 discardColor = wx_vertexColor;
 

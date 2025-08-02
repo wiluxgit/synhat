@@ -121,7 +121,8 @@ MAIN.renderImageNow = () => {
             hexstr([0,1,2,3].map((c) => imageData[getByteOffset(x,y,c)]))
         )
     )
-    console.log("MAIN.renderImageNow", firstbyte, dataSquare)
+    console.log("MAIN.renderImageNow", firstbyte)
+    console.log(dataSquare)
 
     canvasSkinPreviewCtx.texImage2D(
         gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
@@ -151,42 +152,54 @@ function hexstr(buf, extra="") {
 function logHexAndBin(buf, extra="") {
     const binStr = [...buf].map((b) => b.toString(2).padStart(8, "0")).join("_");
     const hexStr = [...buf].map((b) => b.toString(16).padStart(2, "0").toUpperCase()).join("_")
-    console.log(`0b${binStr} | 0x${hexStr} (len=${buf.length}) ${extra}`);
+    console.log(`0b${binStr} | 0x${hexStr} (len=${buf.length})`, extra);
 }
 function getByteOffset_index(faceId) {
-    const rgbaIndex = faceId % 3;
-    const pixelIndex = faceId / 3;
-    const x = (pixelIndex + 8) % 8;
-    const y = (pixelIndex + 8) / 8;
+    const rgbaIndex = Math.floor(faceId % 3) << 0;
+    const pixelIndex = Math.floor(faceId / 3) << 0;
+    const x = Math.floor((pixelIndex + 8) % 8) << 0;
+    const y = Math.floor((pixelIndex + 8) / 8) << 0;
     return getByteOffset(x,y,rgbaIndex)
 }
 function getByteOffset_transform(transformIndex) {
     const temp = 32 + transformIndex;
-    let x = temp % 8;
-    let y = temp / 8;
+    let x = Math.floor(temp % 8) << 0;
+    let y = Math.floor(temp / 8) << 0;
     if (y >= 8) {
         x += 24;
         y -= 8;
     }
     return getByteOffset(x,y)
 }
+
+/**
+ * @param {number} x  x coord (from top left)
+ * @param {number} y  y coord (from top left)
+ * @param {number?} c color
+ * @returns {number} Offset in the imdageData matrix
+ */
 function getByteOffset(x, y, c=0) {
     y = 63-y
     return 4 * (y * 64 + x) + c;
 }
-//function getFaceOperationEntryPos(faceId) {
-//    let c = faceId % 4;
-//    let temp = 2 + ((faceId / 4) >> 0)
-//    let x = temp % 8
-//    let y = (temp / 8) >> 0
-//    return [x, y, c]
-//}
-//function getTransformPosition(transform_arugment_index) {
-//    let temp = (8*2+4) + transform_arugment_index;
-//    let x = temp % 8;
-//    let y = (temp / 8) >> 0;
-//    return [x, y]
-//}
+
+/**
+ * Serializes a 3-byte Uint8Array (RGB) into a 32-bit unsigned integer with A=0xFF.
+ * Format: 0xRRGGBBAA (Red is the highest byte, Alpha in the lowest).
+ *
+ * @param {Uint8Array} uInt8Array - A 3-byte Uint8Array representing RGB color.
+ * @returns {number} A 32-bit unsigned integer in RGBA format.
+ */
+function serialize3BytesToRGBA(uInt8Array) {
+    if (!(uInt8Array instanceof Uint8Array) || uInt8Array.length !== 3) {
+        throw new Error("Expected Uint8Array of length 3");
+    }
+    const r = uInt8Array[2];
+    const g = uInt8Array[1];
+    const b = uInt8Array[0];
+    const a = 0xFF;
+    return (r << 24) | (g << 16) | (b << 8) | a;
+}
 
 MAIN.debounce = (func, timeout = 500) => {
     let timer;
@@ -215,7 +228,7 @@ MAIN.downloadCanvas = () => {
 MAIN.readtransforms = (id2transformOutput) => {
     // Wipe all transforms
     [...Array(72).keys()].map((i) => id2transformOutput[i] = [])
-    
+
     faceId2TfIndex = {}
     // read index
     for (const index of [...Array(72).keys()]) {
@@ -225,14 +238,14 @@ MAIN.readtransforms = (id2transformOutput) => {
             continue // FIXME 0 is valid?
         }
         faceId2TfIndex[index] = data
-        console.log(`readtransforms> F[${offset}] = ${data}`, parse)
+        console.log(`readtransforms> F[x=${x}, y=${y}] = ${data}`, data)
     }
 
     for (let [faceindex, tfIndex] of Object.entries(faceId2TfIndex)) {
         id2transformOutput[faceindex] = []
 
         let sortno = 1 // number used for list sorting
-        while (tfIndex != 255) {
+        while (!(tfIndex == 255 || tfIndex == 0)) {
             // HEADER
             const headerOffset = getByteOffset_transform(tfIndex)
             const headerBuf = new Uint8Array(4)
@@ -242,6 +255,7 @@ MAIN.readtransforms = (id2transformOutput) => {
             const T_next = header["T_next"]
             const T_size = header["T_size"]
             const T_type = header["T_type"]
+            console.log("T_type", T_type)
 
             // DATA
             const dataOffset = getByteOffset_transform(tfIndex+1)
@@ -267,11 +281,11 @@ MAIN.readtransforms = (id2transformOutput) => {
 MAIN.writeTransformsAndRender = (id2transform) => {
     console.log("MAIN.writeTransformsAndRender")
 
-    const serializedIndexs = new Uint8Array(72)
-    const serializedTransforms = new Uint32Array(96)
+    const serializedTransforms = new Uint32Array(96).fill(0xFFFFFFFF);
+    const serializedIndexs = new Uint8Array(72).fill(0xFF);
+    let maxIndex = 0
 
     // fill serializedIndexs, serializedTransforms
-    let transformIndex = 1
     for ([faceId, faceTransfroms] of Object.entries(id2transform)){
         if (faceTransfroms.length === 0) {
             continue
@@ -280,24 +294,27 @@ MAIN.writeTransformsAndRender = (id2transform) => {
         // next of last entry is always 255
         let nextIndex = 255
 
-        for (let faceTransfrom of [...faceTransfroms].reverse()) {
-            const T_type = faceTransfrom.type
+        for (let tfJson of [...faceTransfroms].reverse()) {
+            const T_type = tfJson.type
 
             // Create Header
             const header = MAIN.transformHeaderParser.encode({
-                "T_next": nextSerialized,
+                "T_next": nextIndex,
                 "T_size": 1,
                 "T_type": T_type,
             })
-            serializedTransforms[transformIndex] = header.readInt32LE(0)
-            transformIndex++;
+            nextIndex = maxIndex; // remember my index for next iteration
 
             // Create Data
-            const data = MAIN.transform_parsers[T_type].encode(transform);
-            serializedTransforms[transformIndex] = tfBuf.readInt32LE(0)
-            transformIndex++;
+            const data = MAIN.transform_parsers[T_type].encode(tfJson["data"]);
 
-            logHexAndBin(tfBuf, `= serializedTransforms[${transformIndex}]`);
+            // Serialize
+            serializedTransforms[maxIndex] = serialize3BytesToRGBA(header)
+            maxIndex++;
+            serializedTransforms[maxIndex] = serialize3BytesToRGBA(data)
+            maxIndex++;
+
+            logHexAndBin(data, tfJson);
         }
 
         // First facetransform should be used in lookup.
@@ -310,8 +327,8 @@ MAIN.writeTransformsAndRender = (id2transform) => {
         const offset = getByteOffset_index(index)
         imageData[offset] = int
 
-        if(int != 0) {
-            console.log(`F pos=${index} offset=${offset}, x=${x}, y=${y}, c=${c} value=0x${int.toString(16)}`)
+        if(int != 0xFF) {
+            console.log(`F pos=${index} offset=${offset}, value=0x${int.toString(16)}`)
         }
     }
 
@@ -323,11 +340,11 @@ MAIN.writeTransformsAndRender = (id2transform) => {
         imageData[offset+2] = (int >> 8) & 0xff
         imageData[offset+3] = (int >> 0) & 0xff
 
-        if(int != 0) {
+        if(int != 0xFFFFFFFF) {
             const hexstr = [...Array(4).keys()].map(
                 (x) => imageData[offset+x].toString(16).padStart(2, "0")
             ).join("|")
-            console.log(`T pos=${index} offset=${offset}, x=${x}, y=${y} value=${hexstr}`)
+            console.log(`T pos=${index} offset=${offset}, value=${hexstr}`)
         }
     }
 

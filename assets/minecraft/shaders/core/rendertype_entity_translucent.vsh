@@ -184,10 +184,10 @@ void main() {
     int vertId = getVertId();
 
     //<DEBUG>
-    float vertIdx = float(vertId)/400.0;
-    float vertIdy = float((vertId/4)%6)/6.0;
-    wx_vertexColor = vec4(vertIdx, vertIdy, 0, 1);
-    wx_vertexColor = colorFromInt(vertId);
+    //float vertIdx = float(vertId)/400.0;
+    //float vertIdy = float((vertId/4)%6)/6.0;
+    //wx_vertexColor = vec4(vertIdx, vertIdy, 0, 1);
+    //wx_vertexColor = colorFromInt(vertId);
     //</DEBUG>
 
     wx_isEdited = 0.0;
@@ -222,7 +222,7 @@ void main() {
 
             int nextTfIndex = lookupTransformIndex(faceId);
 
-            while (!(nextTfIndex != 255 || nextTfIndex == 0)) {
+            while (nextTfIndex != 255) {
                 wx_isEdited = 1.0;
 
                 // HEADER
@@ -425,7 +425,7 @@ void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB)
             ClipScale.y *= scale;
             ClipScroll.y -= scroll;
         }
-        wx_vertexColor = colorFromInt(asymEdge);
+        //wx_vertexColor = colorFromInt(asymEdge);
     }
 }
 void applyUVCrop(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
@@ -466,7 +466,7 @@ void applyUVOffset(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
     NewFaceCenter += (vec2(float(xmax+xmin), float(ymax+ymin)) / 64.0) / 2.0;
 
     // Debug
-    wx_vertexColor = colorFromInt(cornerId);
+    //wx_vertexColor = colorFromInt(cornerId);
     return;
 }
 void applyPostFlags(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
@@ -502,18 +502,18 @@ int lookupTransformIndex(int faceId) {
     int pixelIndex = faceId / 3;
     int x = (pixelIndex + 8) % 8;
     int y = (pixelIndex + 8) / 8;
-    vec4 pixelData = texelFetch(Sampler0, ivec2(x, y), 0)*256.0;
+    vec4 pixelData = texelFetch(Sampler0, ivec2(x, y), 0) * 255.0;
 
-    switch (faceId % 4) {
-        case 0: return int(pixelData.r+0.1);
-        case 1: return int(pixelData.g+0.1);
-        case 2: return int(pixelData.b+0.1);
-        case 3: return int(pixelData.a+0.1);
+    switch (rgbaIndex) {
+        case 0: return int(round(pixelData.r));
+        case 1: return int(round(pixelData.g));
+        case 2: return int(round(pixelData.b));
+        default: return 0; // unreachable but WEB GL complains if not defined
     }
 }
 //---------------------------------------------------------------------------------
 // lookupTransformBytes()
-//  returns the value for a specific faceId
+//  returns the RGB value as an ivec3 given a transformIndex
 //---------------------------------------------------------------------------------
 ivec3 lookupTransformBytes(int transformIndex) {
     int temp = 32 + transformIndex;
@@ -523,8 +523,12 @@ ivec3 lookupTransformBytes(int transformIndex) {
         x += 24;
         y -= 8;
     }
-    vec4 pixelData = texelFetch(Sampler0, ivec2(x, y), 0)*256.0;
-    return ivec3(pixelData.r+0.1, pixelData.g+0.1,pixelData.b+0.1);
+    vec4 pixelData = texelFetch(Sampler0, ivec2(x, y), 0) * 255.0;
+    return ivec3(
+        round(pixelData.r),
+        round(pixelData.g),
+        round(pixelData.b)
+    );
 }
 
 // bit data helpers

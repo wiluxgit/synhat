@@ -53,14 +53,20 @@ The byte stores an index to the transform stored in `T`, with the following exce
 
 The following image showcases where the different Face IDs are located ![image](./assets/gl_VertexID.png)
 
-### Reference C code for getting finding the correct byte given the face ID:
+### Reference glsl code for getting finding the correct byte given the face ID:
 ```c
-uint8_t lookupIndex(uint8_t faceid) {
-    uint32_t rgbaIndex = faceId % 3;
-    uint32_t pixelIndex = faceId / 3;
-    uint32_t x = (pixelIndex + 8) % 8;
-    uint32_t y = (pixelIndex + 8) / 8;
-    return 0xFF & (PIXEL_FETCH(x, y) << pixelIndex);
+int lookupTransformIndex(int faceId) {
+    int rgbaIndex = faceId % 3;
+    int pixelIndex = faceId / 3;
+    int x = (pixelIndex + 8) % 8;
+    int y = (pixelIndex + 8) / 8;
+    vec4 pixelData = texelFetch(Sampler0, ivec2(x, y), 0) * 255.0;
+
+    switch (rgbaIndex) {
+        case 0: return int(round(pixelData.r));
+        case 1: return int(round(pixelData.g));
+        case 2: return int(round(pixelData.b));
+    }
 }
 ```
 
@@ -75,17 +81,22 @@ Each transform uses all 4 bytes of a pixel.
 explanation|T_next|T_size|T_type|  -  |<depends on type>|  -  ...
 ```
 
-### Reference C code for getting finding the correct RGBA bytes given a Tranform Index
+### Reference glsl code for getting finding the correct RGBA bytes given a Tranform Index
 ```c
-uint32_t lookupTransformBytes(uint8_t transformIndex) {
-    uint32_t temp = 32 + transformIndex;
-    uint32_t x = temp % 8;
-    uint32_t y = temp / 8;
+ivec3 lookupTransformBytes(int transformIndex) {
+    int temp = 32 + transformIndex;
+    int x = temp % 8;
+    int y = temp / 8;
     if (y >= 8) {
         x += 24;
         y -= 8;
     }
-    return PIXEL_FETCH(x, y);
+    vec4 pixelData = texelFetch(Sampler0, ivec2(x, y), 0) * 255.0;
+    return ivec3(
+        round(pixelData.r),
+        round(pixelData.g),
+        round(pixelData.b)
+    );
 }
 ```
 
