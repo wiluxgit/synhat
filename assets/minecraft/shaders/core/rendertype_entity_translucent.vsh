@@ -222,7 +222,13 @@ void main() {
 
             int nextTfIndex = lookupTransformIndex(faceId);
 
+            int emergencyStop = 0;
             while (nextTfIndex != 255) {
+                // TODO document this
+                if(++emergencyStop >= 10) {
+                    break; // This is needed in order to prevent the render from crashing
+                }
+
                 wx_isEdited = 1.0;
 
                 // HEADER

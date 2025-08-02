@@ -7,9 +7,10 @@ const canvasSkinPreview = document.getElementById("canvasSkinPreview")
 const canvasSkinPreviewCtx = canvasSkinPreview.getContext("webgl2", {preserveDrawingBuffer: true})
 const canvasCameraCtx = document.getElementById("camera").getContext("webgl2")
 
+// Temp, exists to access gl enums
 const gl = canvasSkinPreviewCtx
 
-let skinName = "steve.png"
+// Global BGRA??? buffer for storing the extmodel skin file
 const imageData = new Uint8Array(64*64*4)
 
 MAIN = {}
@@ -27,7 +28,6 @@ MAIN.changedUploadImage = async (id2transformOutput, inputEvent) => {
         const reader = new FileReader()
         reader.onerror = ((e) => reject(e))
         reader.onload = ((e) => {
-            skinName = fileName
             const fileContent = e.target.result
             console.log("MAIN.changedUploadImage>", fileContent)
             resolve(fileContent)
@@ -43,8 +43,7 @@ MAIN.loadImage = async (id2transformOutput, nullablePngbufPromise) => {
     if (nullablePngbufPromise !== undefined) {
         imgageFetch = nullablePngbufPromise
     } else {
-        skinName = "steve.png"
-        imgageFetch = fetch("assets/steve.png", {credentials: 'same-origin'})
+        imgageFetch = fetch("assets/examples/herbex.png", {credentials: 'same-origin'})
             .then((response) => response.arrayBuffer())
     }
     await imgageFetch.then((buf) => loadPngfilebuf(buf))
@@ -115,14 +114,12 @@ MAIN.renderImage = () => {
     MAIN.debounce(MAIN.renderImageNow)()
 }
 MAIN.renderImageNow = () => {
-    const firstbyte = [0,1,2,3].map((x) => imageData[getByteOffset(0,0,x)])
     const dataSquare = [...Array(8).keys()].map((y) =>
         [...Array(8).keys()].map((x) =>
             hexstr([0,1,2,3].map((c) => imageData[getByteOffset(x,y,c)]))
         )
     )
-    console.log("MAIN.renderImageNow", firstbyte)
-    console.log(dataSquare)
+    console.log("MAIN.renderImageNow", dataSquare)
 
     canvasSkinPreviewCtx.texImage2D(
         gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0,
@@ -184,11 +181,11 @@ function getByteOffset(x, y, c=0) {
 }
 
 /**
- * Serializes a 3-byte Uint8Array (RGB) into a 32-bit unsigned integer with A=0xFF.
+ * Serializes a 3-byte Uint8Array [B,G,R] into a 32-bit unsigned integer with A=0xFF.
  * Format: 0xRRGGBBAA (Red is the highest byte, Alpha in the lowest).
  *
  * @param {Uint8Array} uInt8Array - A 3-byte Uint8Array representing RGB color.
- * @returns {number} A 32-bit unsigned integer in RGBA format.
+ * @returns {number} - A 32-bit unsigned integer in RGBA format.
  */
 function serialize3BytesToRGBA(uInt8Array) {
     if (!(uInt8Array instanceof Uint8Array) || uInt8Array.length !== 3) {
@@ -199,6 +196,21 @@ function serialize3BytesToRGBA(uInt8Array) {
     const b = uInt8Array[0];
     const a = 0xFF;
     return (r << 24) | (g << 16) | (b << 8) | a;
+}
+
+/**
+ * Extract a single Uint8Array [R, G, B] from a Uint8Array [B, G, R, A, ...]
+ *
+ * @param {Uint8Array} array - The input BGRA-formatted Uint8Array
+ * @param {number} arrayOffset - The offset (in bytes) into the input array where the BGRA pixel starts
+ * @returns {Uint8Array} - A new Uint8Array containing the single RGB triplet
+ */
+function RGBfromBGRAarray(array, arrayOffset) {
+    return new Uint8Array([
+        array[arrayOffset + 2], // R
+        array[arrayOffset + 1], // G
+        array[arrayOffset]      // B
+    ]);
 }
 
 MAIN.debounce = (func, timeout = 500) => {
@@ -234,33 +246,31 @@ MAIN.readtransforms = (id2transformOutput) => {
     for (const index of [...Array(72).keys()]) {
         const offset = getByteOffset_index(index)
         const data = imageData[offset]
-        if (data == 0 || data == 0xff) {
+        if (data == 0xff) {
             continue // FIXME 0 is valid?
         }
         faceId2TfIndex[index] = data
-        console.log(`readtransforms> F[x=${x}, y=${y}] = ${data}`, data)
+        console.log(`readtransforms> I[${index}] = ${data}`, data)
     }
 
     for (let [faceindex, tfIndex] of Object.entries(faceId2TfIndex)) {
         id2transformOutput[faceindex] = []
 
         let sortno = 1 // number used for list sorting
-        while (!(tfIndex == 255 || tfIndex == 0)) {
+        while (tfIndex != 255) {
             // HEADER
             const headerOffset = getByteOffset_transform(tfIndex)
-            const headerBuf = new Uint8Array(4)
-            for (let i of [0,1,2,3]) headerBuf[3-i] = imageData[headerOffset+i]
+            const headerBuf = RGBfromBGRAarray(imageData, headerOffset)
 
             const header = MAIN.transformHeaderParser.parse(headerBuf)
             const T_next = header["T_next"]
             const T_size = header["T_size"]
             const T_type = header["T_type"]
-            console.log("T_type", T_type)
+            console.log("header=", headerBuf, header, imageData[getByteOffset(0,0,0)].toString(16))
 
             // DATA
             const dataOffset = getByteOffset_transform(tfIndex+1)
-            const dataBuf = new Uint8Array(4)
-            for (let i of [0,1,2,3]) dataBuf[3-i] = imageData[dataOffset+i];
+            const dataBuf = RGBfromBGRAarray(imageData, dataOffset)
 
             const data = MAIN.transform_parsers[T_type].parse(dataBuf)
 
