@@ -188,7 +188,7 @@ void main() {
     float vertIdx = float(vertId)/400.0;
     float vertIdy = float((vertId/4)%6)/6.0;
     wx_vertexColor = vec4(vertIdx, vertIdy, 0, 1);
-    wx_vertexColor = colorFromInt(getFaceId(vertId) + 5*getCornerId(vertId));
+    wx_vertexColor = colorFromInt(getFaceId(vertId));
     //</DEBUG>
 
     wx_isEdited = 0.0;
@@ -536,61 +536,98 @@ vec4 colorFromInt(int i) {
     }
 
     switch (i%8) {
-        case 0: return vec4(1,0,0,1); // R
-        case 1: return vec4(0,1,0,1); // G
-        case 2: return vec4(0,0,1,1); // B
+        case 0: return vec4(1,0,0,1); // RED
+        case 1: return vec4(0,1,0,1); // GREEN
+        case 2: return vec4(0,0,1,1); // BBLUE
         case 3: return vec4(1,1,0,1); // YELLOW
         case 4: return vec4(0,1,1,1); // CYAN
         case 5: return vec4(1,0,1,1); // MAGENTA
-        case 6: return vec4(1,1,1,1);
-        case 7: return vec4(0,0,0,1);
+        case 6: return vec4(1,1,1,1); // WHITE
+        case 7: return vec4(0,0,0,1); // BLACK
     }
 }
 
-// retuns the length (in pixels) to the back face for a given face
+
+//---------------------------------------------------------------------------------
+// getPerpendicularLength()
+//  retuns the length (in pixels) to the back face for a given face
+//---------------------------------------------------------------------------------
 int getPerpendicularLength(int faceId, bool isAlex) {
-    int facetype = faceId/6;
-    int faceAxis = faceId%6;
-    int perpendicularLength;
-    switch(facetype) {
-        case 0:
-        case 6: //Head
+    #define BODY_PART_HEAD    0
+    #define BODY_PART_BODY    1
+    #define BODY_PART_ARM_R   2
+    #define BODY_PART_ARM_L   3
+    #define BODY_PART_LEG_R   4
+    #define BODY_PART_LEG_L   5
+    #define BODY_PART_HAT     6
+    #define BODY_PART_PANT_L  7
+    #define BODY_PART_PANT_R  8
+    #define BODY_PART_SLEVE_L 9
+    #define BODY_PART_SLEVE_R 10
+    #define BODY_PART_JACKET  11
+    #define FACE_AXIS_TOP    0
+    #define FACE_AXIS_BOTTOM 1
+    #define FACE_AXIS_RIGHT  2
+    #define FACE_AXIS_FRONT  3
+    #define FACE_AXIS_LEFT   4
+    #define FACE_AXIS_BACK   5
+
+    int bodyPart = faceId / 6;
+    int faceAxis = faceId % 6;
+    switch(bodyPart) {
+        case BODY_PART_HEAD:
+        case BODY_PART_HAT:
             return 8;
-        case 1:
-        case 2:
-        case 7: // L-Pant
-        case 8: // R-Pant
-            if(faceAxis == 2 || faceAxis == 3){ // Top/Bot
-                return 12;
-            } else {
-                return 4;
+        case BODY_PART_BODY:
+        case BODY_PART_JACKET:
+            switch(faceAxis) {
+                case FACE_AXIS_TOP:
+                case FACE_AXIS_BOTTOM:
+                    return 12;
+                case FACE_AXIS_LEFT:
+                case FACE_AXIS_RIGHT:
+                    return 8;
+                case FACE_AXIS_FRONT:
+                case FACE_AXIS_BACK:
+                    return 4;
             }
-        case 3:
-        case 4:
-        case 9: // R-Arm
-        case 10: // L-Arm
-            if(faceAxis == 2 || faceAxis == 3){ // Top/Bot
-                return 12;
-            } else {
-                return isAlex ? 3 : 4; // Account for Alex models
+        case BODY_PART_LEG_R:
+        case BODY_PART_LEG_L:
+        case BODY_PART_PANT_R:
+        case BODY_PART_PANT_L:
+            switch(faceAxis) {
+                case FACE_AXIS_TOP:
+                case FACE_AXIS_BOTTOM:
+                    return 12;
+                case FACE_AXIS_LEFT:
+                case FACE_AXIS_RIGHT:
+                case FACE_AXIS_FRONT:
+                case FACE_AXIS_BACK:
+                    return 4;
             }
-        case 5:
-        case 11:
-            if(faceAxis == 0 || faceAxis == 1) { // Left/Right
-                return 8;
-            } else if(faceAxis == 2 || faceAxis == 3) {// Top/Bot
-                return 12;
-            } else { // Front/Back
-                return 4;
+        case BODY_PART_ARM_R:
+        case BODY_PART_ARM_L:
+        case BODY_PART_SLEVE_R:
+        case BODY_PART_SLEVE_L:
+            switch(faceAxis) {
+                case FACE_AXIS_TOP:
+                case FACE_AXIS_BOTTOM:
+                    return 12;
+                case FACE_AXIS_LEFT:
+                case FACE_AXIS_RIGHT:
+                    return isAlex ? 3 : 4;
+                case FACE_AXIS_FRONT:
+                case FACE_AXIS_BACK:
+                    return 4;
             }
     }
 }
 
-// ---------------------------------------------------------------------------------
-// getMCVertID():
+//---------------------------------------------------------------------------------
+// getMCVertID()
 //  Returns the The vertex id is unique number for each vertex, all players have identical order
 //  For ThreeJS all polygons are drawn independantly
-// ---------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
 #ifdef BROWSER // ThreeJS
 attribute int THREE_vertexID;
 int getMCVertID() {
@@ -602,70 +639,146 @@ int getMCVertID() {
 }
 #endif
 
+//---------------------------------------------------------------------------------
+// initVanillaUV()
+//  initializes the follow globals
+//    vanillaCenterUV
+//    vanillaMinUV
+//    vanillaMaxUV
+//---------------------------------------------------------------------------------
 void initVanillaUV(int faceId, bool isAlex){
     initVanillaUV2(faceId, isAlex);
     vanillaCenterUV = (vanillaMinUV + vanillaMaxUV) / 2.0;
 }
 // Can be optimized
 void initVanillaUV2(int faceId, bool isAlex){
+    #define FACEID_HEAD_TOP       0
+    #define FACEID_HEAD_BOTTOM    1
+    #define FACEID_HEAD_RIGHT     2
+    #define FACEID_HEAD_FRONT     3
+    #define FACEID_HEAD_LEFT      4
+    #define FACEID_HEAD_BACK      5
+    #define FACEID_BODY_TOP       6
+    #define FACEID_BODY_BOTTOM    7
+    #define FACEID_BODY_RIGHT     8
+    #define FACEID_BODY_FRONT     9
+    #define FACEID_BODY_LEFT      10
+    #define FACEID_BODY_BACK      11
+    #define FACEID_ARM_R_TOP      12
+    #define FACEID_ARM_R_BOTTOM   13
+    #define FACEID_ARM_R_RIGHT    14
+    #define FACEID_ARM_R_FRONT    15
+    #define FACEID_ARM_R_LEFT     16
+    #define FACEID_ARM_R_BACK     17
+    #define FACEID_ARM_L_TOP      18
+    #define FACEID_ARM_L_BOTTOM   19
+    #define FACEID_ARM_L_RIGHT    20
+    #define FACEID_ARM_L_FRONT    21
+    #define FACEID_ARM_L_LEFT     22
+    #define FACEID_ARM_L_BACK     23
+    #define FACEID_LEG_R_TOP      24
+    #define FACEID_LEG_R_BOTTOM   25
+    #define FACEID_LEG_R_RIGHT    26
+    #define FACEID_LEG_R_FRONT    27
+    #define FACEID_LEG_R_LEFT     28
+    #define FACEID_LEG_R_BACK     29
+    #define FACEID_LEG_L_TOP      30
+    #define FACEID_LEG_L_BOTTOM   31
+    #define FACEID_LEG_L_RIGHT    32
+    #define FACEID_LEG_L_FRONT    33
+    #define FACEID_LEG_L_LEFT     34
+    #define FACEID_LEG_L_BACK     35
+    #define FACEID_HAT_TOP        36
+    #define FACEID_HAT_BOTTOM     37
+    #define FACEID_HAT_RIGHT      38
+    #define FACEID_HAT_FRONT      39
+    #define FACEID_HAT_LEFT       40
+    #define FACEID_HAT_BACK       41
+    #define FACEID_PANT_L_TOP     42
+    #define FACEID_PANT_L_BOTTOM  43
+    #define FACEID_PANT_L_RIGHT   44
+    #define FACEID_PANT_L_FRONT   45
+    #define FACEID_PANT_L_LEFT    46
+    #define FACEID_PANT_L_BACK    47
+    #define FACEID_PANT_R_TOP     48
+    #define FACEID_PANT_R_BOTTOM  49
+    #define FACEID_PANT_R_RIGHT   50
+    #define FACEID_PANT_R_FRONT   51
+    #define FACEID_PANT_R_LEFT    52
+    #define FACEID_PANT_R_BACK    53
+    #define FACEID_SLEVE_L_TOP    54
+    #define FACEID_SLEVE_L_BOTTOM 55
+    #define FACEID_SLEVE_L_RIGHT  56
+    #define FACEID_SLEVE_L_FRONT  57
+    #define FACEID_SLEVE_L_LEFT   58
+    #define FACEID_SLEVE_L_BACK   59
+    #define FACEID_SLEVE_R_TOP    60
+    #define FACEID_SLEVE_R_BOTTOM 61
+    #define FACEID_SLEVE_R_RIGHT  62
+    #define FACEID_SLEVE_R_FRONT  63
+    #define FACEID_SLEVE_R_LEFT   64
+    #define FACEID_SLEVE_R_BACK   65
+    #define FACEID_JACKET_TOP      66
+    #define FACEID_JACKET_BOTTOM   67
+    #define FACEID_JACKET_RIGHT    68
+    #define FACEID_JACKET_FRONT    69
+    #define FACEID_JACKET_LEFT     70
+    #define FACEID_JACKET_BACK     71
     switch(faceId) {
-    // +---------------------+
-    // |    PRIMARY LAYER    |
-    // +---------------------+
     // ======== Head ========
-        case 0: //Left Head
+        case FACEID_HEAD_LEFT:
             vanillaMinUV = vec2(48-32, 8)/64.0;
             vanillaMaxUV = vec2(56-32, 16)/64.0;
             return;
-        case 1: //Right Head
+        case FACEID_HEAD_RIGHT:
             vanillaMinUV = vec2(32-32, 8)/64.0;
             vanillaMaxUV = vec2(40-32, 16)/64.0;
             return;
-        case 2: //Top Head
+        case FACEID_HEAD_TOP:
             vanillaMinUV = vec2(40-32, 0)/64.0;
             vanillaMaxUV = vec2(48-32, 8)/64.0;
             return;
-        case 3: //Bottom Head
+        case FACEID_HEAD_BOTTOM:
             vanillaMinUV = vec2(48-32, 0)/64.0;
             vanillaMaxUV = vec2(56-32, 8)/64.0;
             return;
-        case 4: //Front Head
+        case FACEID_HEAD_FRONT:
             vanillaMinUV = vec2(40-32, 8)/64.0;
             vanillaMaxUV = vec2(48-32, 16)/64.0;
             return;
-        case 5: //Back Head
+        case FACEID_HEAD_BACK:
             vanillaMinUV = vec2(56-32, 8)/64.0;
             vanillaMaxUV = vec2(64-32, 16)/64.0;
             return;
 
         // ======== Body ========
-        case 6: //Left Body
+        case FACEID_BODY_LEFT:
             vanillaMinUV = vec2(28, 36-16)/64.0;
             vanillaMaxUV = vec2(32, 48-16)/64.0;
             return;
-        case 7: //Right Body
+        case FACEID_BODY_RIGHT:
             vanillaMinUV = vec2(16, 36-16)/64.0;
             vanillaMaxUV = vec2(20, 48-16)/64.0;
             return;
-        case 8: //Front Body
+        case FACEID_BODY_FRONT:
             vanillaMinUV = vec2(20, 36-16)/64.0;
             vanillaMaxUV = vec2(28, 48-16)/64.0;
             return;
-        case 9: //Back Body
+        case FACEID_BODY_BACK:
             vanillaMinUV = vec2(32, 36-16)/64.0;
             vanillaMaxUV = vec2(40, 48-16)/64.0;
             return;
-        case 10: //Top Body
+        case FACEID_BODY_TOP:
             vanillaMinUV = vec2(20, 32-16)/64.0;
             vanillaMaxUV = vec2(28, 36-16)/64.0;
             return;
-        case 11: //Bottom Body
+        case FACEID_BODY_BOTTOM:
             vanillaMinUV = vec2(28, 32-16)/64.0;
             vanillaMaxUV = vec2(36, 36-16)/64.0;
             return;
 
         // ======== R-Arm ========
-        case 12: //Left R-Arm
+        case FACEID_ARM_R_LEFT:
             if(isAlex){
                 vanillaMinUV = vec2(48-1, 36-16)/64.0;
                 vanillaMaxUV = vec2(52-1, 48-16)/64.0;
@@ -674,11 +787,11 @@ void initVanillaUV2(int faceId, bool isAlex){
                 vanillaMaxUV = vec2(52, 48-16)/64.0;
             }
             return;
-        case 13: //Right R-Arm
+        case FACEID_ARM_R_RIGHT:
             vanillaMinUV = vec2(40, 36-16)/64.0;
             vanillaMaxUV = vec2(44, 48-16)/64.0;
             return;
-        case 14: //Top R-Arm
+        case FACEID_ARM_R_TOP:
             if(isAlex){
                 vanillaMinUV = vec2(44, 32-16)/64.0;
                 vanillaMaxUV = vec2(48-1, 36-16)/64.0;
@@ -687,7 +800,7 @@ void initVanillaUV2(int faceId, bool isAlex){
                 vanillaMaxUV = vec2(48, 36-16)/64.0;
             }
             return;
-        case 15: //Bottom R-Arm
+        case FACEID_ARM_R_BOTTOM:
             if(isAlex){
                 vanillaMinUV = vec2(48-1, 32-16)/64.0;
                 vanillaMaxUV = vec2(52-2, 36-16)/64.0;
@@ -696,7 +809,7 @@ void initVanillaUV2(int faceId, bool isAlex){
                 vanillaMaxUV = vec2(52, 36-16)/64.0;
             }
             return;
-        case 16: //Front R-Arm
+        case FACEID_ARM_R_FRONT:
             if(isAlex){
                 vanillaMinUV = vec2(44, 36-16)/64.0;
                 vanillaMinUV = vec2(48-1, 48-16)/64.0;
@@ -705,7 +818,7 @@ void initVanillaUV2(int faceId, bool isAlex){
                 vanillaMinUV = vec2(48, 48-16)/64.0;
             }
             return;
-        case 17: //Back R-Arm
+        case FACEID_ARM_R_BACK:
             if(isAlex){
                 vanillaMinUV = vec2(52-1, 36-16)/64.0;
                 vanillaMaxUV = vec2(56-2, 48-16)/64.0;
@@ -716,7 +829,7 @@ void initVanillaUV2(int faceId, bool isAlex){
             return;
 
         // ======== L-Arm ========
-        case 18: //Left L-Arm
+        case FACEID_ARM_L_LEFT:
             if(isAlex){
                 vanillaMinUV = vec2(8+48-1-16, 52)/64.0;
                 vanillaMaxUV = vec2(12+48-1-16, 64)/64.0;
@@ -725,11 +838,11 @@ void initVanillaUV2(int faceId, bool isAlex){
                 vanillaMaxUV = vec2(12+48-16, 64)/64.0;
             }
             return;
-        case 19: //Right L-Arm
+        case FACEID_ARM_L_RIGHT:
             vanillaMinUV = vec2(0+48-16, 52)/64.0;
             vanillaMaxUV = vec2(4+48-16, 64)/64.0;
             return;
-        case 20: //Top L-Arm
+        case FACEID_ARM_L_TOP:
             if(isAlex){
                 vanillaMinUV = vec2(4+48-16, 48)/64.0;
                 vanillaMaxUV = vec2(8+48-1-16, 52)/64.0;
@@ -738,7 +851,7 @@ void initVanillaUV2(int faceId, bool isAlex){
                 vanillaMaxUV = vec2(8+48-16, 52)/64.0;
             }
             return;
-        case 21: //Bottom L-Arm
+        case FACEID_ARM_L_BOTTOM:
             if(isAlex){
                 vanillaMinUV = vec2(8+48-1-16, 48)/64.0;
                 vanillaMaxUV = vec2(12+48-2-16, 52)/64.0;
@@ -747,7 +860,7 @@ void initVanillaUV2(int faceId, bool isAlex){
                 vanillaMaxUV = vec2(12+48-16, 52)/64.0;
             }
             return;
-        case 22: //Front L-Arm
+        case FACEID_ARM_L_FRONT:
             if(isAlex){
                 vanillaMinUV = vec2(4+48-16, 52)/64.0;
                 vanillaMaxUV = vec2(8+48-1-16, 64)/64.0;
@@ -756,7 +869,7 @@ void initVanillaUV2(int faceId, bool isAlex){
                 vanillaMaxUV = vec2(8+48-16, 64)/64.0;
             }
             return;
-        case 23: //Back L-Arm
+        case FACEID_ARM_L_BACK:
             if(isAlex){
                 vanillaMinUV = vec2(12+48-1-16, 52)/64.0;
                 vanillaMaxUV = vec2(16+48-2-16, 64)/64.0;
@@ -766,141 +879,138 @@ void initVanillaUV2(int faceId, bool isAlex){
             }
             return;
 
-        // ======== R-Leg ========
-        case 24: //Left R-Leg
+        // ======== LEG_R ========
+        case FACEID_LEG_R_LEFT:
             vanillaMinUV = vec2(8, 36-16)/64.0;
             vanillaMaxUV = vec2(12, 48-16)/64.0;
             return;
-        case 25: //Right R-Leg
+        case FACEID_LEG_R_RIGHT:
             vanillaMinUV = vec2(0, 36-16)/64.0;
             vanillaMaxUV = vec2(4, 48-16)/64.0;
             return;
-        case 26: //Top R-Leg
+        case FACEID_LEG_R_TOP:
             vanillaMinUV = vec2(4, 32-16)/64.0;
             vanillaMaxUV = vec2(8, 36-16)/64.0;
             return;
-        case 27: //Bottom R-Leg
+        case FACEID_LEG_R_BOTTOM:
             vanillaMinUV = vec2(8, 32-16)/64.0;
             vanillaMaxUV = vec2(12, 36-16)/64.0;
             return;
-        case 28: //Front R-Leg
+        case FACEID_LEG_R_FRONT:
             vanillaMinUV = vec2(4, 36-16)/64.0;
             vanillaMaxUV = vec2(8, 48-16)/64.0;
             return;
-        case 29: //Back R-Leg
+        case FACEID_LEG_R_BACK:
             vanillaMinUV = vec2(12, 36-16)/64.0;
             vanillaMaxUV = vec2(16, 48-16)/64.0;
             return;
 
-        // ======== L-Leg ========
-        case 30: //Left L-Leg
+        // ======== LEG_L ========
+        case FACEID_LEG_L_LEFT:
             vanillaMinUV = vec2(8+16, 52)/64.0;
             vanillaMaxUV = vec2(12+16, 64)/64.0;
             return;
-        case 31: //Right L-Leg
+        case FACEID_LEG_L_RIGHT:
             vanillaMinUV = vec2(0+16, 52)/64.0;
             vanillaMaxUV = vec2(4+16, 64)/64.0;
             return;
-        case 32: //Top L-Leg
+        case FACEID_LEG_L_TOP:
             vanillaMinUV = vec2(4+16, 48)/64.0;
             vanillaMaxUV = vec2(8+16, 52)/64.0;
             return;
-        case 33: //Bottom L-Leg
+        case FACEID_LEG_L_BOTTOM:
             vanillaMinUV = vec2(8+16, 48)/64.0;
             vanillaMaxUV = vec2(12+16, 52)/64.0;
             return;
-        case 34: //Front L-Leg
+        case FACEID_LEG_L_FRONT:
             vanillaMinUV = vec2(4+16, 52)/64.0;
             vanillaMaxUV = vec2(8+16, 64)/64.0;
             return;
-        case 35: //Back L-Leg
+        case FACEID_LEG_L_BACK:
             vanillaMinUV = vec2(12+16, 52)/64.0;
             vanillaMaxUV = vec2(16+16, 64)/64.0;
             return;
 
-    // +---------------------+
-    // |   SECONDARY LAYER   |
-    // +---------------------+
         // ======== Hat ========
-        case 36: //Left Hat
+        case FACEID_HAT_LEFT:
             vanillaMinUV = vec2(48, 8)/64.0;
             vanillaMaxUV = vec2(56, 16)/64.0;
             return;
-        case 37: //Right Hat
+        case FACEID_HAT_RIGHT:
             vanillaMinUV = vec2(32, 8)/64.0;
             vanillaMaxUV = vec2(40, 16)/64.0;
             return;
-        case 38: //Top Hat
+        case FACEID_HAT_TOP:
             vanillaMinUV = vec2(40, 0)/64.0;
             vanillaMaxUV = vec2(48, 8)/64.0;
             return;
-        case 39: //Bottom Hat
+        case FACEID_HAT_BOTTOM:
             vanillaMinUV = vec2(48, 0)/64.0;
             vanillaMaxUV = vec2(56, 8)/64.0;
             return;
-        case 40: //Front Hat
+        case FACEID_HAT_FRONT:
             vanillaMinUV = vec2(40, 8)/64.0;
             vanillaMaxUV = vec2(48, 16)/64.0;
             return;
-        case 41: //Back Hat
+        case FACEID_HAT_BACK:
             vanillaMinUV = vec2(56, 8)/64.0;
             vanillaMaxUV = vec2(64, 16)/64.0;
             return;
 
         // ======== L-pant ========
-        case 42: //Left L-Pant
+        case FACEID_PANT_L_LEFT:
             vanillaMinUV = vec2(8, 52)/64.0;
             vanillaMaxUV = vec2(12, 64)/64.0;
             return;
-        case 43: //Right L-Pant
+        case FACEID_PANT_L_RIGHT:
             vanillaMinUV = vec2(0, 52)/64.0;
             vanillaMaxUV = vec2(4, 64)/64.0;
             return;
-        case 44: //Top L-Pant
+        case FACEID_PANT_L_TOP:
             vanillaMinUV = vec2(4, 48)/64.0;
             vanillaMaxUV = vec2(8, 52)/64.0;
             return;
-        case 45: //Bottom L-Pant
+        case FACEID_PANT_L_BOTTOM:
             vanillaMinUV = vec2(8, 48)/64.0;
             vanillaMaxUV = vec2(12, 52)/64.0;
             return;
-        case 46: //Front L-Pant
+        case FACEID_PANT_L_FRONT:
             vanillaMinUV = vec2(4, 52)/64.0;
             vanillaMaxUV = vec2(8, 64)/64.0;
             return;
-        case 47: //Back L-Pant
+        case FACEID_PANT_L_BACK:
             vanillaMinUV = vec2(12, 52)/64.0;
             vanillaMaxUV = vec2(16, 64)/64.0;
             return;
 
         // ======== R-Pant ========
-        case 48: //Left R-Pant
+        case FACEID_PANT_R_LEFT:
             vanillaMinUV = vec2(8, 36)/64.0;
             vanillaMaxUV = vec2(12, 48)/64.0;
             return;
-        case 49: //Right R-Pant
+        case FACEID_PANT_R_RIGHT:
             vanillaMinUV = vec2(0, 36)/64.0;
             vanillaMaxUV = vec2(4, 48)/64.0;
             return;
-        case 50: //Top R-Pant
+        case FACEID_PANT_R_TOP:
             vanillaMinUV = vec2(4, 32)/64.0;
             vanillaMaxUV = vec2(8, 36)/64.0;
             return;
-        case 51: //Bottom R-Pant
+        case FACEID_PANT_R_BOTTOM:
             vanillaMinUV = vec2(8, 32)/64.0;
             vanillaMaxUV = vec2(12, 36)/64.0;
             return;
-        case 52: //Front R-Pant
+        case FACEID_PANT_R_FRONT:
             vanillaMinUV = vec2(4, 36)/64.0;
             vanillaMaxUV = vec2(8, 48)/64.0;
             return;
-        case 53: //Back R-Pant
+        case FACEID_PANT_R_BACK:
             vanillaMinUV = vec2(12, 36)/64.0;
             vanillaMaxUV = vec2(16, 48)/64.0;
             return;
 
         // ======== L-Shirt ========
-        case 54: //Left L-Shirt
+        case FACEID_SLEVE_L_LEFT:
             if(isAlex){
                 vanillaMinUV = vec2(8+48-1, 52)/64.0;
                 vanillaMaxUV = vec2(12+48-1, 64)/64.0;
@@ -909,11 +1019,11 @@ void initVanillaUV2(int faceId, bool isAlex){
                 vanillaMaxUV = vec2(12+48, 64)/64.0;
             }
             return;
-        case 55: //Right L-Shirt
+        case FACEID_SLEVE_L_RIGHT:
             vanillaMinUV = vec2(0+48, 52)/64.0;
             vanillaMaxUV = vec2(4+48, 64)/64.0;
             return;
-        case 56: //Top L-Shirt
+        case FACEID_SLEVE_L_TOP:
             if(isAlex){
                 vanillaMinUV = vec2(4+48, 48)/64.0;
                 vanillaMaxUV = vec2(8+48-1, 52)/64.0;
@@ -922,7 +1032,7 @@ void initVanillaUV2(int faceId, bool isAlex){
                 vanillaMaxUV = vec2(8+48, 52)/64.0;
             }
             return;
-        case 57: //Bottom L-Shirt
+        case FACEID_SLEVE_L_BOTTOM:
             if(isAlex){
                 vanillaMinUV = vec2(8+48-1, 48)/64.0;
                 vanillaMaxUV = vec2(12+48-2, 52)/64.0;
@@ -931,7 +1041,7 @@ void initVanillaUV2(int faceId, bool isAlex){
                 vanillaMaxUV = vec2(12+48, 52)/64.0;
             }
             return;
-        case 58: //Front L-Shirt
+        case FACEID_SLEVE_L_FRONT:
             if(isAlex){
                 vanillaMinUV = vec2(4+48, 52)/64.0;
                 vanillaMaxUV = vec2(8+48-1, 64)/64.0;
@@ -940,7 +1050,7 @@ void initVanillaUV2(int faceId, bool isAlex){
                 vanillaMaxUV = vec2(8+48, 64)/64.0;
             }
             return;
-        case 59: //Back L-Shirt
+        case FACEID_SLEVE_L_BACK:
             if(isAlex){
                 vanillaMinUV = vec2(12+48-1, 52)/64.0;
                 vanillaMaxUV = vec2(16+48-2, 64)/64.0;
@@ -951,7 +1061,7 @@ void initVanillaUV2(int faceId, bool isAlex){
             return;
 
         // ======== R-Shirt ========
-        case 60: //Left R-Shirt
+        case FACEID_SLEVE_R_LEFT:
             if(isAlex){
                 vanillaMinUV = vec2(48-1, 36)/64.0;
                 vanillaMaxUV = vec2(52-1, 48)/64.0;
@@ -960,11 +1070,11 @@ void initVanillaUV2(int faceId, bool isAlex){
                 vanillaMaxUV = vec2(52, 48)/64.0;
             }
             return;
-        case 61: //Right R-Shirt
+        case FACEID_SLEVE_R_RIGHT:
             vanillaMinUV = vec2(40, 36)/64.0;
             vanillaMaxUV = vec2(44, 48)/64.0;
             return;
-        case 62: //Top R-Shirt
+        case FACEID_SLEVE_R_TOP:
             if(isAlex){
                 vanillaMinUV = vec2(44, 32)/64.0;
                 vanillaMaxUV = vec2(48-1, 36)/64.0;
@@ -973,7 +1083,7 @@ void initVanillaUV2(int faceId, bool isAlex){
                 vanillaMaxUV = vec2(48, 36)/64.0;
             }
             return;
-        case 63: //Bottom R-Shirt
+        case FACEID_SLEVE_R_BOTTOM:
             if(isAlex){
                 vanillaMinUV = vec2(48-1, 32)/64.0;
                 vanillaMaxUV = vec2(52-2, 36)/64.0;
@@ -982,7 +1092,7 @@ void initVanillaUV2(int faceId, bool isAlex){
                 vanillaMaxUV = vec2(52, 36)/64.0;
             }
             return;
-        case 64: //Front R-Shirt
+        case FACEID_SLEVE_R_FRONT:
             if(isAlex){
                 vanillaMinUV = vec2(44, 36)/64.0;
                 vanillaMinUV = vec2(48-1, 48)/64.0;
@@ -991,7 +1101,7 @@ void initVanillaUV2(int faceId, bool isAlex){
                 vanillaMinUV = vec2(48, 48)/64.0;
             }
             return;
-        case 65: //Back R-Shirt
+        case FACEID_SLEVE_R_BACK:
             if(isAlex){
                 vanillaMinUV = vec2(52-1, 36)/64.0;
                 vanillaMaxUV = vec2(56-2, 48)/64.0;
@@ -1001,29 +1111,28 @@ void initVanillaUV2(int faceId, bool isAlex){
             }
             return;
 
-        // ======== Shirt ========
-        // NOTE THE DIFFERENT ORDER
-        case 66: //Left Shirt
+        // ======== JACKET ========
+        case FACEID_JACKET_LEFT:
             vanillaMinUV = vec2(28, 36)/64.0;
             vanillaMaxUV = vec2(32, 48)/64.0;
             return;
-        case 67: //Right Shirt
+        case FACEID_JACKET_RIGHT:
             vanillaMinUV = vec2(16, 36)/64.0;
             vanillaMaxUV = vec2(20, 48)/64.0;
             return;
-        case 68: //Top Shirt
+        case FACEID_JACKET_TOP:
             vanillaMinUV = vec2(20, 32)/64.0;
             vanillaMaxUV = vec2(28, 36)/64.0;
             return;
-        case 69: //Bottom Shirt
+        case FACEID_JACKET_BOTTOM:
             vanillaMinUV = vec2(28, 32)/64.0;
             vanillaMaxUV = vec2(36, 36)/64.0;
             return;
-        case 70: //Front Shirt
+        case FACEID_JACKET_FRONT:
             vanillaMinUV = vec2(20, 36)/64.0;
             vanillaMaxUV = vec2(28, 48)/64.0;
             return;
-        case 71: //Back Shirt
+        case FACEID_JACKET_BACK:
             vanillaMinUV = vec2(32, 36)/64.0;
             vanillaMaxUV = vec2(40, 48)/64.0;
             return;
