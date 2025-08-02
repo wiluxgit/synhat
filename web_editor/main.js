@@ -153,23 +153,40 @@ function logHexAndBin(buf, extra="") {
     const hexStr = [...buf].map((b) => b.toString(16).padStart(2, "0").toUpperCase()).join("_")
     console.log(`0b${binStr} | 0x${hexStr} (len=${buf.length}) ${extra}`);
 }
-function getFaceOperationEntryPos(faceId) {
-    let c = faceId % 4;
-    let temp = 2 + ((faceId / 4) >> 0)
-    let x = temp % 8
-    let y = (temp / 8) >> 0
-    return [x, y, c]
+function getByteOffset_index(faceId) {
+    const rgbaIndex = faceId % 3;
+    const pixelIndex = faceId / 3;
+    const x = (pixelIndex + 8) % 8;
+    const y = (pixelIndex + 8) / 8;
+    return getByteOffset(x,y,rgbaIndex)
 }
-function getTransformPosition(transform_arugment_index) {
-    let temp = (8*2+4) + transform_arugment_index;
+function getByteOffset_transform(transformIndex) {
+    const temp = 32 + transformIndex;
     let x = temp % 8;
-    let y = (temp / 8) >> 0;
-    return [x, y]
+    let y = temp / 8;
+    if (y >= 8) {
+        x += 24;
+        y -= 8;
+    }
+    return getByteOffset(x,y)
 }
 function getByteOffset(x, y, c=0) {
     y = 63-y
     return 4 * (y * 64 + x) + c;
 }
+//function getFaceOperationEntryPos(faceId) {
+//    let c = faceId % 4;
+//    let temp = 2 + ((faceId / 4) >> 0)
+//    let x = temp % 8
+//    let y = (temp / 8) >> 0
+//    return [x, y, c]
+//}
+//function getTransformPosition(transform_arugment_index) {
+//    let temp = (8*2+4) + transform_arugment_index;
+//    let x = temp % 8;
+//    let y = (temp / 8) >> 0;
+//    return [x, y]
+//}
 
 MAIN.debounce = (func, timeout = 500) => {
     let timer;
@@ -199,105 +216,98 @@ MAIN.readtransforms = (id2transformOutput) => {
     // Wipe all transforms
     [...Array(72).keys()].map((i) => id2transformOutput[i] = [])
     
-    faceId2typeAndOffset = {}
-    // read lookup tables
+    faceId2TfIndex = {}
+    // read index
     for (const index of [...Array(72).keys()]) {
-        const [x,y,c] = getFaceOperationEntryPos(index)
-        const offset = getByteOffset(x,y,c)
+        const offset = getByteOffset_index(index)
         const data = imageData[offset]
         if (data == 0 || data == 0xff) {
-            continue
+            continue // FIXME 0 is valid?
         }
-        const buf = new Uint8Array(1)
-        buf[0] = imageData[offset]
-        const parse = MAIN.faceOperationParser.parse(buf)
-        faceId2typeAndOffset[index] = parse
-        console.log(`readtransforms> F[${x},${y},${c}] = ${data}`, parse)
-    }
-    if(Object.keys(faceId2typeAndOffset).length == 72) {
-        // TODO: make good
-        return
+        faceId2TfIndex[index] = data
+        console.log(`readtransforms> F[${offset}] = ${data}`, parse)
     }
 
-    for (let [faceindex, v] of Object.entries(faceId2typeAndOffset)) {
+    for (let [faceindex, tfIndex] of Object.entries(faceId2TfIndex)) {
         id2transformOutput[faceindex] = []
 
-        let transformType = v.transform_type
-        let argumentIndex = v.transform_argument_index
-        let sortno = 1
-        while (argumentIndex != 0 && argumentIndex <= 44) {
+        let sortno = 1 // number used for list sorting
+        while (tfIndex != 255) {
+            // HEADER
+            const headerOffset = getByteOffset_transform(tfIndex)
+            const headerBuf = new Uint8Array(4)
+            for (let i of [0,1,2,3]) headerBuf[3-i] = imageData[headerOffset+i]
 
-            const [x, y] = getTransformPosition(argumentIndex)
-            const transformOffset = getByteOffset(x,y)
+            const header = MAIN.transformHeaderParser.parse(headerBuf)
+            const T_next = header["T_next"]
+            const T_size = header["T_size"]
+            const T_type = header["T_type"]
 
-            const transformBuf = new Uint8Array(4)
-            for (let i of [0,1,2,3]) {
-                transformBuf[3-i] = imageData[transformOffset+i] //fixes endianness
-            }
-            const parser = MAIN.transform_parsers[transformType]
-            const parse = parser.parse(transformBuf)
+            // DATA
+            const dataOffset = getByteOffset_transform(tfIndex+1)
+            const dataBuf = new Uint8Array(4)
+            for (let i of [0,1,2,3]) dataBuf[3-i] = imageData[dataOffset+i];
 
-            console.log(`readtransforms> parse[${faceindex}]:`, parse)
+            const data = MAIN.transform_parsers[T_type].parse(dataBuf)
+
+            // Add to GUI
+            console.log(`readtransforms> parse[${faceindex}]:`, data)
             id2transformOutput[faceindex].push({
                 "face":`${faceindex}`,
                 "id":sortno,
-                "type":transformType,
-                "data":parse
+                "type":T_type,
+                "data":data
             })
 
-            transformType = parse.next >> 6;
-            argumentIndex = parse.next & 0b00111111;
             sortno++;
+            tfIndex = T_next;
         }
     }
 }
 MAIN.writeTransformsAndRender = (id2transform) => {
     console.log("MAIN.writeTransformsAndRender")
 
-    const serializedFaceEntries = new Uint8Array(72)
-    const serializedTransforms = new Uint32Array(44)
+    const serializedIndexs = new Uint8Array(72)
+    const serializedTransforms = new Uint32Array(96)
 
-    // fill serializedFaceEntries, serializedTransforms
+    // fill serializedIndexs, serializedTransforms
     let transformIndex = 1
     for ([faceId, faceTransfroms] of Object.entries(id2transform)){
         if (faceTransfroms.length === 0) {
             continue
         }
 
-        // next of last entry is always 0
-        let nextSerialized = 0
+        // next of last entry is always 255
+        let nextIndex = 255
 
-        // TODO: sort transforms
         for (let faceTransfrom of [...faceTransfroms].reverse()) {
-            const ttype = faceTransfrom.type
+            const T_type = faceTransfrom.type
 
-            // Create Transforms entry
-            const transform = {...faceTransfrom.data, ...{"next": nextSerialized}}
-            const transformParser = MAIN.transform_parsers[ttype];
-            const tfBuf = transformParser.encode(transform);
+            // Create Header
+            const header = MAIN.transformHeaderParser.encode({
+                "T_next": nextSerialized,
+                "T_size": 1,
+                "T_type": T_type,
+            })
+            serializedTransforms[transformIndex] = header.readInt32LE(0)
+            transformIndex++;
+
+            // Create Data
+            const data = MAIN.transform_parsers[T_type].encode(transform);
             serializedTransforms[transformIndex] = tfBuf.readInt32LE(0)
+            transformIndex++;
+
             logHexAndBin(tfBuf, `= serializedTransforms[${transformIndex}]`);
-
-            // Create Lookup entry
-            const faceOperation = {
-                "transform_type": ttype,
-                "transform_argument_index": transformIndex,
-            }
-            nextSerialized = MAIN.faceOperationParser.encode(faceOperation)[0]
-
-            transformIndex++
         }
 
         // First facetransform should be used in lookup.
-        serializedFaceEntries[faceId] = nextSerialized
-        console.log(`${nextSerialized} = serializedFaceEntries[${faceId}]`);
+        serializedIndexs[faceId] = nextIndex
+        console.log(`${nextIndex} = serializedFaceEntries[${faceId}]`);
     }
 
-    // write lookup tables
-    for (let [index, int] of serializedFaceEntries.entries()) {
-        const [x,y,c] = getFaceOperationEntryPos(index)
-
-        const offset = getByteOffset(x,y,c)
+    // pixel write indexes
+    for (let [index, int] of serializedIndexs.entries()) {
+        const offset = getByteOffset_index(index)
         imageData[offset] = int
 
         if(int != 0) {
@@ -305,11 +315,9 @@ MAIN.writeTransformsAndRender = (id2transform) => {
         }
     }
 
-    // write transforms
+    // pixel write transforms
     for (let [index, int] of serializedTransforms.entries()) {
-        const [x, y] = getTransformPosition(index)
-
-        const offset = getByteOffset(x,y)
+        const offset = getByteOffset_transform(index)
         imageData[offset+0] = (int >> 24) & 0xff
         imageData[offset+1] = (int >> 16) & 0xff
         imageData[offset+2] = (int >> 8) & 0xff
@@ -371,12 +379,13 @@ MAIN.enums = {
     },
 }
 
-MAIN.faceOperationParser = (
+MAIN.transformHeaderParser = (
     new BinaryParser.Parser()
         .endianess("little")
         .encoderSetOptions({bitEndianess: true})
-        .bit6("transform_argument_index")
-        .bit2("transform_type")
+        .bit8("T_next")
+        .bit8("T_size")
+        .bit8("T_type")
 )
 
 MAIN.default_transform = {}
@@ -394,7 +403,6 @@ MAIN.transform_parsers[MAIN.enums.transform_type.displacement] = (
         .bit1("asym_sign")
         .bit2("asym_edge")
         .bit6("__filler__")
-        .bit8("next")
 )
 MAIN.default_transform[MAIN.enums.transform_type.displacement] = {
     global_displacement: 0,
@@ -417,7 +425,6 @@ MAIN.transform_parsers[MAIN.enums.transform_type.uv_offset] = (
         .bit2("uv_y_min_1")
         .bit6("uv_y_max")
         .bit2("uv_y_min_2")
-        .bit8("next")
 )
 MAIN.default_transform[MAIN.enums.transform_type.uv_offset] = {
     uv_x_max: 0,
@@ -442,7 +449,6 @@ MAIN.transform_parsers[MAIN.enums.transform_type.uv_crop] = (
         .bit1("__filler1__")
         .bit1("__filler2__")
         .bit4("__filler3__")
-        .bit8("next")
 )
 MAIN.default_transform[MAIN.enums.transform_type.uv_crop] = {
     crop_top: 0,
@@ -467,7 +473,6 @@ MAIN.transform_parsers[MAIN.enums.transform_type.special] = (
         .bit4("__filler__")
         .bit8("__filler2__")
         .bit8("__filler3__")
-        .bit8("next")
 )
 MAIN.default_transform[MAIN.enums.transform_type.special] = {
     top_snap_clip_uv: 0,

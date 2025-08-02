@@ -64,15 +64,14 @@
 // Helper Functios
 //=================================================================================
 // Data Reading
-int getMCVertID();
+int getVertId();
 int getFaceId(int vertId);
 int getCornerId(int vertId);
 int getDirId(int vertId);
-int getFaceOperationEntry(int faceId);
-vec4 getFaceOperationPixel(int faceId);
-vec4 getTransformArguments(int activeTransformIndex);
+int lookupTransformIndex(int faceId);
+ivec3 lookupTransformBytes(int transformIndex);
 
-// hard coded face properties
+// Hard coded face properties
 int getPerpendicularLength(int faceId, bool isAlex);
 bool isSecondaryLayer(int vertId);
 void initVanillaUV(int faceId, bool isAlex);
@@ -182,7 +181,7 @@ void main() {
     Normal = normal;
     UV0 = vec2(uv.x, 1.0-uv.y); // ThreeJS reverses the UV coordinates AND the texture by default
 #endif
-    int vertId = getMCVertID();
+    int vertId = getVertId();
 
     //<DEBUG>
     float vertIdx = float(vertId)/400.0;
@@ -218,49 +217,44 @@ void main() {
 
             int faceId = getFaceId(vertId);
             int cornerId = getCornerId(vertId);
+            initVanillaUV(faceId, isAlex);
+            NewFaceCenter = vanillaCenterUV;
 
-            int nextFaceOperationEntry = getFaceOperationEntry(faceId);
+            int nextTfIndex = lookupTransformIndex(faceId);
 
-            if (nextFaceOperationEntry != 0) {
-                initVanillaUV(faceId, isAlex);
-                NewFaceCenter = vanillaCenterUV;
+            while (!(nextTfIndex != 255 || nextTfIndex == 0)) {
+                wx_isEdited = 1.0;
 
-                while (true) {
-                    int activeTransformIndex = nextFaceOperationEntry & MASK_FACE_OPERATION_ENTRY_TRANFORM_ARGUMENT_INDEX;
-                    int activeTransformType = nextFaceOperationEntry & MASK_TRANFORM_TYPE;
+                // HEADER
+                ivec3 tfHeader = lookupTransformBytes(nextTfIndex);
+                int T_next = tfHeader.x;
+                int T_size = tfHeader.y;
+                int T_type = tfHeader.z;
 
-                    if (activeTransformIndex == 0 || activeTransformIndex > 44) {
+                // DATA
+                ivec3 tfData = lookupTransformBytes(nextTfIndex+1);
+                switch (T_type) {
+                    case TRANFORM_TYPE_DISPLACEMENT:
+                        applyDisplacement(isAlex, vertId, tfData.x, tfData.y, tfData.z);
                         break;
-                    }
-
-                    wx_isEdited = 1.0;
-
-                    vec4 transformData = getTransformArguments(activeTransformIndex);
-                    wx_vertexColor = transformData / 256.0;
-
-                    int dataR = int(transformData.r+0.1);
-                    int dataG = int(transformData.g+0.1);
-                    int dataB = int(transformData.b+0.1);
-                    nextFaceOperationEntry = int(transformData.a+0.1);
-
-                    switch (activeTransformType) {
-                        case TRANFORM_TYPE_DISPLACEMENT:
-                            applyDisplacement(isAlex, vertId, dataR, dataG, dataB);
-                            break;
-                        case TRANFORM_TYPE_UV_CROP:
-                            applyUVCrop(isAlex, vertId, dataR, dataG, dataB);
-                            break;
-                        case TRANFORM_TYPE_UV_OFFSET:
-                            applyUVOffset(isAlex, vertId, dataR, dataG, dataB);
-                            break;
-                        case TRANFORM_TYPE_SPECIAL:
-                            applyPostFlags(isAlex, vertId, dataR, dataG, dataB);
-                            break;
-                    }
+                    case TRANFORM_TYPE_UV_CROP:
+                        applyUVCrop(isAlex, vertId, tfData.x, tfData.y, tfData.z);
+                        break;
+                    case TRANFORM_TYPE_UV_OFFSET:
+                        applyUVOffset(isAlex, vertId, tfData.x, tfData.y, tfData.z);
+                        break;
+                    case TRANFORM_TYPE_SPECIAL:
+                        applyPostFlags(isAlex, vertId, tfData.x, tfData.y, tfData.z);
+                        break;
+                    default:
+                        break;
                 }
+
+                // Iterate to next in linked list
+                nextTfIndex = T_next;
             }
 
-            // UV crop shenanigans
+            // UV crop shenanigans postproccessing
             if (wx_isEdited == 1.0) {
                 vec2 center2cornerVec = NewUV - NewFaceCenter;
                 vec2 opposing = NewFaceCenter - center2cornerVec;
@@ -498,29 +492,39 @@ int getDirId(int vertId) {
 int getCornerId(int vertId) {
     return vertId % 4;
 }
-vec4 getFaceOperationPixel(int faceId) {
-    int F_index = faceId / 4;
-    int temp = 2 + F_index;
-    int x = temp % 8;
-    int y = temp / 8;
 
-    return texelFetch(Sampler0, ivec2(x, y), 0)*256.0;
-}
-int getFaceOperationEntry(int faceId) {
-    vec4 rgba = getFaceOperationPixel(faceId);
+//---------------------------------------------------------------------------------
+// lookupTransformIndex()
+//  returns the Transfom Index for a specific faceId
+//---------------------------------------------------------------------------------
+int lookupTransformIndex(int faceId) {
+    int rgbaIndex = faceId % 3;
+    int pixelIndex = faceId / 3;
+    int x = (pixelIndex + 8) % 8;
+    int y = (pixelIndex + 8) / 8;
+    vec4 pixelData = texelFetch(Sampler0, ivec2(x, y), 0)*256.0;
 
     switch (faceId % 4) {
-        case 0: return int(rgba.r+0.1);
-        case 1: return int(rgba.g+0.1);
-        case 2: return int(rgba.b+0.1);
-        case 3: return int(rgba.a+0.1);
+        case 0: return int(pixelData.r+0.1);
+        case 1: return int(pixelData.g+0.1);
+        case 2: return int(pixelData.b+0.1);
+        case 3: return int(pixelData.a+0.1);
     }
 }
-vec4 getTransformArguments(int activeTransformIndex) {
-    int temp = (8*2+4) + activeTransformIndex;
+//---------------------------------------------------------------------------------
+// lookupTransformBytes()
+//  returns the value for a specific faceId
+//---------------------------------------------------------------------------------
+ivec3 lookupTransformBytes(int transformIndex) {
+    int temp = 32 + transformIndex;
     int x = temp % 8;
     int y = temp / 8;
-    return texelFetch(Sampler0, ivec2(x, y), 0)*256.0;
+    if (y >= 8) {
+        x += 24;
+        y -= 8;
+    }
+    vec4 pixelData = texelFetch(Sampler0, ivec2(x, y), 0)*256.0;
+    return ivec3(pixelData.r+0.1, pixelData.g+0.1,pixelData.b+0.1);
 }
 
 // bit data helpers
@@ -624,17 +628,17 @@ int getPerpendicularLength(int faceId, bool isAlex) {
 }
 
 //---------------------------------------------------------------------------------
-// getMCVertID()
+// getVertId()
 //  Returns the The vertex id is unique number for each vertex, all players have identical order
 //  The THREE_vertexID must be implemented to be the same order as minecraft
 //---------------------------------------------------------------------------------
 #ifdef BROWSER // ThreeJS
 attribute int THREE_vertexID;
-int getMCVertID() {
+int getVertId() {
     return THREE_vertexID;
 }
 #else // Minecraft
-int getMCVertID() {
+int getVertId() {
     return gl_VertexID;
 }
 #endif
