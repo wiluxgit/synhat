@@ -48,7 +48,7 @@ MAIN.loadImage = async (id2transformOutput, nullablePngbufPromise) => {
     }
     await imgageFetch.then((buf) => loadPngfilebuf(buf))
     await glRetry(MAIN.renderImageNow)
-    MAIN.readtransforms(id2transformOutput)
+    MAIN.readTransforms(id2transformOutput)
 }
 function loadPngfilebuf(buf) {
     return new Promise(
@@ -74,6 +74,28 @@ function loadPngfilebuf(buf) {
                 }
             }
             // </Chat GPT>
+
+            // If not an extmodel skin init it
+            const isExtModel = imageData[getByteOffset(0,0,0)] == 0xda && imageData[getByteOffset(0,0,1)] == 0x67
+            if (!isExtModel) {
+                for (const y of [...Array(8).keys()]) {
+                    for (const x of [...Array(8).keys()]) {
+                        imageData[getByteOffset(x, y, 0)] = 0xFF;
+                        imageData[getByteOffset(x, y, 1)] = 0xFF;
+                        imageData[getByteOffset(x, y, 2)] = 0xFF;
+                        imageData[getByteOffset(x, y, 3)] = 0xFF;
+
+                        imageData[getByteOffset(x + 24, y, 0)] = 0xFF;
+                        imageData[getByteOffset(x + 24, y, 1)] = 0xFF;
+                        imageData[getByteOffset(x + 24, y, 2)] = 0xFF;
+                        imageData[getByteOffset(x + 24, y, 3)] = 0xFF;
+                    }
+                }
+                imageData[getByteOffset(0,0,0)] = 0xda
+                imageData[getByteOffset(0,0,1)] = 0x67
+                imageData[getByteOffset(0,0,2)] = 0x00
+            }
+
             return resolve()
         }
     ))
@@ -248,7 +270,7 @@ MAIN.downloadCanvas = () => {
     FileSaver.saveAs(blob, 'output64x64.png');
 }
 
-MAIN.readtransforms = (id2transformOutput) => {
+MAIN.readTransforms = (id2transformOutput) => {
     // Wipe all transforms
     [...Array(72).keys()].map((i) => id2transformOutput[i] = [])
 
@@ -261,7 +283,7 @@ MAIN.readtransforms = (id2transformOutput) => {
             continue // FIXME 0 is valid?
         }
         faceId2TfIndex[index] = data
-        console.log(`readtransforms> I[${index}] = ${data}`, data)
+        console.log(`readTransforms> I[${index}] = ${data}`, data)
     }
 
     for (let [faceindex, tfIndex] of Object.entries(faceId2TfIndex)) {
@@ -286,7 +308,7 @@ MAIN.readtransforms = (id2transformOutput) => {
             const data = MAIN.transform_parsers[T_type].parse(dataBuf)
 
             // Add to GUI
-            console.log(`readtransforms> parse[${faceindex}]:`, data)
+            console.log(`readTransforms> parse[${faceindex}]:`, data)
             id2transformOutput[faceindex].push({
                 "face":`${faceindex}`,
                 "id":sortno,
