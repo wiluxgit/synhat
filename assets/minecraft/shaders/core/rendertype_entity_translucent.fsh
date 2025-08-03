@@ -70,6 +70,7 @@ vec4 getDirectionalColor() {
 //---------------------------------------------------------------------------------
 void main() {
     vec4 color;
+    vec4 vvertexColor;
     if (wx_isEdited != 0.0) {
         color = texture2D(Sampler0, texCoord0);
         vec4 discardColor = wx_vertexColor;
@@ -99,9 +100,11 @@ void main() {
             fragColor = color;
             //fragColor = (discardColor + color) / 2.0;
         }
+        vvertexColor = getDirectionalColor();
     } else {
         // Vanilla behaviour
         color = texture2D(Sampler0, texCoord0);
+        vvertexColor = vertexColor;
     }
     if (color.a < 0.1) {
         discard;
@@ -109,9 +112,10 @@ void main() {
 #ifdef BROWSER
     fragColor = color;
 #else
-    color *= vertexColor * ColorModulator;
+    color *= vvertexColor * ColorModulator;
     color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
     color *= lightMapColor;
     fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
+    fragColor += wx_vertexColor * 0.000000001;
 #endif
 }
