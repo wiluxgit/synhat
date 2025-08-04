@@ -1,4 +1,7 @@
 {"models": [
+	{"item": "minecraft:clock", "data": -393, "model": "synhat/wilux/painting/meme/omfgdogs", "displayName": "OMFGDOGS!"},
+	{"item": "minecraft:clock", "data": -392, "model": "synhat/wilux/painting/meme/im_steve", "displayName": "I'm Steve"},
+	{"item": "minecraft:clock", "data": -391, "model": "synhat/wilux/animal/rubber_duck_with_hat", "displayName": "Superior Rubber Duck"},
 	{"item": "minecraft:clock", "data": -390, "model": "synhat/zielridder/red_dude", "displayName": "Red Dude"},
 	{"item": "minecraft:clock", "data": -389, "model": "synhat/zielridder/red_speedster", "displayName": "Red Speedster"},
 	{"item": "minecraft:clock", "data": -388, "model": "synhat/zielridder/skulky_zielhead", "displayName": "Skulky Ziely Head"},

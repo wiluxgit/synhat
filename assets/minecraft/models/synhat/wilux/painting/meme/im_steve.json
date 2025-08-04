@@ -1,0 +1,6 @@
+{
+    "parent": "synhat/wilux/_parent/painting3232",
+    "textures": {
+		"0": "synhat/wilux/painting/meme/im_steve"
+    }
+}

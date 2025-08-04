@@ -1,4 +1,7 @@
 {"parent": "item/_clock_state/clock_00", "overrides": [
+	{"predicate": {"custom_model_data": -393}, "model": "synhat/wilux/painting/meme/omfgdogs"},
+	{"predicate": {"custom_model_data": -392}, "model": "synhat/wilux/painting/meme/im_steve"},
+	{"predicate": {"custom_model_data": -391}, "model": "synhat/wilux/animal/rubber_duck_with_hat"},
 	{"predicate": {"custom_model_data": -390}, "model": "synhat/zielridder/red_dude"},
 	{"predicate": {"custom_model_data": -389}, "model": "synhat/zielridder/red_speedster"},
 	{"predicate": {"custom_model_data": -388}, "model": "synhat/zielridder/skulky_zielhead"},
