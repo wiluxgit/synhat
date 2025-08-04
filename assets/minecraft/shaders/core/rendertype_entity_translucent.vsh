@@ -19,11 +19,11 @@
 
 // How much bigger the second layer is
 #define OVERLAYSCALE (1.125)
-#define PIXELFACTOR (1.0/16.0)
+
+// How big a pixel is in relation to a Normal (in wordspace?)
+#define PIXELFACTOR (0.942/16.0)
 
 // FACE_OPERATION_ENTRY
-#define MASK_FACE_OPERATION_ENTRY_TRANFORM_ARGUMENT_INDEX (63) // 0b00111111
-#define MASK_TRANFORM_TYPE (192) // 0b11000000
 #define TRANFORM_TYPE_DISPLACEMENT 0
 #define TRANFORM_TYPE_UV_CROP 1
 #define TRANFORM_TYPE_UV_OFFSET 2
@@ -480,7 +480,7 @@ void applyPostFlags(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
     return;
 }
 vec3 pixelNormal() {
-    return Normal * PIXELFACTOR;
+    return normalize(Normal) * PIXELFACTOR; // Normalization is needed for sodium?
 }
 float pixelNormalLength() {
     return length(pixelNormal());
