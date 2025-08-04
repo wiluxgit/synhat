@@ -1148,7 +1148,7 @@
 	{"item": "minecraft:cooked_salmon", "data": 1, "model": "synhat/old/held/food/omelette_keto", "displayName": "Keto Omelette", "type": "held"},
 	{"item": "minecraft:cooked_salmon", "data": 2, "model": "synhat/old/held/food/omelette_japan", "displayName": "Endangered Omelette", "type": "held"},
 	{"item": "minecraft:golden_apple", "data": 1, "model": "synhat/old/held/paladins/io", "displayName": "Io", "type": "held", "lore": "Unhealthy"},
-	{"item": "minecraft:honey_bottle", "data": 1, "model": "synhat/old/held/food/ketchup", "displayName": "\\\\\"Ketchup\\\\\"?", "type": "held"},
+	{"item": "minecraft:honey_bottle", "data": 1, "model": "synhat/old/held/food/ketchup", "displayName": "\"Ketchup\"?", "type": "held"},
 	{"item": "minecraft:honey_bottle", "data": 2, "model": "synhat/old/held/food/red_sauce", "displayName": "Red Sauce", "type": "held"},
 	{"item": "minecraft:leather_horse_armor", "data": 1, "model": "synhat/old/hat/dyed/dyed_cap", "displayName": "Dyeable Cap"},
 	{"item": "minecraft:leather_horse_armor", "data": 2, "model": "synhat/old/hat/dyed/dyed_block", "displayName": "Dyeable Block"},
