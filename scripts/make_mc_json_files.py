@@ -53,7 +53,7 @@ def make_mc_files():
 
 
 def getMcModelPath(item):
-    return f"../../../assets/minecraft/models/item/{item}.json"
+    return f"../assets/minecraft/models/item/{item}.json"
 
 def get_cmdata(override):
     if "predicate" in override:

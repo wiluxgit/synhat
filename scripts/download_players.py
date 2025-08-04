@@ -35,9 +35,9 @@ def run(minData = 0, maxData = 1):
     xsort()
 
 def getSkinModelPath(uuid):
-    return f"../../../assets/minecraft/models/synhat/player/player/{uuid}.json"
+    return f"../assets/minecraft/models/synhat/player/player/{uuid}.json"
 def getSkinTexturePath(uuid):
-    return f"../../../assets/minecraft/textures/synhat/player/player/{uuid}.png"
+    return f"../assets/minecraft/textures/synhat/player/player/{uuid}.png"
 
 def makeSkin(uuid, procnum):
     try:
