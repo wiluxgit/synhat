@@ -21,7 +21,11 @@
 #define OVERLAYSCALE (1.125)
 
 // How big a pixel is in relation to a Normal (in wordspace?)
+#ifdef BROWSER
+#define PIXELFACTOR 0.5 / 16.0
+#else // Minecraft
 #define PIXELFACTOR (0.942/16.0)
+#endif
 
 // FACE_OPERATION_ENTRY
 #define TRANFORM_TYPE_DISPLACEMENT 0
@@ -187,8 +191,8 @@ void main() {
     //float vertIdx = float(vertId)/400.0;
     //float vertIdy = float((vertId/4)%6)/6.0;
     //wx_vertexColor = vec4(vertIdx, vertIdy, 0, 1);
-    //wx_vertexColor = colorFromInt(vertId);
-    wx_vertexColor = vec4(Normal, 1.0);
+    wx_vertexColor = colorFromInt(getFaceId(vertId));
+    //wx_vertexColor = vec4(Normal, 1.0);
     //</DEBUG>
 
     wx_isEdited = 0.0;

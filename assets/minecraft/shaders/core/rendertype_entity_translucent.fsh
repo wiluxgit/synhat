@@ -109,13 +109,13 @@ void main() {
     if (color.a < 0.1) {
         discard;
     }
-#ifdef BROWSER
-    fragColor = color;
-#else
-    color *= vvertexColor * ColorModulator;
-    color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
-    color *= lightMapColor;
-    fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
-    //fragColor += wx_vertexColor * 0.000000001; // Without this sodium breaks?!?!?
-#endif
+    fragColor = wx_vertexColor;
+//#ifdef BROWSER
+//    fragColor = color;
+//#else
+//    color *= vvertexColor * ColorModulator;
+//    color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
+//    color *= lightMapColor;
+//    fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
+//#endif
 }

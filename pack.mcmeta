@@ -77,6 +77,12 @@
                 "text": "(DEV)",
                 "color": "#444444"
             }
-        ]
+        ],
+        "sodium": {
+            "ignored_shaders": [
+                "rendertype_entity_translucent.fsh",
+                "rendertype_entity_translucent.vsh"
+            ]
+        }
     }
 }
