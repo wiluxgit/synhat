@@ -1,14 +1,29 @@
 #version 330
 
-#ifdef BROWSER
+#ifdef GL_ES
 // ThreeJS
 #define in in highp
 #define out out highp
-#else
-// Minecraft
+#else // Minecraft
+#define texture2D texture
+
 #moj_import <fog.glsl>
 #moj_import <light.glsl>
-#define texture2D texture
+
+// Shenaigans for sodium compatibility
+#define uniform
+#define mat4
+#define u_ProjectionMatrix
+#define u_ModelViewMatrix
+#moj_import <sodium:chunk_matrices.glsl>
+#undef uniform
+#undef mat4
+#undef u_ProjectionMatrix
+#undef u_ModelViewMatrix
+#ifdef u_ModelViewProjectionMatrix
+#define SODIUM
+#endif
+
 #endif
 
 // Vanilla uniform
@@ -40,7 +55,7 @@ out vec4 fragColor;
 //  Calculates the directional color relative to worldspace.
 //  I no longer remember why this work, all i know is that it took a long time to figure out
 //---------------------------------------------------------------------------------
-#ifdef BROWSER
+#ifdef GL_ES
 // ThreeJS
 vec4 getDirectionalColor() {
     return vec4(1,1,1,0);
@@ -109,13 +124,12 @@ void main() {
     if (color.a < 0.1) {
         discard;
     }
-    fragColor = wx_vertexColor;
-//#ifdef BROWSER
-//    fragColor = color;
-//#else
-//    color *= vvertexColor * ColorModulator;
-//    color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
-//    color *= lightMapColor;
-//    fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
-//#endif
+    #ifdef GL_ES
+        fragColor = color;
+    #else
+        color *= vvertexColor * ColorModulator;
+        color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
+        color *= lightMapColor;
+        fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
+    #endif
 }

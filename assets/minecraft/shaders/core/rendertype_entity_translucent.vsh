@@ -1,12 +1,27 @@
 #version 330
 
-#ifdef BROWSER // ThreeJS
+#ifdef GL_ES // ThreeJS
 #define in in highp
 #define out out highp
 #else // Minecraft
-#extension GL_EXT_gpu_shader4 : enable
-#moj_import <light.glsl>
+
 #moj_import <fog.glsl>
+#moj_import <light.glsl>
+
+// Shenaigans for sodium compatibility
+#define uniform
+#define mat4
+#define u_ProjectionMatrix
+#define u_ModelViewMatrix
+#moj_import <sodium:chunk_matrices.glsl>
+#undef uniform
+#undef mat4
+#undef u_ProjectionMatrix
+#undef u_ModelViewMatrix
+#ifdef u_ModelViewProjectionMatrix
+#define SODIUM
+#endif
+
 #endif
 
 //=================================================================================
@@ -21,7 +36,7 @@
 #define OVERLAYSCALE (1.125)
 
 // How big a pixel is in relation to a Normal (in wordspace?)
-#ifdef BROWSER
+#ifdef GL_ES
 #define PIXELFACTOR 0.5 / 16.0
 #else // Minecraft
 #define PIXELFACTOR (0.942/16.0)
@@ -101,7 +116,7 @@ float pixelNormalLength();
 //=================================================================================
 // INPUTS
 //=================================================================================
-#ifdef BROWSER // ThreeJS
+#ifdef GL_ES // ThreeJS
 mat4 ModelViewMat;
 mat4 ProjMat;
 vec3 Position;
@@ -146,7 +161,7 @@ out float wx_isEdited;
 out vec2 wx_clipMin;
 out vec2 wx_clipMax;
 
-#ifdef BROWSER // ThreeJS
+#ifdef GL_ES // ThreeJS
 #else // Minecraft
 out vec3 wx_passLight0_Direction;
 out vec3 wx_passLight1_Direction;
@@ -177,7 +192,7 @@ bool MirrorY;
 
 void main() {
 
-#ifdef BROWSER
+#ifdef GL_ES
     // ThreeJS fix to convert all names to the same as minecraft
     ModelViewMat = viewMatrix;
     ProjMat = projectionMatrix;
@@ -191,7 +206,7 @@ void main() {
     //float vertIdx = float(vertId)/400.0;
     //float vertIdy = float((vertId/4)%6)/6.0;
     //wx_vertexColor = vec4(vertIdx, vertIdy, 0, 1);
-    wx_vertexColor = colorFromInt(getFaceId(vertId));
+    wx_vertexColor = colorFromInt(vertId);
     //wx_vertexColor = vec4(Normal, 1.0);
     //</DEBUG>
 
@@ -308,7 +323,7 @@ void main() {
         }
     }
 
-#ifdef BROWSER // ThreeJS
+#ifdef GL_ES // ThreeJS
 #else // Minecraft
     // Directional Lighting Hack
     mat3 invMatrix = inverse(mat3(ProjMat)) * inverse(mat3(ModelViewMat));
@@ -647,7 +662,7 @@ int getPerpendicularLength(int faceId, bool isAlex) {
 //  Returns the The vertex id is unique number for each vertex, all players have identical order
 //  The THREE_vertexID must be implemented to be the same order as minecraft
 //---------------------------------------------------------------------------------
-#ifdef BROWSER // ThreeJS
+#ifdef GL_ES // ThreeJS
 attribute int THREE_vertexID;
 int getVertId() {
     return THREE_vertexID;
