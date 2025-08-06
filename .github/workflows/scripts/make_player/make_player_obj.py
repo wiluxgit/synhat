@@ -1,9 +1,11 @@
 from enum import Enum
-from typing import Generator, Self, TextIO
+from pathlib import Path
+import subprocess
+from typing import Generator, TextIO
 import numpy as np
 from numpy.typing import NDArray
-import matplotlib.pyplot as plt
 from dataclasses import dataclass
+import itertools
 
 class FaceDirection(Enum):
     TOP = 0
@@ -36,6 +38,7 @@ DIRECTION_2_VERTEXORDER = {
 
 @dataclass
 class BodyPart:
+    # some name
     name: str
     # TOP LEFT of the UV square
     origin_uv: tuple[int,int]
@@ -54,8 +57,10 @@ class ObjCounters:
     fid: int
 
 OVERLAY_SCALE = 1.125
+
+# ORDER MATTERS!!!
+#            id  name     uv TL     size      3d center  3d scale
 PARTS_STEVE = [
-#            name     uv TL     size      3d center  3d scale
     BodyPart("Head",  ( 0, 0),  (8, 8,8), ( 0,28,0), 1),
     BodyPart("Body",  (16,16),  (8,12,4), ( 0,18,0), 1),
     BodyPart("LArm",  (40,16),  (4,12,4), (-6,18,0), 1),
@@ -87,16 +92,115 @@ PARTS_ALEX = [
 def run():
     parts = PARTS_STEVE
 
+    generateCssGrid(parts)
+    generateSodiumVertIdFixer()
+
     # Handrolling some .obj file because we need very specific vertex ordering
     with open("C:/Users/wilux/AppData/Roaming/.minecraft/resourcepacks/synhat-dev/web_editor/assets/steve.obj", "w+") as f:
         f.write("# Made by Wilux\n")
         f.write("mtllib steve.mtl\n\n")
 
         counters = ObjCounters(1,1,1,1)
-
         for part in parts:
             #f.write(f"o {name}\n")
             writeCube(f, part, counters)
+
+def generateCssGrid(parts: list[BodyPart]):
+    pixelgrid = [[f".   " for _ in range(64)] for _ in range(64)]
+    for i in range(6):
+        dirId = FaceDirection(i)
+        for cubeId, part in enumerate(parts):
+            uvids = faceDir_counterClockwiseCornerUVIds(dirId, 0)
+            uvId2Coord = body_cornerUvs(part)
+            a = [uvId2Coord[uvid] for uvid in uvids]
+            us, vs = zip(*a)
+
+            umin, vmin = (min(us), min(vs))
+            umax, vmax = (max(us), max(vs))
+
+            faceId = cubeId*6 + i
+
+            for u in range(umin, umax):
+                for v in range(vmin, vmax):
+                    pixelgrid[v][u] = f"fi{faceId:>02}"
+
+    with open("cssgridcode.txt", "w+") as f:
+        for line in pixelgrid:
+            f.write(f'\"{" ".join(line)}\"\n')
+
+import perfect_hash
+def generateSodiumVertIdFixer():
+    """ Unfortunately using sodium mirrors the vertex ids, this code generates GLSL
+        code that peeks the UV to figure out if its the left or right face being rendered
+    """
+    @dataclass(frozen=True, order=True)
+    class Key:
+        vertId: int # not part of the hash, for sorting
+        u: int # [0,64]
+        v: int # [0,64]
+        def hashKey(self):
+            # Designed to be input to perfect_hash
+            # perfect_hash is designed around strings but glsl only has ints
+            # buuut, since we know the uv is only uint16_t unsafely interpret the number as a string
+            return (self.u + (self.v << 8)).to_bytes(2, byteorder="big").decode('latin1')
+
+    DIRS = [
+        FaceDirection.RIGHT,
+        FaceDirection.LEFT,
+    ]
+
+    keySet: set[Key] = set()
+    parts = PARTS_STEVE + PARTS_ALEX
+    for part in parts:
+        uvs = body_cornerUvs(part)
+        for dir in DIRS:
+            cids = faceDir_counterClockwiseCornerUVIds(dir, 0)
+            for u,v in (uvs[c] for c in cids):
+                k = Key(u=u, v=v)
+                keySet.add(k)
+    keyList = sorted(keySet)
+
+    # generate a perfect hash function
+    TEMPLATE =  """
+G = [$G]
+S1 = [$S1]
+S2 = [$S2]
+
+def perfectHash(u: int, v: int):
+    return (
+        G[(S1[0]*u + S1[1]*v) % $NG] +
+        G[(S2[0]*u + S2[1]*v) % $NG]
+    ) % $NG
+"""
+    strList = [k.hashKey() for k in keyList]
+    ph = perfect_hash.generate_code(strList, Hash=perfect_hash.IntSaltHash, template=TEMPLATE)
+    print(ph)
+
+    for k in keyList:
+        foo = perfectHash(k.v, k.u)
+        print(foo)
+
+G = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 228, 0, 0, 0, 0, 0, 0, 132, 0, 0, 0, 0, 0, 106, 180,
+    0, 114, 18, 49, 0, 0, 0, 0, 0, 156, 194, 0, 0, 32, 0, 31, 0, 0, 15,
+    192, 0, 36, 0, 0, 111, 0, 0, 0, 0, 50, 12, 54, 0, 0, 10, 0, 0, 54, 0,
+    71, 19, 84, 0, 38, 17, 0, 0, 0, 0, 70, 232, 104, 55, 199, 0, 0, 0, 0,
+    225, 53, 33, 14, 0, 0, 0, 0, 79, 84, 149, 153, 220, 0, 104, 0, 0, 31,
+    0, 62, 151, 0, 0, 0, 0, 0, 7, 37, 92, 0, 68, 0, 0, 50, 0, 93, 27, 36,
+    0, 0, 98, 0, 37, 49, 0, 27, 45, 31, 5, 107, 0, 0, 40, 19, 169, 0, 227,
+    24, 66, 69, 0, 30, 210, 0, 25, 65, 0, 44, 96, 78, 0, 0, 0, 0, 0, 40,
+    111, 60, 172, 64, 0, 0, 202, 115, 220, 232, 0, 20, 0, 0, 0, 0, 86, 58,
+    39, 0, 0, 110, 0, 0, 91, 35, 41, 2, 71, 0, 0, 0, 0, 75, 1, 96, 16, 22,
+    0, 88, 0, 0, 82, 0, 160, 41, 211, 0, 66, 37, 0, 0, 118, 9, 3, 59, 102,
+    0, 85, 57, 42, 0]
+S1 = [107, 23]
+S2 = [57, 40]
+
+def perfectHash(u: int, v: int):
+    return (
+        G[(S1[0]*u + S1[1]*v) % 235] +
+        G[(S2[0]*u + S2[1]*v) % 235]
+    ) % 235
 
 def writeCube(f: TextIO, part: BodyPart, counters: ObjCounters):
     file_v = []
@@ -158,38 +262,36 @@ def faceDir_normal(self: FaceDirection) -> NDArray[np.floating]:
     return ret*0.555
 
 """
-UV ordering is an arbitrary ordering by me, it does not correspond to any minecraft property
+
 #       ^ v (up)
 #
-#           x   x
-#         0---1---2
-#         |   |   |
-# z       | 0 | 1 |
-#         |   |   |
-#         3---4---5
-#   6-----7---8-----9---10    -> u (left)
-# y |  2  | 3 |  4  | 5 |
-#   11----12--13----14--15
-#      z    x    z    x
+#           x    x
+#         1---0 2---3
+# z       | 0 | | 1 |
+#         2---3 1---0
+#   1---0 1---0 1---0 1---0
+# y | 2 | | 3 | | 4 | | 5 |
+#   2---3 2---3 2---3 2---3
+#     z     x     z     x
 """
-UV_ORDER_COUNT = 16
-def faceDir_counterClockwiseCornerUVIds(self: FaceDirection, offset) -> Generator[int, None, None]:
+UV_ORDER_COUNT = 6 * 4
+def faceDir_counterClockwiseVertId(self: FaceDirection, offset) -> Generator[int, None, None]:
     """ The starting point of the indexing must be corner 0 see gl_VertexID.png """
     match self:
         case FaceDirection.TOP:
-            return (offset + i for i in (1, 0, 3, 4))
+            return (offset + 4*0 + i for i in (1, 0, 3, 4))
         case FaceDirection.BOTTOM:
-            return (offset + i for i in (5, 4, 1, 2))
+            return (offset + 4*1 + i for i in (5, 4, 1, 2))
         case FaceDirection.RIGHT:
-            return (offset + i for i in (7, 6, 11, 12))
+            return (offset + 4*2 + i for i in (7, 6, 11, 12))
         case FaceDirection.FRONT:
-            return (offset + i for i in (8, 7, 12, 13))
+            return (offset + 4*3 +i for i in (8, 7, 12, 13))
         case FaceDirection.LEFT:
-            return (offset + i for i in (9, 8, 13, 14))
+            return (offset + 4*4 +i for i in (9, 8, 13, 14))
         case FaceDirection.BACK:
-            return (offset + i for i in (10, 9, 14, 15))
+            return (offset + 4*5 +i for i in (10, 9, 14, 15))
 
-def body_cornerUvs(self: BodyPart) -> list[tuple[int,int]]:
+def body_vertUvs(self: BodyPart) -> list[tuple[int,int]]:
     """ Returns an iterator for the UV as [u,v] tuples in units of pixels from the top left
         Sorted in UV ordering """
     x = self.axis_sizes[0]
