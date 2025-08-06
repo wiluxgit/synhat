@@ -10,20 +10,6 @@
 #moj_import <fog.glsl>
 #moj_import <light.glsl>
 
-// Shenaigans for sodium compatibility
-#define uniform
-#define mat4
-#define u_ProjectionMatrix
-#define u_ModelViewMatrix
-#moj_import <sodium:chunk_matrices.glsl>
-#undef uniform
-#undef mat4
-#undef u_ProjectionMatrix
-#undef u_ModelViewMatrix
-#ifdef u_ModelViewProjectionMatrix
-#define SODIUM
-#endif
-
 #endif
 
 // Vanilla uniform
@@ -124,12 +110,16 @@ void main() {
     if (color.a < 0.1) {
         discard;
     }
-    #ifdef GL_ES
-        fragColor = color;
-    #else
-        color *= vvertexColor * ColorModulator;
-        color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
-        color *= lightMapColor;
-        fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
-    #endif
+#ifdef GL_ES
+    fragColor = color;
+#else
+    color *= vvertexColor * ColorModulator;
+    color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
+    color *= lightMapColor;
+    fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
+#endif
+
+#ifdef SODIUM_CORE_SHADER_SUPPORT
+    fragColor = wx_vertexColor;
+#endif
 }
