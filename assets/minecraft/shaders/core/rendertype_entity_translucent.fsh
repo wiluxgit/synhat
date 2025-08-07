@@ -58,7 +58,7 @@ in vec3 wx_invMatrix2;
 
 vec4 getDirectionalColor() {
     vec3 normalInScreenSpace = normalize(cross(dFdx(wx_passModelViewPos), dFdy(wx_passModelViewPos)));
-    normalInScreenSpace.z *= -1;
+    //normalInScreenSpace.z *= -1;
 
     mat3 wx_invMatrix = mat3(wx_invMatrix0, wx_invMatrix1, wx_invMatrix2);
     vec3 normalInVertexShaderWorld = normalize(wx_invMatrix * normalInScreenSpace);
@@ -94,9 +94,9 @@ void main() {
             return;
         }
 
-        if (color.a < 0.1) {
+        if (color.a < 0.1 || color.rgb == vec3(0.0)) {
             discard;
-            fragColor = discardColor;
+            return;
         } else {
             fragColor = color;
             //fragColor = (discardColor + color) / 2.0;

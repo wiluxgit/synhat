@@ -14,47 +14,28 @@
 // Macros
 //=================================================================================
 
-// how long to stretch along normal to simulate 90 deg face
-#define AS_FLIP (128.0)
-
-
 // How much bigger the second layer is
 #define OVERLAYSCALE (1.125)
 
 // How big a pixel is in relation to a Normal (in wordspace?)
 #ifdef GL_ES
-#define PIXELFACTOR 0.5 / 16.0
+#define PIXELFACTOR (0.55/16.0)
 #else // Minecraft
-#define PIXELFACTOR (0.942/16.0)
+#define PIXELFACTOR (1.03/16.0)
 #endif
 
 // FACE_OPERATION_ENTRY
 #define TRANFORM_TYPE_DISPLACEMENT 0
 #define TRANFORM_TYPE_UV_CROP 1
 #define TRANFORM_TYPE_UV_OFFSET 2
-#define TRANFORM_TYPE_SPECIAL 3
 
-// TRANFORM_TYPE_DISPLACEMENT
-#define MASK_TTD_globalDisplacement (63) // 0b00111111
-#define FLAG_TTD_snap (64)  // 0b01000000
-#define FLAG_TTD_sign (128) // 0b10000000
-#define MASK_TTD_asymDisplacement (63) // 0b00111111
-#define MASK_TTD_asymSpecialMode (63) // 0b00111111
-#define FLAG_TTD_asymSpec (64)  // 0b01000000
-#define FLAG_TTD_asymSign (128) // 0b10000000
-#define MASK_TTD_asymEdge (3) // 0b00000011
-#define ASYM_EDGE_top (0)
-#define ASYM_EDGE_bot (1)
-#define ASYM_EDGE_left (2)
-#define ASYM_EDGE_right (3)
-#define ASYM_SPECIAL_MODE_flipOuter (0)
-#define ASYM_SPECIAL_MODE_flipInner (1)
-
-// TRANSFROM_TYPE_UV_CROP
-#define FLAG_TUC_SNAP_X (1<<0)
-#define FLAG_TUC_SNAP_Y (1<<1)
-#define FLAG_TUC_MIRROR_X (1<<2)
-#define FLAG_TUC_MIRROR_Y (1<<3)
+// Inherent properties
+#define FACE_AXIS_TOP    0
+#define FACE_AXIS_BOTTOM 1
+#define FACE_AXIS_RIGHT  2
+#define FACE_AXIS_FRONT  3
+#define FACE_AXIS_LEFT   4
+#define FACE_AXIS_BACK   5
 
 // Util
 #define FLAG_DIR_RIGHT (1)
@@ -255,9 +236,6 @@ void main() {
                     case TRANFORM_TYPE_UV_OFFSET:
                         applyUVOffset(isAlex, vertId, tfData.x, tfData.y, tfData.z);
                         break;
-                    case TRANFORM_TYPE_SPECIAL:
-                        applyPostFlags(isAlex, vertId, tfData.x, tfData.y, tfData.z);
-                        break;
                     default:
                         break;
                 }
@@ -334,6 +312,26 @@ void main() {
     return;
 }
 
+
+//---------------------------------------------------------------------------------
+// applyDisplacement()
+//   TRANFORM_TYPE_DISPLACEMENT
+//---------------------------------------------------------------------------------
+#define AS_FLIP (128.0)
+#define MASK_TTD_globalDisplacement (63) // 0b00111111
+#define FLAG_TTD_snap (64)  // 0b01000000
+#define FLAG_TTD_sign (128) // 0b10000000
+#define MASK_TTD_asymDisplacement (63) // 0b00111111
+#define MASK_TTD_asymSpecialMode (63) // 0b00111111
+#define FLAG_TTD_asymSpec (64)  // 0b01000000
+#define FLAG_TTD_asymSign (128) // 0b10000000
+#define MASK_TTD_asymEdge (3) // 0b00000011
+#define ASYM_EDGE_top (0)
+#define ASYM_EDGE_bot (1)
+#define ASYM_EDGE_left (2)
+#define ASYM_EDGE_right (3)
+#define ASYM_SPECIAL_MODE_flipOuter (0)
+#define ASYM_SPECIAL_MODE_flipInner (1)
 void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
     bool isNegativeOffset 		= (dataR & FLAG_TTD_sign) != 0;
     bool isSnap				    = (dataR & FLAG_TTD_snap) != 0;
@@ -413,18 +411,19 @@ void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB)
         float scrollMod = (asymEdge == ASYM_EDGE_bot || asymEdge == ASYM_EDGE_left) ? 1.0 : -1.0;
 
         // If bottom face flip axis
-        if (dirId == 3) {
+        if (dirId == FACE_AXIS_BOTTOM) {
             scrollMod *= -1.0;
         }
 
+        // Yeah this is magic, it makes no sense
         switch(asymSpecialMode) {
             case ASYM_SPECIAL_MODE_flipOuter:
-                scale = asymDeltaAbs * pixelNormalLength() * (0.5 / PIXELFACTOR);
+                scale = asymDeltaAbs * pixelNormalLength() * (0.25 / PIXELFACTOR);
                 scroll = 0.5 * scrollMod * perpLenPixels / 64.0;
                 break;
             case ASYM_SPECIAL_MODE_flipInner:
                 float correctSnap = (perpLenPixels + 2.0 * distanceToOtherLayer) / (perpLenPixels + distanceToOtherLayer);
-                scale = correctSnap * asymDeltaAbs * pixelNormalLength() * (0.5 / PIXELFACTOR);
+                scale = correctSnap * asymDeltaAbs * pixelNormalLength() * (0.25 / PIXELFACTOR);
                 scroll = 1.5 * scrollMod * perpLenPixels / 64.0;
                 break;
             default:
@@ -440,6 +439,15 @@ void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB)
         //wx_vertexColor = colorFromInt(asymEdge);
     }
 }
+
+//---------------------------------------------------------------------------------
+// applyUVCrop()
+//  TRANFORM_TYPE_UV_CROP
+//---------------------------------------------------------------------------------
+#define FLAG_TUC_SNAP_X (1<<0)
+#define FLAG_TUC_SNAP_Y (1<<1)
+#define FLAG_TUC_MIRROR_X (1<<2)
+#define FLAG_TUC_MIRROR_Y (1<<3)
 void applyUVCrop(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
     CropEdgeTop += float(dataR & 15); // 0b00001111
     CropEdgeBot += float(dataR >> 4);
@@ -451,6 +459,11 @@ void applyUVCrop(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
     MirrorY = (dataB & FLAG_TUC_MIRROR_Y) != 0;
     return;
 }
+
+//---------------------------------------------------------------------------------
+// applyUVOffset()
+//  TRANFORM_TYPE_UV_OFFSET
+//---------------------------------------------------------------------------------
 void applyUVOffset(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
     int xmax = dataR & 63; // 0b00111111
     int xmin = dataG & 63;
@@ -481,20 +494,15 @@ void applyUVOffset(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
     //wx_vertexColor = colorFromInt(cornerId);
     return;
 }
-void applyPostFlags(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
-    return;
-}
+
 vec3 pixelNormal() {
-    return normalize(Normal) * PIXELFACTOR; // Normalization is needed for sodium?
+    return normalize(Normal) * PIXELFACTOR;
 }
 float pixelNormalLength() {
     return length(pixelNormal());
 }
 
-
-bool isSecondaryLayer(int vertId) {
-    return vertId >= 36*4;
-}
+// Getters, see (web_editor/assets/gl_VertexID.png)
 int getFaceId(int vertId) {
     return (vertId / 4);
 }
@@ -503,6 +511,14 @@ int getDirId(int vertId) {
 }
 int getCornerId(int vertId) {
     return vertId % 4;
+}
+int getBoxId(int vertId) {
+    return (vertId / 24);
+}
+bool isSecondaryLayer(int vertId) {
+    // box id alternates between primary -> secondary -> primary....
+    int boxId = getBoxId(vertId);
+    return (boxId & 1) == 1; // is odd
 }
 
 //---------------------------------------------------------------------------------
@@ -574,23 +590,17 @@ vec4 colorFromInt(int i) {
 //---------------------------------------------------------------------------------
 int getPerpendicularLength(int faceId, bool isAlex) {
     #define BODY_PART_HEAD    0
-    #define BODY_PART_BODY    1
-    #define BODY_PART_ARM_R   2
-    #define BODY_PART_ARM_L   3
-    #define BODY_PART_LEG_R   4
-    #define BODY_PART_LEG_L   5
-    #define BODY_PART_HAT     6
-    #define BODY_PART_PANT_L  7
-    #define BODY_PART_PANT_R  8
-    #define BODY_PART_SLEVE_L 9
-    #define BODY_PART_SLEVE_R 10
-    #define BODY_PART_JACKET  11
-    #define FACE_AXIS_TOP    0
-    #define FACE_AXIS_BOTTOM 1
-    #define FACE_AXIS_RIGHT  2
-    #define FACE_AXIS_FRONT  3
-    #define FACE_AXIS_LEFT   4
-    #define FACE_AXIS_BACK   5
+    #define BODY_PART_HAT     1
+    #define BODY_PART_L_ARM   2
+    #define BODY_PART_L_SLEVE 3
+    #define BODY_PART_R_LEG   4
+    #define BODY_PART_R_PANT  5
+    #define BODY_PART_R_ARM   6
+    #define BODY_PART_R_SLEVE 7
+    #define BODY_PART_L_LEG   8
+    #define BODY_PART_L_PANT  9
+    #define BODY_PART_BODY    10
+    #define BODY_PART_SHIRT   11
 
     int bodyPart = faceId / 6;
     int faceAxis = faceId % 6;
@@ -599,7 +609,7 @@ int getPerpendicularLength(int faceId, bool isAlex) {
         case BODY_PART_HAT:
             return 8;
         case BODY_PART_BODY:
-        case BODY_PART_JACKET:
+        case BODY_PART_SHIRT:
             switch(faceAxis) {
                 case FACE_AXIS_TOP:
                 case FACE_AXIS_BOTTOM:
@@ -611,10 +621,10 @@ int getPerpendicularLength(int faceId, bool isAlex) {
                 case FACE_AXIS_BACK:
                     return 4;
             }
-        case BODY_PART_LEG_R:
-        case BODY_PART_LEG_L:
-        case BODY_PART_PANT_R:
-        case BODY_PART_PANT_L:
+        case BODY_PART_R_LEG:
+        case BODY_PART_L_LEG:
+        case BODY_PART_R_PANT:
+        case BODY_PART_L_PANT:
             switch(faceAxis) {
                 case FACE_AXIS_TOP:
                 case FACE_AXIS_BOTTOM:
@@ -625,10 +635,10 @@ int getPerpendicularLength(int faceId, bool isAlex) {
                 case FACE_AXIS_BACK:
                     return 4;
             }
-        case BODY_PART_ARM_R:
-        case BODY_PART_ARM_L:
-        case BODY_PART_SLEVE_R:
-        case BODY_PART_SLEVE_L:
+        case BODY_PART_R_ARM:
+        case BODY_PART_L_ARM:
+        case BODY_PART_R_SLEVE:
+        case BODY_PART_L_SLEVE:
             switch(faceAxis) {
                 case FACE_AXIS_TOP:
                 case FACE_AXIS_BOTTOM:
