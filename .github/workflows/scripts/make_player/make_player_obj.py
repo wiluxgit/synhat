@@ -61,39 +61,39 @@ OVERLAY_SCALE = 1.125
 # ORDER MATTERS!!!
 #            id  name     uv TL     size      3d center  3d scale
 PARTS_STEVE = [
-    BodyPart("Head",  ( 0, 0), (8, 8,8), ( 0,28,0), 1),
-    BodyPart("oHead", (32, 0), (8, 8,8), ( 0,28,0), OVERLAY_SCALE),
-    BodyPart("LArm",  (40,16), (4,12,4), (-6,18,0), 1),
-    BodyPart("oLArm", (40,32), (4,12,4), (-6,18,0), OVERLAY_SCALE),
-    BodyPart("RLeg",  (16,48), (4,12,4), ( 2, 6,0), 1),
-    BodyPart("oRLeg", ( 0,48), (4,12,4), ( 2, 6,0), OVERLAY_SCALE),
-    BodyPart("RArm",  (32,48), (4,12,4), ( 6,18,0), 1),
-    BodyPart("oRArm", (48,48), (4,12,4), ( 6,18,0), OVERLAY_SCALE),
-    BodyPart("LLeg",  ( 0,16), (4,12,4), (-2, 6,0), 1),
-    BodyPart("oLLeg", ( 0,32), (4,12,4), (-2, 6,0), OVERLAY_SCALE),
-    BodyPart("Body",  (16,16), (8,12,4), ( 0,18,0), 1),
-    BodyPart("oBody", (16,32), (8,12,4), ( 0,18,0), OVERLAY_SCALE),
+    BodyPart("HEAD",   ( 0, 0), (8, 8,8), ( 0,28,0), 1),
+    BodyPart("HAT",    (32, 0), (8, 8,8), ( 0,28,0), OVERLAY_SCALE),
+    BodyPart("L_ARM",  (40,16), (4,12,4), (-6,18,0), 1),
+    BodyPart("L_SLEVE",(40,32), (4,12,4), (-6,18,0), OVERLAY_SCALE),
+    BodyPart("R_LEG",  (16,48), (4,12,4), ( 2, 6,0), 1),
+    BodyPart("R_PANT", ( 0,48), (4,12,4), ( 2, 6,0), OVERLAY_SCALE),
+    BodyPart("R_ARM",  (32,48), (4,12,4), ( 6,18,0), 1),
+    BodyPart("R_SLEVE",(48,48), (4,12,4), ( 6,18,0), OVERLAY_SCALE),
+    BodyPart("L_LEG",  ( 0,16), (4,12,4), (-2, 6,0), 1),
+    BodyPart("L_PANT", ( 0,32), (4,12,4), (-2, 6,0), OVERLAY_SCALE),
+    BodyPart("BODY",   (16,16), (8,12,4), ( 0,18,0), 1),
+    BodyPart("SHIRT",  (16,32), (8,12,4), ( 0,18,0), OVERLAY_SCALE),
 ]
 PARTS_ALEX = [
-    BodyPart("Head",  ( 0, 0), (8, 8,8), ( 0,28,0), 1),
-    BodyPart("oHead", (32, 0), (8, 8,8), ( 0,28,0), OVERLAY_SCALE),
-    BodyPart("LArm",  (40,16), (3,12,4), (-6,18,0), 1),
-    BodyPart("oLArm", (40,32), (3,12,4), (-6,18,0), OVERLAY_SCALE),
-    BodyPart("RLeg",  (16,48), (4,12,4), ( 2, 6,0), 1),
-    BodyPart("oRLeg", ( 0,48), (4,12,4), ( 2, 6,0), OVERLAY_SCALE),
-    BodyPart("RArm",  (32,48), (3,12,4), ( 6,18,0), 1),
-    BodyPart("oRArm", (48,48), (3,12,4), ( 6,18,0), OVERLAY_SCALE),
-    BodyPart("LLeg",  ( 0,16), (4,12,4), (-2, 6,0), 1),
-    BodyPart("oLLeg", ( 0,32), (4,12,4), (-2, 6,0), OVERLAY_SCALE),
-    BodyPart("Body",  (16,16), (8,12,4), ( 0,18,0), 1),
-    BodyPart("oBody", (16,32), (8,12,4), ( 0,18,0), OVERLAY_SCALE),
+    BodyPart("HEAD",   ( 0, 0), (8, 8,8), ( 0,28,0), 1),
+    BodyPart("HAT",    (32, 0), (8, 8,8), ( 0,28,0), OVERLAY_SCALE),
+    BodyPart("L_ARM",  (40,16), (3,12,4), (-6,18,0), 1),
+    BodyPart("L_SLEVE",(40,32), (3,12,4), (-6,18,0), OVERLAY_SCALE),
+    BodyPart("R_LEG",  (16,48), (4,12,4), ( 2, 6,0), 1),
+    BodyPart("R_PANT", ( 0,48), (4,12,4), ( 2, 6,0), OVERLAY_SCALE),
+    BodyPart("R_ARM",  (32,48), (3,12,4), ( 6,18,0), 1),
+    BodyPart("R_SLEVE",(48,48), (3,12,4), ( 6,18,0), OVERLAY_SCALE),
+    BodyPart("L_LEG",  ( 0,16), (4,12,4), (-2, 6,0), 1),
+    BodyPart("L_PANT", ( 0,32), (4,12,4), (-2, 6,0), OVERLAY_SCALE),
+    BodyPart("BODY",   (16,16), (8,12,4), ( 0,18,0), 1),
+    BodyPart("SHIRT",  (16,32), (8,12,4), ( 0,18,0), OVERLAY_SCALE),
 ]
 
 def run():
     parts = PARTS_STEVE
 
     generateCssGrid(parts)
-    #generateSodiumVertIdFixer()
+    generateUvLookup()
 
     # Handrolling some .obj file because we need very specific vertex ordering
     with open("C:/Users/wilux/AppData/Roaming/.minecraft/resourcepacks/synhat-dev/web_editor/assets/steve.obj", "w+") as f:
@@ -128,57 +128,25 @@ def generateCssGrid(parts: list[BodyPart]):
         for line in pixelgrid:
             f.write(f'\"{" ".join(line)}\"\n')
 
-import perfect_hash
-def generateSodiumVertIdFixer():
-    """ Unfortunately using sodium mirrors the vertex ids, this code generates GLSL
-        code that peeks the UV to figure out if its the left or right face being rendered
-    """
-    @dataclass(frozen=True, order=True)
-    class Key:
-        vertId: int # not part of the hash, for sorting
-        u: int # [0,64]
-        v: int # [0,64]
-        def hashKey(self):
-            # Designed to be input to perfect_hash
-            # perfect_hash is designed around strings but glsl only has ints
-            # buuut, since we know the uv is only uint16_t unsafely interpret the number as a string
-            return (self.u + (self.v << 8)).to_bytes(2, byteorder="big").decode('latin1')
+def generateUvLookup():
+    strSwitch = "    switch (faceId + (isAlex ? (1<<8) : 0)) {\n"
+    for isAlex, parts in enumerate([PARTS_STEVE,PARTS_ALEX]):
+        vertId = 0
+        for part in parts:
+            for dir, cornerUvs in zip(FaceDirection, itertools.batched(body_vertUvs(part), 4)):
+                key = f"FACEID_{part.name}_{dir.name}"
+                intKey = vertId + ((1<<8) * isAlex)
+                minU, minV = min(cornerUvs)
+                maxU, maxV = max(cornerUvs)
+                strKey = f"{intKey}:"
+                strVec = f"vec4({minU:2},{minV:2},{maxU:2},{maxV:2})"
+                strSwitch += f"        case {strKey:4} return {strVec:12} / 64.0;\n"
+                vertId += 1
+    strSwitch += "    }\n"
 
-    DIRS = [
-        FaceDirection.RIGHT,
-        FaceDirection.LEFT,
-    ]
+    with open("uvcode.txt", "w+") as f:
+        f.write(f"// Auto generated code from {__file__}\nvec4 lookupVanillaUvs(int faceId, bool isAlex) {{\n{strSwitch}}}")
 
-    keySet: set[Key] = set()
-    parts = PARTS_STEVE + PARTS_ALEX
-    for part in parts:
-        uvs = body_vertUvs(part)
-        for dir in DIRS:
-            cids = faceDir_counterClockwiseVertId(dir, 0)
-            for u,v in (uvs[c] for c in cids):
-                k = Key(u=u, v=v)
-                keySet.add(k)
-    keyList = sorted(keySet)
-
-    # generate a perfect hash function
-    TEMPLATE =  """
-G = [$G]
-S1 = [$S1]
-S2 = [$S2]
-
-def perfectHash(u: int, v: int):
-    return (
-        G[(S1[0]*u + S1[1]*v) % $NG] +
-        G[(S2[0]*u + S2[1]*v) % $NG]
-    ) % $NG
-"""
-    strList = [k.hashKey() for k in keyList]
-    ph = perfect_hash.generate_code(strList, Hash=perfect_hash.IntSaltHash, template=TEMPLATE)
-    print(ph)
-
-    for k in keyList:
-        foo = perfectHash(k.v, k.u)
-        print(foo)
 
 def writeCube(f: TextIO, part: BodyPart, counters: ObjCounters):
     file_v = []
@@ -243,7 +211,7 @@ def faceDir_normal(self: FaceDirection) -> NDArray[np.floating]:
 
 #       ^ v (up)
 #
-#           x    x
+#           x     x
 #         1---0 2---3
 # z       | 0 | | 1 |
 #         2---3 1---0

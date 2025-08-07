@@ -3,3 +3,5 @@
 .vscode/settings.json
 assets/minecraft/shaders/_data/shader_web/node_modules
 .github/workflows/scripts/temp/*
+.github/workflows/scripts/make_player/uvcode.txt
+.github/workflows/scripts/make_player/cssgridcode.txt

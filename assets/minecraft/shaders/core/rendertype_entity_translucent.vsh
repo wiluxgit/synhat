@@ -80,7 +80,7 @@ ivec3 lookupTransformBytes(int transformIndex);
 int getPerpendicularLength(int faceId, bool isAlex);
 bool isSecondaryLayer(int vertId);
 void initVanillaUV(int faceId, bool isAlex);
-void initVanillaUV2(int faceId, bool isAlex);
+vec4 lookupVanillaUvs(int faceId, bool isAlex);
 vec2 vanillaMinUV;
 vec2 vanillaMaxUV;
 vec2 vanillaCenterUV;
@@ -682,494 +682,157 @@ int getVertId() {
 //    vanillaMaxUV
 //---------------------------------------------------------------------------------
 void initVanillaUV(int faceId, bool isAlex){
-    initVanillaUV2(faceId, isAlex);
+    vec4 uvs = lookupVanillaUvs(faceId, isAlex);
+    vanillaMinUV = uvs.xy;
+    vanillaMaxUV = uvs.zw;
     vanillaCenterUV = (vanillaMinUV + vanillaMaxUV) / 2.0;
 }
-// Can be optimized
-void initVanillaUV2(int faceId, bool isAlex){
-    #define FACEID_HEAD_TOP       0
-    #define FACEID_HEAD_BOTTOM    1
-    #define FACEID_HEAD_RIGHT     2
-    #define FACEID_HEAD_FRONT     3
-    #define FACEID_HEAD_LEFT      4
-    #define FACEID_HEAD_BACK      5
-    #define FACEID_BODY_TOP       6
-    #define FACEID_BODY_BOTTOM    7
-    #define FACEID_BODY_RIGHT     8
-    #define FACEID_BODY_FRONT     9
-    #define FACEID_BODY_LEFT      10
-    #define FACEID_BODY_BACK      11
-    #define FACEID_ARM_R_TOP      12
-    #define FACEID_ARM_R_BOTTOM   13
-    #define FACEID_ARM_R_RIGHT    14
-    #define FACEID_ARM_R_FRONT    15
-    #define FACEID_ARM_R_LEFT     16
-    #define FACEID_ARM_R_BACK     17
-    #define FACEID_ARM_L_TOP      18
-    #define FACEID_ARM_L_BOTTOM   19
-    #define FACEID_ARM_L_RIGHT    20
-    #define FACEID_ARM_L_FRONT    21
-    #define FACEID_ARM_L_LEFT     22
-    #define FACEID_ARM_L_BACK     23
-    #define FACEID_LEG_R_TOP      24
-    #define FACEID_LEG_R_BOTTOM   25
-    #define FACEID_LEG_R_RIGHT    26
-    #define FACEID_LEG_R_FRONT    27
-    #define FACEID_LEG_R_LEFT     28
-    #define FACEID_LEG_R_BACK     29
-    #define FACEID_LEG_L_TOP      30
-    #define FACEID_LEG_L_BOTTOM   31
-    #define FACEID_LEG_L_RIGHT    32
-    #define FACEID_LEG_L_FRONT    33
-    #define FACEID_LEG_L_LEFT     34
-    #define FACEID_LEG_L_BACK     35
-    #define FACEID_HAT_TOP        36
-    #define FACEID_HAT_BOTTOM     37
-    #define FACEID_HAT_RIGHT      38
-    #define FACEID_HAT_FRONT      39
-    #define FACEID_HAT_LEFT       40
-    #define FACEID_HAT_BACK       41
-    #define FACEID_PANT_L_TOP     42
-    #define FACEID_PANT_L_BOTTOM  43
-    #define FACEID_PANT_L_RIGHT   44
-    #define FACEID_PANT_L_FRONT   45
-    #define FACEID_PANT_L_LEFT    46
-    #define FACEID_PANT_L_BACK    47
-    #define FACEID_PANT_R_TOP     48
-    #define FACEID_PANT_R_BOTTOM  49
-    #define FACEID_PANT_R_RIGHT   50
-    #define FACEID_PANT_R_FRONT   51
-    #define FACEID_PANT_R_LEFT    52
-    #define FACEID_PANT_R_BACK    53
-    #define FACEID_SLEVE_L_TOP    54
-    #define FACEID_SLEVE_L_BOTTOM 55
-    #define FACEID_SLEVE_L_RIGHT  56
-    #define FACEID_SLEVE_L_FRONT  57
-    #define FACEID_SLEVE_L_LEFT   58
-    #define FACEID_SLEVE_L_BACK   59
-    #define FACEID_SLEVE_R_TOP    60
-    #define FACEID_SLEVE_R_BOTTOM 61
-    #define FACEID_SLEVE_R_RIGHT  62
-    #define FACEID_SLEVE_R_FRONT  63
-    #define FACEID_SLEVE_R_LEFT   64
-    #define FACEID_SLEVE_R_BACK   65
-    #define FACEID_JACKET_TOP      66
-    #define FACEID_JACKET_BOTTOM   67
-    #define FACEID_JACKET_RIGHT    68
-    #define FACEID_JACKET_FRONT    69
-    #define FACEID_JACKET_LEFT     70
-    #define FACEID_JACKET_BACK     71
-    switch(faceId) {
-    // ======== Head ========
-        case FACEID_HEAD_LEFT:
-            vanillaMinUV = vec2(48-32, 8)/64.0;
-            vanillaMaxUV = vec2(56-32, 16)/64.0;
-            return;
-        case FACEID_HEAD_RIGHT:
-            vanillaMinUV = vec2(32-32, 8)/64.0;
-            vanillaMaxUV = vec2(40-32, 16)/64.0;
-            return;
-        case FACEID_HEAD_TOP:
-            vanillaMinUV = vec2(40-32, 0)/64.0;
-            vanillaMaxUV = vec2(48-32, 8)/64.0;
-            return;
-        case FACEID_HEAD_BOTTOM:
-            vanillaMinUV = vec2(48-32, 0)/64.0;
-            vanillaMaxUV = vec2(56-32, 8)/64.0;
-            return;
-        case FACEID_HEAD_FRONT:
-            vanillaMinUV = vec2(40-32, 8)/64.0;
-            vanillaMaxUV = vec2(48-32, 16)/64.0;
-            return;
-        case FACEID_HEAD_BACK:
-            vanillaMinUV = vec2(56-32, 8)/64.0;
-            vanillaMaxUV = vec2(64-32, 16)/64.0;
-            return;
-
-        // ======== Body ========
-        case FACEID_BODY_LEFT:
-            vanillaMinUV = vec2(28, 36-16)/64.0;
-            vanillaMaxUV = vec2(32, 48-16)/64.0;
-            return;
-        case FACEID_BODY_RIGHT:
-            vanillaMinUV = vec2(16, 36-16)/64.0;
-            vanillaMaxUV = vec2(20, 48-16)/64.0;
-            return;
-        case FACEID_BODY_FRONT:
-            vanillaMinUV = vec2(20, 36-16)/64.0;
-            vanillaMaxUV = vec2(28, 48-16)/64.0;
-            return;
-        case FACEID_BODY_BACK:
-            vanillaMinUV = vec2(32, 36-16)/64.0;
-            vanillaMaxUV = vec2(40, 48-16)/64.0;
-            return;
-        case FACEID_BODY_TOP:
-            vanillaMinUV = vec2(20, 32-16)/64.0;
-            vanillaMaxUV = vec2(28, 36-16)/64.0;
-            return;
-        case FACEID_BODY_BOTTOM:
-            vanillaMinUV = vec2(28, 32-16)/64.0;
-            vanillaMaxUV = vec2(36, 36-16)/64.0;
-            return;
-
-        // ======== R-Arm ========
-        case FACEID_ARM_R_LEFT:
-            if(isAlex){
-                vanillaMinUV = vec2(48-1, 36-16)/64.0;
-                vanillaMaxUV = vec2(52-1, 48-16)/64.0;
-            } else {
-                vanillaMinUV = vec2(48, 36-16)/64.0;
-                vanillaMaxUV = vec2(52, 48-16)/64.0;
-            }
-            return;
-        case FACEID_ARM_R_RIGHT:
-            vanillaMinUV = vec2(40, 36-16)/64.0;
-            vanillaMaxUV = vec2(44, 48-16)/64.0;
-            return;
-        case FACEID_ARM_R_TOP:
-            if(isAlex){
-                vanillaMinUV = vec2(44, 32-16)/64.0;
-                vanillaMaxUV = vec2(48-1, 36-16)/64.0;
-            } else {
-                vanillaMinUV = vec2(44, 32-16)/64.0;
-                vanillaMaxUV = vec2(48, 36-16)/64.0;
-            }
-            return;
-        case FACEID_ARM_R_BOTTOM:
-            if(isAlex){
-                vanillaMinUV = vec2(48-1, 32-16)/64.0;
-                vanillaMaxUV = vec2(52-2, 36-16)/64.0;
-            } else {
-                vanillaMinUV = vec2(48, 32-16)/64.0;
-                vanillaMaxUV = vec2(52, 36-16)/64.0;
-            }
-            return;
-        case FACEID_ARM_R_FRONT:
-            if(isAlex){
-                vanillaMinUV = vec2(44, 36-16)/64.0;
-                vanillaMinUV = vec2(48-1, 48-16)/64.0;
-            } else {
-                vanillaMinUV = vec2(44, 36-16)/64.0;
-                vanillaMinUV = vec2(48, 48-16)/64.0;
-            }
-            return;
-        case FACEID_ARM_R_BACK:
-            if(isAlex){
-                vanillaMinUV = vec2(52-1, 36-16)/64.0;
-                vanillaMaxUV = vec2(56-2, 48-16)/64.0;
-            } else {
-                vanillaMinUV = vec2(52, 36-16)/64.0;
-                vanillaMaxUV = vec2(56, 48-16)/64.0;
-            }
-            return;
-
-        // ======== L-Arm ========
-        case FACEID_ARM_L_LEFT:
-            if(isAlex){
-                vanillaMinUV = vec2(8+48-1-16, 52)/64.0;
-                vanillaMaxUV = vec2(12+48-1-16, 64)/64.0;
-            } else {
-                vanillaMinUV = vec2(8+48-16, 52)/64.0;
-                vanillaMaxUV = vec2(12+48-16, 64)/64.0;
-            }
-            return;
-        case FACEID_ARM_L_RIGHT:
-            vanillaMinUV = vec2(0+48-16, 52)/64.0;
-            vanillaMaxUV = vec2(4+48-16, 64)/64.0;
-            return;
-        case FACEID_ARM_L_TOP:
-            if(isAlex){
-                vanillaMinUV = vec2(4+48-16, 48)/64.0;
-                vanillaMaxUV = vec2(8+48-1-16, 52)/64.0;
-            } else {
-                vanillaMinUV = vec2(4+48-16, 48)/64.0;
-                vanillaMaxUV = vec2(8+48-16, 52)/64.0;
-            }
-            return;
-        case FACEID_ARM_L_BOTTOM:
-            if(isAlex){
-                vanillaMinUV = vec2(8+48-1-16, 48)/64.0;
-                vanillaMaxUV = vec2(12+48-2-16, 52)/64.0;
-            } else {
-                vanillaMinUV = vec2(8+48-16, 48)/64.0;
-                vanillaMaxUV = vec2(12+48-16, 52)/64.0;
-            }
-            return;
-        case FACEID_ARM_L_FRONT:
-            if(isAlex){
-                vanillaMinUV = vec2(4+48-16, 52)/64.0;
-                vanillaMaxUV = vec2(8+48-1-16, 64)/64.0;
-            } else {
-                vanillaMinUV = vec2(4+48-16, 52)/64.0;
-                vanillaMaxUV = vec2(8+48-16, 64)/64.0;
-            }
-            return;
-        case FACEID_ARM_L_BACK:
-            if(isAlex){
-                vanillaMinUV = vec2(12+48-1-16, 52)/64.0;
-                vanillaMaxUV = vec2(16+48-2-16, 64)/64.0;
-            } else {
-                vanillaMinUV = vec2(12+48-16, 52)/64.0;
-                vanillaMaxUV = vec2(16+48-16, 64)/64.0;
-            }
-            return;
-
-        // ======== LEG_R ========
-        case FACEID_LEG_R_LEFT:
-            vanillaMinUV = vec2(8, 36-16)/64.0;
-            vanillaMaxUV = vec2(12, 48-16)/64.0;
-            return;
-        case FACEID_LEG_R_RIGHT:
-            vanillaMinUV = vec2(0, 36-16)/64.0;
-            vanillaMaxUV = vec2(4, 48-16)/64.0;
-            return;
-        case FACEID_LEG_R_TOP:
-            vanillaMinUV = vec2(4, 32-16)/64.0;
-            vanillaMaxUV = vec2(8, 36-16)/64.0;
-            return;
-        case FACEID_LEG_R_BOTTOM:
-            vanillaMinUV = vec2(8, 32-16)/64.0;
-            vanillaMaxUV = vec2(12, 36-16)/64.0;
-            return;
-        case FACEID_LEG_R_FRONT:
-            vanillaMinUV = vec2(4, 36-16)/64.0;
-            vanillaMaxUV = vec2(8, 48-16)/64.0;
-            return;
-        case FACEID_LEG_R_BACK:
-            vanillaMinUV = vec2(12, 36-16)/64.0;
-            vanillaMaxUV = vec2(16, 48-16)/64.0;
-            return;
-
-        // ======== LEG_L ========
-        case FACEID_LEG_L_LEFT:
-            vanillaMinUV = vec2(8+16, 52)/64.0;
-            vanillaMaxUV = vec2(12+16, 64)/64.0;
-            return;
-        case FACEID_LEG_L_RIGHT:
-            vanillaMinUV = vec2(0+16, 52)/64.0;
-            vanillaMaxUV = vec2(4+16, 64)/64.0;
-            return;
-        case FACEID_LEG_L_TOP:
-            vanillaMinUV = vec2(4+16, 48)/64.0;
-            vanillaMaxUV = vec2(8+16, 52)/64.0;
-            return;
-        case FACEID_LEG_L_BOTTOM:
-            vanillaMinUV = vec2(8+16, 48)/64.0;
-            vanillaMaxUV = vec2(12+16, 52)/64.0;
-            return;
-        case FACEID_LEG_L_FRONT:
-            vanillaMinUV = vec2(4+16, 52)/64.0;
-            vanillaMaxUV = vec2(8+16, 64)/64.0;
-            return;
-        case FACEID_LEG_L_BACK:
-            vanillaMinUV = vec2(12+16, 52)/64.0;
-            vanillaMaxUV = vec2(16+16, 64)/64.0;
-            return;
-
-        // ======== Hat ========
-        case FACEID_HAT_LEFT:
-            vanillaMinUV = vec2(48, 8)/64.0;
-            vanillaMaxUV = vec2(56, 16)/64.0;
-            return;
-        case FACEID_HAT_RIGHT:
-            vanillaMinUV = vec2(32, 8)/64.0;
-            vanillaMaxUV = vec2(40, 16)/64.0;
-            return;
-        case FACEID_HAT_TOP:
-            vanillaMinUV = vec2(40, 0)/64.0;
-            vanillaMaxUV = vec2(48, 8)/64.0;
-            return;
-        case FACEID_HAT_BOTTOM:
-            vanillaMinUV = vec2(48, 0)/64.0;
-            vanillaMaxUV = vec2(56, 8)/64.0;
-            return;
-        case FACEID_HAT_FRONT:
-            vanillaMinUV = vec2(40, 8)/64.0;
-            vanillaMaxUV = vec2(48, 16)/64.0;
-            return;
-        case FACEID_HAT_BACK:
-            vanillaMinUV = vec2(56, 8)/64.0;
-            vanillaMaxUV = vec2(64, 16)/64.0;
-            return;
-
-        // ======== L-pant ========
-        case FACEID_PANT_L_LEFT:
-            vanillaMinUV = vec2(8, 52)/64.0;
-            vanillaMaxUV = vec2(12, 64)/64.0;
-            return;
-        case FACEID_PANT_L_RIGHT:
-            vanillaMinUV = vec2(0, 52)/64.0;
-            vanillaMaxUV = vec2(4, 64)/64.0;
-            return;
-        case FACEID_PANT_L_TOP:
-            vanillaMinUV = vec2(4, 48)/64.0;
-            vanillaMaxUV = vec2(8, 52)/64.0;
-            return;
-        case FACEID_PANT_L_BOTTOM:
-            vanillaMinUV = vec2(8, 48)/64.0;
-            vanillaMaxUV = vec2(12, 52)/64.0;
-            return;
-        case FACEID_PANT_L_FRONT:
-            vanillaMinUV = vec2(4, 52)/64.0;
-            vanillaMaxUV = vec2(8, 64)/64.0;
-            return;
-        case FACEID_PANT_L_BACK:
-            vanillaMinUV = vec2(12, 52)/64.0;
-            vanillaMaxUV = vec2(16, 64)/64.0;
-            return;
-
-        // ======== R-Pant ========
-        case FACEID_PANT_R_LEFT:
-            vanillaMinUV = vec2(8, 36)/64.0;
-            vanillaMaxUV = vec2(12, 48)/64.0;
-            return;
-        case FACEID_PANT_R_RIGHT:
-            vanillaMinUV = vec2(0, 36)/64.0;
-            vanillaMaxUV = vec2(4, 48)/64.0;
-            return;
-        case FACEID_PANT_R_TOP:
-            vanillaMinUV = vec2(4, 32)/64.0;
-            vanillaMaxUV = vec2(8, 36)/64.0;
-            return;
-        case FACEID_PANT_R_BOTTOM:
-            vanillaMinUV = vec2(8, 32)/64.0;
-            vanillaMaxUV = vec2(12, 36)/64.0;
-            return;
-        case FACEID_PANT_R_FRONT:
-            vanillaMinUV = vec2(4, 36)/64.0;
-            vanillaMaxUV = vec2(8, 48)/64.0;
-            return;
-        case FACEID_PANT_R_BACK:
-            vanillaMinUV = vec2(12, 36)/64.0;
-            vanillaMaxUV = vec2(16, 48)/64.0;
-            return;
-
-        // ======== L-Shirt ========
-        case FACEID_SLEVE_L_LEFT:
-            if(isAlex){
-                vanillaMinUV = vec2(8+48-1, 52)/64.0;
-                vanillaMaxUV = vec2(12+48-1, 64)/64.0;
-            } else {
-                vanillaMinUV = vec2(8+48, 52)/64.0;
-                vanillaMaxUV = vec2(12+48, 64)/64.0;
-            }
-            return;
-        case FACEID_SLEVE_L_RIGHT:
-            vanillaMinUV = vec2(0+48, 52)/64.0;
-            vanillaMaxUV = vec2(4+48, 64)/64.0;
-            return;
-        case FACEID_SLEVE_L_TOP:
-            if(isAlex){
-                vanillaMinUV = vec2(4+48, 48)/64.0;
-                vanillaMaxUV = vec2(8+48-1, 52)/64.0;
-            } else {
-                vanillaMinUV = vec2(4+48, 48)/64.0;
-                vanillaMaxUV = vec2(8+48, 52)/64.0;
-            }
-            return;
-        case FACEID_SLEVE_L_BOTTOM:
-            if(isAlex){
-                vanillaMinUV = vec2(8+48-1, 48)/64.0;
-                vanillaMaxUV = vec2(12+48-2, 52)/64.0;
-            } else {
-                vanillaMinUV = vec2(8+48, 48)/64.0;
-                vanillaMaxUV = vec2(12+48, 52)/64.0;
-            }
-            return;
-        case FACEID_SLEVE_L_FRONT:
-            if(isAlex){
-                vanillaMinUV = vec2(4+48, 52)/64.0;
-                vanillaMaxUV = vec2(8+48-1, 64)/64.0;
-            } else {
-                vanillaMinUV = vec2(4+48, 52)/64.0;
-                vanillaMaxUV = vec2(8+48, 64)/64.0;
-            }
-            return;
-        case FACEID_SLEVE_L_BACK:
-            if(isAlex){
-                vanillaMinUV = vec2(12+48-1, 52)/64.0;
-                vanillaMaxUV = vec2(16+48-2, 64)/64.0;
-            } else {
-                vanillaMinUV = vec2(12+48, 52)/64.0;
-                vanillaMaxUV = vec2(16+48, 64)/64.0;
-            }
-            return;
-
-        // ======== R-Shirt ========
-        case FACEID_SLEVE_R_LEFT:
-            if(isAlex){
-                vanillaMinUV = vec2(48-1, 36)/64.0;
-                vanillaMaxUV = vec2(52-1, 48)/64.0;
-            } else {
-                vanillaMinUV = vec2(48, 36)/64.0;
-                vanillaMaxUV = vec2(52, 48)/64.0;
-            }
-            return;
-        case FACEID_SLEVE_R_RIGHT:
-            vanillaMinUV = vec2(40, 36)/64.0;
-            vanillaMaxUV = vec2(44, 48)/64.0;
-            return;
-        case FACEID_SLEVE_R_TOP:
-            if(isAlex){
-                vanillaMinUV = vec2(44, 32)/64.0;
-                vanillaMaxUV = vec2(48-1, 36)/64.0;
-            } else {
-                vanillaMinUV = vec2(44, 32)/64.0;
-                vanillaMaxUV = vec2(48, 36)/64.0;
-            }
-            return;
-        case FACEID_SLEVE_R_BOTTOM:
-            if(isAlex){
-                vanillaMinUV = vec2(48-1, 32)/64.0;
-                vanillaMaxUV = vec2(52-2, 36)/64.0;
-            } else {
-                vanillaMinUV = vec2(48, 32)/64.0;
-                vanillaMaxUV = vec2(52, 36)/64.0;
-            }
-            return;
-        case FACEID_SLEVE_R_FRONT:
-            if(isAlex){
-                vanillaMinUV = vec2(44, 36)/64.0;
-                vanillaMinUV = vec2(48-1, 48)/64.0;
-            } else {
-                vanillaMinUV = vec2(44, 36)/64.0;
-                vanillaMinUV = vec2(48, 48)/64.0;
-            }
-            return;
-        case FACEID_SLEVE_R_BACK:
-            if(isAlex){
-                vanillaMinUV = vec2(52-1, 36)/64.0;
-                vanillaMaxUV = vec2(56-2, 48)/64.0;
-            } else {
-                vanillaMinUV = vec2(52, 36)/64.0;
-                vanillaMaxUV = vec2(56, 48)/64.0;
-            }
-            return;
-
-        // ======== JACKET ========
-        case FACEID_JACKET_LEFT:
-            vanillaMinUV = vec2(28, 36)/64.0;
-            vanillaMaxUV = vec2(32, 48)/64.0;
-            return;
-        case FACEID_JACKET_RIGHT:
-            vanillaMinUV = vec2(16, 36)/64.0;
-            vanillaMaxUV = vec2(20, 48)/64.0;
-            return;
-        case FACEID_JACKET_TOP:
-            vanillaMinUV = vec2(20, 32)/64.0;
-            vanillaMaxUV = vec2(28, 36)/64.0;
-            return;
-        case FACEID_JACKET_BOTTOM:
-            vanillaMinUV = vec2(28, 32)/64.0;
-            vanillaMaxUV = vec2(36, 36)/64.0;
-            return;
-        case FACEID_JACKET_FRONT:
-            vanillaMinUV = vec2(20, 36)/64.0;
-            vanillaMaxUV = vec2(28, 48)/64.0;
-            return;
-        case FACEID_JACKET_BACK:
-            vanillaMinUV = vec2(32, 36)/64.0;
-            vanillaMaxUV = vec2(40, 48)/64.0;
-            return;
+// Auto generated code from c:\Users\wilux\AppData\Roaming\.minecraft\resourcepacks\synhat-dev\.github\workflows\scripts\make_player\make_player_obj.py
+vec4 lookupVanillaUvs(int faceId, bool isAlex) {
+    switch (faceId + (isAlex ? (1<<8) : 0)) {
+        case 0:   return vec4( 8, 0,16, 8) / 64.0;
+        case 1:   return vec4(16, 0,24, 8) / 64.0;
+        case 2:   return vec4( 0, 8, 8,16) / 64.0;
+        case 3:   return vec4( 8, 8,16,16) / 64.0;
+        case 4:   return vec4(16, 8,24,16) / 64.0;
+        case 5:   return vec4(24, 8,32,16) / 64.0;
+        case 6:   return vec4(40, 0,48, 8) / 64.0;
+        case 7:   return vec4(48, 0,56, 8) / 64.0;
+        case 8:   return vec4(32, 8,40,16) / 64.0;
+        case 9:   return vec4(40, 8,48,16) / 64.0;
+        case 10:  return vec4(48, 8,56,16) / 64.0;
+        case 11:  return vec4(56, 8,64,16) / 64.0;
+        case 12:  return vec4(44,16,48,20) / 64.0;
+        case 13:  return vec4(48,16,52,20) / 64.0;
+        case 14:  return vec4(40,20,44,32) / 64.0;
+        case 15:  return vec4(44,20,48,32) / 64.0;
+        case 16:  return vec4(48,20,52,32) / 64.0;
+        case 17:  return vec4(52,20,56,32) / 64.0;
+        case 18:  return vec4(44,32,48,36) / 64.0;
+        case 19:  return vec4(48,32,52,36) / 64.0;
+        case 20:  return vec4(40,36,44,48) / 64.0;
+        case 21:  return vec4(44,36,48,48) / 64.0;
+        case 22:  return vec4(48,36,52,48) / 64.0;
+        case 23:  return vec4(52,36,56,48) / 64.0;
+        case 24:  return vec4(20,48,24,52) / 64.0;
+        case 25:  return vec4(24,48,28,52) / 64.0;
+        case 26:  return vec4(16,52,20,64) / 64.0;
+        case 27:  return vec4(20,52,24,64) / 64.0;
+        case 28:  return vec4(24,52,28,64) / 64.0;
+        case 29:  return vec4(28,52,32,64) / 64.0;
+        case 30:  return vec4( 4,48, 8,52) / 64.0;
+        case 31:  return vec4( 8,48,12,52) / 64.0;
+        case 32:  return vec4( 0,52, 4,64) / 64.0;
+        case 33:  return vec4( 4,52, 8,64) / 64.0;
+        case 34:  return vec4( 8,52,12,64) / 64.0;
+        case 35:  return vec4(12,52,16,64) / 64.0;
+        case 36:  return vec4(36,48,40,52) / 64.0;
+        case 37:  return vec4(40,48,44,52) / 64.0;
+        case 38:  return vec4(32,52,36,64) / 64.0;
+        case 39:  return vec4(36,52,40,64) / 64.0;
+        case 40:  return vec4(40,52,44,64) / 64.0;
+        case 41:  return vec4(44,52,48,64) / 64.0;
+        case 42:  return vec4(52,48,56,52) / 64.0;
+        case 43:  return vec4(56,48,60,52) / 64.0;
+        case 44:  return vec4(48,52,52,64) / 64.0;
+        case 45:  return vec4(52,52,56,64) / 64.0;
+        case 46:  return vec4(56,52,60,64) / 64.0;
+        case 47:  return vec4(60,52,64,64) / 64.0;
+        case 48:  return vec4( 4,16, 8,20) / 64.0;
+        case 49:  return vec4( 8,16,12,20) / 64.0;
+        case 50:  return vec4( 0,20, 4,32) / 64.0;
+        case 51:  return vec4( 4,20, 8,32) / 64.0;
+        case 52:  return vec4( 8,20,12,32) / 64.0;
+        case 53:  return vec4(12,20,16,32) / 64.0;
+        case 54:  return vec4( 4,32, 8,36) / 64.0;
+        case 55:  return vec4( 8,32,12,36) / 64.0;
+        case 56:  return vec4( 0,36, 4,48) / 64.0;
+        case 57:  return vec4( 4,36, 8,48) / 64.0;
+        case 58:  return vec4( 8,36,12,48) / 64.0;
+        case 59:  return vec4(12,36,16,48) / 64.0;
+        case 60:  return vec4(20,16,28,20) / 64.0;
+        case 61:  return vec4(28,16,36,20) / 64.0;
+        case 62:  return vec4(16,20,20,32) / 64.0;
+        case 63:  return vec4(20,20,28,32) / 64.0;
+        case 64:  return vec4(28,20,32,32) / 64.0;
+        case 65:  return vec4(32,20,40,32) / 64.0;
+        case 66:  return vec4(20,32,28,36) / 64.0;
+        case 67:  return vec4(28,32,36,36) / 64.0;
+        case 68:  return vec4(16,36,20,48) / 64.0;
+        case 69:  return vec4(20,36,28,48) / 64.0;
+        case 70:  return vec4(28,36,32,48) / 64.0;
+        case 71:  return vec4(32,36,40,48) / 64.0;
+        case 256: return vec4( 8, 0,16, 8) / 64.0;
+        case 257: return vec4(16, 0,24, 8) / 64.0;
+        case 258: return vec4( 0, 8, 8,16) / 64.0;
+        case 259: return vec4( 8, 8,16,16) / 64.0;
+        case 260: return vec4(16, 8,24,16) / 64.0;
+        case 261: return vec4(24, 8,32,16) / 64.0;
+        case 262: return vec4(40, 0,48, 8) / 64.0;
+        case 263: return vec4(48, 0,56, 8) / 64.0;
+        case 264: return vec4(32, 8,40,16) / 64.0;
+        case 265: return vec4(40, 8,48,16) / 64.0;
+        case 266: return vec4(48, 8,56,16) / 64.0;
+        case 267: return vec4(56, 8,64,16) / 64.0;
+        case 268: return vec4(44,16,47,20) / 64.0;
+        case 269: return vec4(47,16,50,20) / 64.0;
+        case 270: return vec4(40,20,44,32) / 64.0;
+        case 271: return vec4(44,20,47,32) / 64.0;
+        case 272: return vec4(47,20,51,32) / 64.0;
+        case 273: return vec4(51,20,54,32) / 64.0;
+        case 274: return vec4(44,32,47,36) / 64.0;
+        case 275: return vec4(47,32,50,36) / 64.0;
+        case 276: return vec4(40,36,44,48) / 64.0;
+        case 277: return vec4(44,36,47,48) / 64.0;
+        case 278: return vec4(47,36,51,48) / 64.0;
+        case 279: return vec4(51,36,54,48) / 64.0;
+        case 280: return vec4(20,48,24,52) / 64.0;
+        case 281: return vec4(24,48,28,52) / 64.0;
+        case 282: return vec4(16,52,20,64) / 64.0;
+        case 283: return vec4(20,52,24,64) / 64.0;
+        case 284: return vec4(24,52,28,64) / 64.0;
+        case 285: return vec4(28,52,32,64) / 64.0;
+        case 286: return vec4( 4,48, 8,52) / 64.0;
+        case 287: return vec4( 8,48,12,52) / 64.0;
+        case 288: return vec4( 0,52, 4,64) / 64.0;
+        case 289: return vec4( 4,52, 8,64) / 64.0;
+        case 290: return vec4( 8,52,12,64) / 64.0;
+        case 291: return vec4(12,52,16,64) / 64.0;
+        case 292: return vec4(36,48,39,52) / 64.0;
+        case 293: return vec4(39,48,42,52) / 64.0;
+        case 294: return vec4(32,52,36,64) / 64.0;
+        case 295: return vec4(36,52,39,64) / 64.0;
+        case 296: return vec4(39,52,43,64) / 64.0;
+        case 297: return vec4(43,52,46,64) / 64.0;
+        case 298: return vec4(52,48,55,52) / 64.0;
+        case 299: return vec4(55,48,58,52) / 64.0;
+        case 300: return vec4(48,52,52,64) / 64.0;
+        case 301: return vec4(52,52,55,64) / 64.0;
+        case 302: return vec4(55,52,59,64) / 64.0;
+        case 303: return vec4(59,52,62,64) / 64.0;
+        case 304: return vec4( 4,16, 8,20) / 64.0;
+        case 305: return vec4( 8,16,12,20) / 64.0;
+        case 306: return vec4( 0,20, 4,32) / 64.0;
+        case 307: return vec4( 4,20, 8,32) / 64.0;
+        case 308: return vec4( 8,20,12,32) / 64.0;
+        case 309: return vec4(12,20,16,32) / 64.0;
+        case 310: return vec4( 4,32, 8,36) / 64.0;
+        case 311: return vec4( 8,32,12,36) / 64.0;
+        case 312: return vec4( 0,36, 4,48) / 64.0;
+        case 313: return vec4( 4,36, 8,48) / 64.0;
+        case 314: return vec4( 8,36,12,48) / 64.0;
+        case 315: return vec4(12,36,16,48) / 64.0;
+        case 316: return vec4(20,16,28,20) / 64.0;
+        case 317: return vec4(28,16,36,20) / 64.0;
+        case 318: return vec4(16,20,20,32) / 64.0;
+        case 319: return vec4(20,20,28,32) / 64.0;
+        case 320: return vec4(28,20,32,32) / 64.0;
+        case 321: return vec4(32,20,40,32) / 64.0;
+        case 322: return vec4(20,32,28,36) / 64.0;
+        case 323: return vec4(28,32,36,36) / 64.0;
+        case 324: return vec4(16,36,20,48) / 64.0;
+        case 325: return vec4(20,36,28,48) / 64.0;
+        case 326: return vec4(28,36,32,48) / 64.0;
+        case 327: return vec4(32,36,40,48) / 64.0;
     }
 }
