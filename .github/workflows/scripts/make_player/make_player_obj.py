@@ -56,37 +56,38 @@ class ObjCounters:
     vn: int
     fid: int
 
-OVERLAY_SCALE = 1.125
+OVERLAY_HEAD_SCALE = 1.0 + 0.125
+OVERLAY_OTHER_SCALE = 1.0 + 0.125 / 2.0
 
 # ORDER MATTERS!!!
 #            id  name     uv TL     size      3d center  3d scale
 PARTS_STEVE = [
     BodyPart("HEAD",   ( 0, 0), (8, 8,8), ( 0,28,0), 1),
-    BodyPart("HAT",    (32, 0), (8, 8,8), ( 0,28,0), OVERLAY_SCALE),
+    BodyPart("HAT",    (32, 0), (8, 8,8), ( 0,28,0), OVERLAY_HEAD_SCALE),
     BodyPart("L_ARM",  (40,16), (4,12,4), (-6,18,0), 1),
-    BodyPart("L_SLEVE",(40,32), (4,12,4), (-6,18,0), OVERLAY_SCALE),
+    BodyPart("L_SLEVE",(40,32), (4,12,4), (-6,18,0), OVERLAY_OTHER_SCALE),
     BodyPart("R_LEG",  (16,48), (4,12,4), ( 2, 6,0), 1),
-    BodyPart("R_PANT", ( 0,48), (4,12,4), ( 2, 6,0), OVERLAY_SCALE),
+    BodyPart("R_PANT", ( 0,48), (4,12,4), ( 2, 6,0), OVERLAY_OTHER_SCALE),
     BodyPart("R_ARM",  (32,48), (4,12,4), ( 6,18,0), 1),
-    BodyPart("R_SLEVE",(48,48), (4,12,4), ( 6,18,0), OVERLAY_SCALE),
+    BodyPart("R_SLEVE",(48,48), (4,12,4), ( 6,18,0), OVERLAY_OTHER_SCALE),
     BodyPart("L_LEG",  ( 0,16), (4,12,4), (-2, 6,0), 1),
-    BodyPart("L_PANT", ( 0,32), (4,12,4), (-2, 6,0), OVERLAY_SCALE),
+    BodyPart("L_PANT", ( 0,32), (4,12,4), (-2, 6,0), OVERLAY_OTHER_SCALE),
     BodyPart("BODY",   (16,16), (8,12,4), ( 0,18,0), 1),
-    BodyPart("SHIRT",  (16,32), (8,12,4), ( 0,18,0), OVERLAY_SCALE),
+    BodyPart("SHIRT",  (16,32), (8,12,4), ( 0,18,0), OVERLAY_OTHER_SCALE),
 ]
 PARTS_ALEX = [
     BodyPart("HEAD",   ( 0, 0), (8, 8,8), ( 0,28,0), 1),
-    BodyPart("HAT",    (32, 0), (8, 8,8), ( 0,28,0), OVERLAY_SCALE),
+    BodyPart("HAT",    (32, 0), (8, 8,8), ( 0,28,0), OVERLAY_HEAD_SCALE),
     BodyPart("L_ARM",  (40,16), (3,12,4), (-6,18,0), 1),
-    BodyPart("L_SLEVE",(40,32), (3,12,4), (-6,18,0), OVERLAY_SCALE),
+    BodyPart("L_SLEVE",(40,32), (3,12,4), (-6,18,0), OVERLAY_OTHER_SCALE),
     BodyPart("R_LEG",  (16,48), (4,12,4), ( 2, 6,0), 1),
-    BodyPart("R_PANT", ( 0,48), (4,12,4), ( 2, 6,0), OVERLAY_SCALE),
+    BodyPart("R_PANT", ( 0,48), (4,12,4), ( 2, 6,0), OVERLAY_OTHER_SCALE),
     BodyPart("R_ARM",  (32,48), (3,12,4), ( 6,18,0), 1),
-    BodyPart("R_SLEVE",(48,48), (3,12,4), ( 6,18,0), OVERLAY_SCALE),
+    BodyPart("R_SLEVE",(48,48), (3,12,4), ( 6,18,0), OVERLAY_OTHER_SCALE),
     BodyPart("L_LEG",  ( 0,16), (4,12,4), (-2, 6,0), 1),
-    BodyPart("L_PANT", ( 0,32), (4,12,4), (-2, 6,0), OVERLAY_SCALE),
+    BodyPart("L_PANT", ( 0,32), (4,12,4), (-2, 6,0), OVERLAY_OTHER_SCALE),
     BodyPart("BODY",   (16,16), (8,12,4), ( 0,18,0), 1),
-    BodyPart("SHIRT",  (16,32), (8,12,4), ( 0,18,0), OVERLAY_SCALE),
+    BodyPart("SHIRT",  (16,32), (8,12,4), ( 0,18,0), OVERLAY_OTHER_SCALE),
 ]
 
 def run():

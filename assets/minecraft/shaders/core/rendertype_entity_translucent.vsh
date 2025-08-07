@@ -14,9 +14,6 @@
 // Macros
 //=================================================================================
 
-// How much bigger the second layer is
-#define OVERLAYSCALE (1.125)
-
 // How big a pixel is in relation to a Normal (in wordspace?)
 #ifdef GL_ES
 #define PIXELFACTOR (0.55/16.0)
@@ -54,6 +51,7 @@ int getVertId();
 int getFaceId(int vertId);
 int getCornerId(int vertId);
 int getDirId(int vertId);
+float getSecondaryLayerFactor(int vertId);
 int lookupTransformIndex(int faceId);
 ivec3 lookupTransformBytes(int transformIndex);
 
@@ -72,10 +70,10 @@ int extractCombineBits6and7(int r, int g, int b);
 //DEBUG
 vec4 colorFromInt(int i);
 
-void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB);
-void applyUVCrop      (bool isAlex, int vertId, int dataR, int dataG, int dataB);
-void applyUVOffset    (bool isAlex, int vertId, int dataR, int dataG, int dataB);
-void applyPostFlags   (bool isAlex, int vertId, int dataR, int dataG, int dataB);
+void applyDisplacement(bool isAlex, float layerFac, int vertId, int dataR, int dataG, int dataB);
+void applyUVCrop      (bool isAlex, float layerFac, int vertId, int dataR, int dataG, int dataB);
+void applyUVOffset    (bool isAlex, float layerFac, int vertId, int dataR, int dataG, int dataB);
+void applyPostFlags   (bool isAlex, float layerFac, int vertId, int dataR, int dataG, int dataB);
 
 vec3 pixelNormal();
 float pixelNormalLength();
@@ -168,6 +166,7 @@ void main() {
     UV0 = vec2(uv.x, 1.0-uv.y); // ThreeJS reverses the UV coordinates AND the texture by default
 #endif
     int vertId = getVertId();
+    float layerFac = getSecondaryLayerFactor(vertId);
 
     //<DEBUG>
     //float vertIdx = float(vertId)/400.0;
@@ -228,13 +227,13 @@ void main() {
                 ivec3 tfData = lookupTransformBytes(nextTfIndex+1);
                 switch (T_type) {
                     case TRANFORM_TYPE_DISPLACEMENT:
-                        applyDisplacement(isAlex, vertId, tfData.x, tfData.y, tfData.z);
+                        applyDisplacement(isAlex, layerFac, vertId, tfData.x, tfData.y, tfData.z);
                         break;
                     case TRANFORM_TYPE_UV_CROP:
-                        applyUVCrop(isAlex, vertId, tfData.x, tfData.y, tfData.z);
+                        applyUVCrop(isAlex, layerFac, vertId, tfData.x, tfData.y, tfData.z);
                         break;
                     case TRANFORM_TYPE_UV_OFFSET:
-                        applyUVOffset(isAlex, vertId, tfData.x, tfData.y, tfData.z);
+                        applyUVOffset(isAlex, layerFac, vertId, tfData.x, tfData.y, tfData.z);
                         break;
                     default:
                         break;
@@ -276,10 +275,10 @@ void main() {
                 wx_clipMax -= vec2(CropEdgeRight, CropEdgeBot) / 64.0;
 
                 if (SnapX) {
-                    ClipScale.x *= OVERLAYSCALE;
+                    ClipScale.x *= layerFac;
                 }
                 if (SnapY) {
-                    ClipScale.y *= OVERLAYSCALE;
+                    ClipScale.y *= layerFac;
                 }
 
                 NewUV = NewFaceCenter + (center2cornerVec * ClipScale) + ClipScroll;
@@ -332,7 +331,7 @@ void main() {
 #define ASYM_EDGE_right (3)
 #define ASYM_SPECIAL_MODE_flipOuter (0)
 #define ASYM_SPECIAL_MODE_flipInner (1)
-void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
+void applyDisplacement(bool isAlex, float layerFac, int vertId, int dataR, int dataG, int dataB) {
     bool isNegativeOffset 		= (dataR & FLAG_TTD_sign) != 0;
     bool isSnap				    = (dataR & FLAG_TTD_snap) != 0;
     bool isAsymNegativeOffset   = (dataG & FLAG_TTD_asymSign) != 0;
@@ -358,10 +357,10 @@ void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB)
     }
     float pixelSize = 1.0;
     if (isSecondary != isSnap) { // isSecondary XOR snapToOpposing
-        pixelSize = OVERLAYSCALE;
+        pixelSize = layerFac;
     }
 
-    float distanceToOtherLayer = (OVERLAYSCALE - 1.0) * perpLenPixels / 2.0;
+    float distanceToOtherLayer = (layerFac - 1.0) * perpLenPixels / 2.0;
     if (isSnap) {
         float snapDirection = 1.0;
         if (isSecondary) {
@@ -448,7 +447,7 @@ void applyDisplacement(bool isAlex, int vertId, int dataR, int dataG, int dataB)
 #define FLAG_TUC_SNAP_Y (1<<1)
 #define FLAG_TUC_MIRROR_X (1<<2)
 #define FLAG_TUC_MIRROR_Y (1<<3)
-void applyUVCrop(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
+void applyUVCrop(bool isAlex, float layerFac, int vertId, int dataR, int dataG, int dataB) {
     CropEdgeTop += float(dataR & 15); // 0b00001111
     CropEdgeBot += float(dataR >> 4);
     CropEdgeLeft += float(dataG & 15); // 0b00001111
@@ -464,7 +463,7 @@ void applyUVCrop(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
 // applyUVOffset()
 //  TRANFORM_TYPE_UV_OFFSET
 //---------------------------------------------------------------------------------
-void applyUVOffset(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
+void applyUVOffset(bool isAlex, float layerFac, int vertId, int dataR, int dataG, int dataB) {
     int xmax = dataR & 63; // 0b00111111
     int xmin = dataG & 63;
     int ymax = dataB & 63;
@@ -519,6 +518,20 @@ bool isSecondaryLayer(int vertId) {
     // box id alternates between primary -> secondary -> primary....
     int boxId = getBoxId(vertId);
     return (boxId & 1) == 1; // is odd
+}
+
+//---------------------------------------------------------------------------------
+// getSecondaryLayerFactor()
+//  returns fow much bigger the second layer is
+//---------------------------------------------------------------------------------
+float getSecondaryLayerFactor(int vertId) {
+    switch (getBoxId(vertId)) {
+        case 0: // HEAD
+        case 1: // HAT
+            return 1.0 + 0.125;
+        default:
+            return 1.0 + 0.125 / 2.0;
+    }
 }
 
 //---------------------------------------------------------------------------------
