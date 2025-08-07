@@ -192,7 +192,7 @@ void main() {
     //float vertIdx = float(vertId)/400.0;
     //float vertIdy = float((vertId/4)%6)/6.0;
     //wx_vertexColor = vec4(vertIdx, vertIdy, 0, 1);
-    wx_vertexColor = colorFromInt(getFaceId(vertId));
+    wx_vertexColor = colorFromInt(getFaceId(vertId) / 6);
     //wx_vertexColor = vec4(Normal, 1.0);
     //</DEBUG>
 
@@ -485,7 +485,7 @@ void applyPostFlags(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
     return;
 }
 vec3 pixelNormal() {
-    return Normal * PIXELFACTOR; // Normalization is needed for sodium?
+    return normalize(Normal) * PIXELFACTOR; // Normalization is needed for sodium?
 }
 float pixelNormalLength() {
     return length(pixelNormal());

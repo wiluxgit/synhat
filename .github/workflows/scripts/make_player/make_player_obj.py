@@ -61,39 +61,39 @@ OVERLAY_SCALE = 1.125
 # ORDER MATTERS!!!
 #            id  name     uv TL     size      3d center  3d scale
 PARTS_STEVE = [
-    BodyPart("Head",  ( 0, 0),  (8, 8,8), ( 0,28,0), 1),
-    BodyPart("Body",  (16,16),  (8,12,4), ( 0,18,0), 1),
-    BodyPart("LArm",  (40,16),  (4,12,4), (-6,18,0), 1),
-    BodyPart("RArm",  (32,48),  (4,12,4), ( 6,18,0), 1),
-    BodyPart("LLeg",  ( 0,16),  (4,12,4), (-2, 6,0), 1),
-    BodyPart("RLeg",  (16,48),  (4,12,4), ( 2, 6,0), 1),
-    BodyPart("oHead", (32, 0),  (8, 8,8), ( 0,28,0), OVERLAY_SCALE),
-    BodyPart("oRLeg", ( 0, 48), (4,12,4), ( 2, 6,0), OVERLAY_SCALE),
-    BodyPart("oLLeg", ( 0, 32), (4,12,4), (-2, 6,0), OVERLAY_SCALE),
-    BodyPart("oRArm", (48, 48), (4,12,4), ( 6,18,0), OVERLAY_SCALE),
-    BodyPart("oLArm", (40, 32), (4,12,4), (-6,18,0), OVERLAY_SCALE),
-    BodyPart("oBody", (16, 32), (8,12,4), ( 0,18,0), OVERLAY_SCALE),
+    BodyPart("Head",  ( 0, 0), (8, 8,8), ( 0,28,0), 1),
+    BodyPart("oHead", (32, 0), (8, 8,8), ( 0,28,0), OVERLAY_SCALE),
+    BodyPart("LArm",  (40,16), (4,12,4), (-6,18,0), 1),
+    BodyPart("oLArm", (40,32), (4,12,4), (-6,18,0), OVERLAY_SCALE),
+    BodyPart("RLeg",  (16,48), (4,12,4), ( 2, 6,0), 1),
+    BodyPart("oRLeg", ( 0,48), (4,12,4), ( 2, 6,0), OVERLAY_SCALE),
+    BodyPart("RArm",  (32,48), (4,12,4), ( 6,18,0), 1),
+    BodyPart("oRArm", (48,48), (4,12,4), ( 6,18,0), OVERLAY_SCALE),
+    BodyPart("LLeg",  ( 0,16), (4,12,4), (-2, 6,0), 1),
+    BodyPart("oLLeg", ( 0,32), (4,12,4), (-2, 6,0), OVERLAY_SCALE),
+    BodyPart("Body",  (16,16), (8,12,4), ( 0,18,0), 1),
+    BodyPart("oBody", (16,32), (8,12,4), ( 0,18,0), OVERLAY_SCALE),
 ]
 PARTS_ALEX = [
-    BodyPart("Head",  ( 0, 0),  (8, 8,8), ( 0,28,0), 1),
-    BodyPart("Body",  (16,16),  (8,12,4), ( 0,18,0), 1),
-    BodyPart("LArm",  (40,16),  (3,12,4), (-6,18,0), 1),
-    BodyPart("RArm",  (32,48),  (3,12,4), ( 6,18,0), 1),
-    BodyPart("LLeg",  ( 0,16),  (4,12,4), (-2, 6,0), 1),
-    BodyPart("RLeg",  (16,48),  (4,12,4), ( 2, 6,0), 1),
-    BodyPart("oHead", (32, 0),  (8, 8,8), ( 0,28,0), OVERLAY_SCALE),
-    BodyPart("oRLeg", ( 0, 48), (4,12,4), ( 2, 6,0), OVERLAY_SCALE),
-    BodyPart("oLLeg", ( 0, 32), (4,12,4), (-2, 6,0), OVERLAY_SCALE),
-    BodyPart("oRArm", (48, 48), (3,12,4), ( 6,18,0), OVERLAY_SCALE),
-    BodyPart("oLArm", (40, 32), (3,12,4), (-6,18,0), OVERLAY_SCALE),
-    BodyPart("oBody", (16, 32), (8,12,4), ( 0,18,0), OVERLAY_SCALE),
+    BodyPart("Head",  ( 0, 0), (8, 8,8), ( 0,28,0), 1),
+    BodyPart("oHead", (32, 0), (8, 8,8), ( 0,28,0), OVERLAY_SCALE),
+    BodyPart("LArm",  (40,16), (3,12,4), (-6,18,0), 1),
+    BodyPart("oLArm", (40,32), (3,12,4), (-6,18,0), OVERLAY_SCALE),
+    BodyPart("RLeg",  (16,48), (4,12,4), ( 2, 6,0), 1),
+    BodyPart("oRLeg", ( 0,48), (4,12,4), ( 2, 6,0), OVERLAY_SCALE),
+    BodyPart("RArm",  (32,48), (3,12,4), ( 6,18,0), 1),
+    BodyPart("oRArm", (48,48), (3,12,4), ( 6,18,0), OVERLAY_SCALE),
+    BodyPart("LLeg",  ( 0,16), (4,12,4), (-2, 6,0), 1),
+    BodyPart("oLLeg", ( 0,32), (4,12,4), (-2, 6,0), OVERLAY_SCALE),
+    BodyPart("Body",  (16,16), (8,12,4), ( 0,18,0), 1),
+    BodyPart("oBody", (16,32), (8,12,4), ( 0,18,0), OVERLAY_SCALE),
 ]
 
 def run():
     parts = PARTS_STEVE
 
     generateCssGrid(parts)
-    generateSodiumVertIdFixer()
+    #generateSodiumVertIdFixer()
 
     # Handrolling some .obj file because we need very specific vertex ordering
     with open("C:/Users/wilux/AppData/Roaming/.minecraft/resourcepacks/synhat-dev/web_editor/assets/steve.obj", "w+") as f:
@@ -110,8 +110,8 @@ def generateCssGrid(parts: list[BodyPart]):
     for i in range(6):
         dirId = FaceDirection(i)
         for cubeId, part in enumerate(parts):
-            uvids = faceDir_counterClockwiseCornerUVIds(dirId, 0)
-            uvId2Coord = body_cornerUvs(part)
+            uvids = faceDir_counterClockwiseVertId(dirId, 0)
+            uvId2Coord = body_vertUvs(part)
             a = [uvId2Coord[uvid] for uvid in uvids]
             us, vs = zip(*a)
 
@@ -152,9 +152,9 @@ def generateSodiumVertIdFixer():
     keySet: set[Key] = set()
     parts = PARTS_STEVE + PARTS_ALEX
     for part in parts:
-        uvs = body_cornerUvs(part)
+        uvs = body_vertUvs(part)
         for dir in DIRS:
-            cids = faceDir_counterClockwiseCornerUVIds(dir, 0)
+            cids = faceDir_counterClockwiseVertId(dir, 0)
             for u,v in (uvs[c] for c in cids):
                 k = Key(u=u, v=v)
                 keySet.add(k)
@@ -180,35 +180,13 @@ def perfectHash(u: int, v: int):
         foo = perfectHash(k.v, k.u)
         print(foo)
 
-G = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 228, 0, 0, 0, 0, 0, 0, 132, 0, 0, 0, 0, 0, 106, 180,
-    0, 114, 18, 49, 0, 0, 0, 0, 0, 156, 194, 0, 0, 32, 0, 31, 0, 0, 15,
-    192, 0, 36, 0, 0, 111, 0, 0, 0, 0, 50, 12, 54, 0, 0, 10, 0, 0, 54, 0,
-    71, 19, 84, 0, 38, 17, 0, 0, 0, 0, 70, 232, 104, 55, 199, 0, 0, 0, 0,
-    225, 53, 33, 14, 0, 0, 0, 0, 79, 84, 149, 153, 220, 0, 104, 0, 0, 31,
-    0, 62, 151, 0, 0, 0, 0, 0, 7, 37, 92, 0, 68, 0, 0, 50, 0, 93, 27, 36,
-    0, 0, 98, 0, 37, 49, 0, 27, 45, 31, 5, 107, 0, 0, 40, 19, 169, 0, 227,
-    24, 66, 69, 0, 30, 210, 0, 25, 65, 0, 44, 96, 78, 0, 0, 0, 0, 0, 40,
-    111, 60, 172, 64, 0, 0, 202, 115, 220, 232, 0, 20, 0, 0, 0, 0, 86, 58,
-    39, 0, 0, 110, 0, 0, 91, 35, 41, 2, 71, 0, 0, 0, 0, 75, 1, 96, 16, 22,
-    0, 88, 0, 0, 82, 0, 160, 41, 211, 0, 66, 37, 0, 0, 118, 9, 3, 59, 102,
-    0, 85, 57, 42, 0]
-S1 = [107, 23]
-S2 = [57, 40]
-
-def perfectHash(u: int, v: int):
-    return (
-        G[(S1[0]*u + S1[1]*v) % 235] +
-        G[(S2[0]*u + S2[1]*v) % 235]
-    ) % 235
-
 def writeCube(f: TextIO, part: BodyPart, counters: ObjCounters):
     file_v = []
     file_vt = []
     file_vn = []
     file_f = []
 
-    for u, v in body_cornerUvsNormalized(part):
+    for u, v in body_vertUvsNormalized(part):
         file_vt.append(f"vt {u} {v}\n")
         counters.vt += 1
 
@@ -227,7 +205,7 @@ def writeCube(f: TextIO, part: BodyPart, counters: ObjCounters):
         xn = counters.vn-1              # get the index for the first vn for this face
         xv = counters.v-4               # get the index for the first v for this face
 
-        c0, c1, c2, c3 = faceDir_counterClockwiseCornerUVIds(dir, xt)
+        c0, c1, c2, c3 = faceDir_counterClockwiseVertId(dir, xt)
         file_f.append(
             f"f {xv}/{c0}/{xn} {xv+1}/{c1}/{xn} {xv+2}/{c2}/{xn}\n"
         )
@@ -279,17 +257,17 @@ def faceDir_counterClockwiseVertId(self: FaceDirection, offset) -> Generator[int
     """ The starting point of the indexing must be corner 0 see gl_VertexID.png """
     match self:
         case FaceDirection.TOP:
-            return (offset + 4*0 + i for i in (1, 0, 3, 4))
+            return (offset + 4*0 + i for i in (0, 1, 2, 3))
         case FaceDirection.BOTTOM:
-            return (offset + 4*1 + i for i in (5, 4, 1, 2))
+            return (offset + 4*1 + i for i in (0, 1, 2, 3))
         case FaceDirection.RIGHT:
-            return (offset + 4*2 + i for i in (7, 6, 11, 12))
+            return (offset + 4*2 + i for i in (0, 1, 2, 3))
         case FaceDirection.FRONT:
-            return (offset + 4*3 +i for i in (8, 7, 12, 13))
+            return (offset + 4*3 +i for i in (0, 1, 2, 3))
         case FaceDirection.LEFT:
-            return (offset + 4*4 +i for i in (9, 8, 13, 14))
+            return (offset + 4*4 +i for i in (0, 1, 2, 3))
         case FaceDirection.BACK:
-            return (offset + 4*5 +i for i in (10, 9, 14, 15))
+            return (offset + 4*5 +i for i in (0, 1, 2, 3))
 
 def body_vertUvs(self: BodyPart) -> list[tuple[int,int]]:
     """ Returns an iterator for the UV as [u,v] tuples in units of pixels from the top left
@@ -299,28 +277,40 @@ def body_vertUvs(self: BodyPart) -> list[tuple[int,int]]:
     z = self.axis_sizes[2]
     (ou, ov) = self.origin_uv
     uvpx = [
-        # TOP/BOTTOM
+        # TOP (0)
+        (ou + z + x,         ov),
         (ou + z,             ov),
-        (ou + z + x ,        ov),
-        (ou + z + x + x ,    ov),
-        (ou + z,             ov + z),
-        (ou + z + x ,        ov + z),
-        (ou + z + x + x ,    ov + z),
-        # RIGHT/FRONT/LEFT/BACK
-        (ou,                 ov + z),
         (ou + z,             ov + z),
         (ou + z + x,         ov + z),
-        (ou + z + x + z,     ov + z),
-        (ou + z + x + z + x, ov + z),
+        # BOTTOM (1)
+        (ou + z + x + x,     ov + z),
+        (ou + z + x,         ov + z),
+        (ou + z + x,         ov),
+        (ou + z + x + x,     ov),
+        # RIGHT (2)
+        (ou + z,             ov + z),
+        (ou,                 ov + z),
         (ou,                 ov + z + y),
         (ou + z,             ov + z + y),
+        # FRONT (3)
+        (ou + z + x,         ov + z),
+        (ou + z,             ov + z),
+        (ou + z,             ov + z + y),
         (ou + z + x,         ov + z + y),
+        # LEFT (4)
+        (ou + z + x + z,     ov + z),
+        (ou + z + x,         ov + z),
+        (ou + z + x,         ov + z + y),
+        (ou + z + x + z,     ov + z + y),
+        # BACK (5)
+        (ou + z + x + z + x, ov + z),
+        (ou + z + x + z,     ov + z),
         (ou + z + x + z,     ov + z + y),
         (ou + z + x + z + x, ov + z + y),
     ]
     return uvpx
-def body_cornerUvsNormalized(self: BodyPart) -> list[tuple[float,float]]:
-    return [(u/64, 1-v/64) for (u,v) in body_cornerUvs(self)]
+def body_vertUvsNormalized(self: BodyPart) -> list[tuple[float,float]]:
+    return [(u/64, 1-v/64) for (u,v) in body_vertUvs(self)]
 
 def mulin(arr, scales):
     return np.array([(row * scales) for row in arr])

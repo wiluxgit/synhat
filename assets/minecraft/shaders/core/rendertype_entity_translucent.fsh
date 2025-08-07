@@ -119,5 +119,5 @@ void main() {
     fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
 #endif
 
-    fragColor = wx_vertexColor;
+    //fragColor = wx_vertexColor;
 }
