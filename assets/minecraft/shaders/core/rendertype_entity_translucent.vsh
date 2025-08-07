@@ -192,7 +192,7 @@ void main() {
     //float vertIdx = float(vertId)/400.0;
     //float vertIdy = float((vertId/4)%6)/6.0;
     //wx_vertexColor = vec4(vertIdx, vertIdy, 0, 1);
-    wx_vertexColor = colorFromInt(vertId);
+    wx_vertexColor = colorFromInt(getFaceId(vertId));
     //wx_vertexColor = vec4(Normal, 1.0);
     //</DEBUG>
 
@@ -485,7 +485,7 @@ void applyPostFlags(bool isAlex, int vertId, int dataR, int dataG, int dataB) {
     return;
 }
 vec3 pixelNormal() {
-    return normalize(Normal) * PIXELFACTOR; // Normalization is needed for sodium?
+    return Normal * PIXELFACTOR; // Normalization is needed for sodium?
 }
 float pixelNormalLength() {
     return length(pixelNormal());
@@ -653,9 +653,24 @@ attribute int THREE_vertexID;
 int getVertId() {
     return THREE_vertexID;
 }
-#else // Minecraft
+#else  // Minecraft
 int getVertId() {
+#ifdef SODIUM_CORE_SHADER_SUPPORT
+    int vid = gl_VertexID;
+    switch ((vid / 4) % 6) {
+        case 0:
+        case 1:
+        case 3:
+        case 5:
+            return vid;
+        case 2:
+            return vid + 8;
+        case 4:
+            return vid - 8;
+    }
+#else
     return gl_VertexID;
+#endif
 }
 #endif
 

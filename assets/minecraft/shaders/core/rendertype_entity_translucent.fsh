@@ -119,7 +119,5 @@ void main() {
     fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
 #endif
 
-#ifdef SODIUM_CORE_SHADER_SUPPORT
     fragColor = wx_vertexColor;
-#endif
 }
