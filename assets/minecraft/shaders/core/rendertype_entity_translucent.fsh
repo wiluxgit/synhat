@@ -57,8 +57,17 @@ in vec3 wx_invMatrix1;
 in vec3 wx_invMatrix2;
 
 vec4 getDirectionalColor() {
-    vec3 normalInScreenSpace = normalize(cross(dFdx(wx_passModelViewPos), dFdy(wx_passModelViewPos)));
-    //normalInScreenSpace.z *= -1;
+    vec3 crossProd = cross(dFdx(wx_passModelViewPos), dFdy(wx_passModelViewPos));
+    float len = length(crossProd);
+    vec3 normalInScreenSpace = crossProd / len; // normalize
+
+    // Ugly fix to avoid black outlines
+    //   Pixels on the edge of a face end up with a crossProd of 0 which makes them black
+    //   To avoid this we discard pixels with bad data
+    //   TODO: this halfs the resolution for edited layers, is there a better way?
+    if (len < 1e-24) {
+        discard;
+    }
 
     mat3 wx_invMatrix = mat3(wx_invMatrix0, wx_invMatrix1, wx_invMatrix2);
     vec3 normalInVertexShaderWorld = normalize(wx_invMatrix * normalInScreenSpace);
