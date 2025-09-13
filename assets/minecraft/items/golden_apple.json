@@ -1,0 +1,2 @@
+{"model": {"type": "range_dispatch", "property": "custom_model_data", "index": 0, "entries": [
+	{"threshold": 1, "model": {"type": "model", "model": "synhat/old/held/paladins/io"}}], "fallback": {"type": "minecraft:model", "model": "minecraft:item/golden_apple"}}}

@@ -1,0 +1,8 @@
+{"model": {"type": "range_dispatch", "property": "custom_model_data", "index": 0, "entries": [
+	{"threshold": 1, "model": {"type": "model", "model": "synhat/old/held/food/sandwich_jam"}},
+	{"threshold": 2, "model": {"type": "model", "model": "synhat/old/held/food/sandwich_cheese"}},
+	{"threshold": 3, "model": {"type": "model", "model": "synhat/old/held/food/sandwich_grand"}},
+	{"threshold": 4, "model": {"type": "model", "model": "synhat/old/held/food/pasta"}},
+	{"threshold": 5, "model": {"type": "model", "model": "synhat/old/held/food/pizza_dough"}},
+	{"threshold": 6, "model": {"type": "model", "model": "synhat/old/held/food/pizza_blank"}},
+	{"threshold": 7, "model": {"type": "model", "model": "synhat/old/held/food/pizza_magarita"}}], "fallback": {"type": "minecraft:model", "model": "minecraft:item/bread"}}}

@@ -1,0 +1,4 @@
+{"model": {"type": "range_dispatch", "property": "custom_model_data", "index": 0, "entries": [
+	{"threshold": 1, "model": {"type": "model", "model": "synhat/old/held/food/jam_apple"}},
+	{"threshold": 2, "model": {"type": "model", "model": "synhat/old/held/food/jam_fruity"}},
+	{"threshold": 3, "model": {"type": "model", "model": "synhat/old/held/food/juice_apple"}}], "fallback": {"type": "minecraft:model", "model": "minecraft:item/apple"}}}

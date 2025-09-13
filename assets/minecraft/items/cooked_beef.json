@@ -1,0 +1,9 @@
+{"model": {"type": "range_dispatch", "property": "custom_model_data", "index": 0, "entries": [
+	{"threshold": 1, "model": {"type": "model", "model": "synhat/old/held/food/minced_beef"}},
+	{"threshold": 2, "model": {"type": "model", "model": "synhat/old/held/food/meat_sauce"}},
+	{"threshold": 3, "model": {"type": "model", "model": "synhat/old/held/food/lasagna"}},
+	{"threshold": 4, "model": {"type": "model", "model": "synhat/old/held/food/magic_lasagna"}},
+	{"threshold": 5, "model": {"type": "model", "model": "synhat/old/held/food/pizza_kebab"}},
+	{"threshold": 6, "model": {"type": "model", "model": "synhat/old/held/food/pizza_gothemburg"}},
+	{"threshold": 7, "model": {"type": "model", "model": "synhat/old/held/food/pizza_reale"}},
+	{"threshold": 8, "model": {"type": "model", "model": "synhat/old/held/food/pizza_grand_deluxe"}}], "fallback": {"type": "minecraft:model", "model": "minecraft:item/cooked_beef"}}}

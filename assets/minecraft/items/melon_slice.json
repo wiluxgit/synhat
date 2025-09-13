@@ -1,0 +1,5 @@
+{"model": {"type": "range_dispatch", "property": "custom_model_data", "index": 0, "entries": [
+	{"threshold": 1, "model": {"type": "model", "model": "synhat/old/held/food/cheese_jam_platter"}},
+	{"threshold": 2, "model": {"type": "model", "model": "synhat/old/held/food/cheese_executive_platter"}},
+	{"threshold": 3, "model": {"type": "model", "model": "synhat/old/held/food/jam_melon"}},
+	{"threshold": 4, "model": {"type": "model", "model": "synhat/old/held/food/juice_melon"}}], "fallback": {"type": "minecraft:model", "model": "minecraft:item/melon_slice"}}}

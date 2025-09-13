@@ -1,0 +1,7 @@
+{"model": {"type": "range_dispatch", "property": "custom_model_data", "index": 0, "entries": [
+	{"threshold": 1, "model": {"type": "model", "model": "synhat/old/held/food/minced_pork"}},
+	{"threshold": 2, "model": {"type": "model", "model": "synhat/old/held/food/pizza_vesuvio"}},
+	{"threshold": 3, "model": {"type": "model", "model": "synhat/old/held/food/pizza_capricciosa"}},
+	{"threshold": 4, "model": {"type": "model", "model": "synhat/old/held/food/pizza_pollo"}},
+	{"threshold": 5, "model": {"type": "model", "model": "synhat/old/held/food/pizza_speciale"}},
+	{"threshold": 6, "model": {"type": "model", "model": "synhat/old/held/food/bacon"}}], "fallback": {"type": "minecraft:model", "model": "minecraft:item/cooked_porkchop"}}}

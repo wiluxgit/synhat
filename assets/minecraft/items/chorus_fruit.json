@@ -1,0 +1,5 @@
+{"model": {"type": "range_dispatch", "property": "custom_model_data", "index": 0, "entries": [
+	{"threshold": 1, "model": {"type": "model", "model": "synhat/old/held/food/jam_chorus"}},
+	{"threshold": 2, "model": {"type": "model", "model": "synhat/old/held/food/jam_exotic"}},
+	{"threshold": 3, "model": {"type": "model", "model": "synhat/old/held/food/jam_supreme"}},
+	{"threshold": 4, "model": {"type": "model", "model": "synhat/old/held/food/juice_chorus"}}], "fallback": {"type": "minecraft:model", "model": "minecraft:item/chorus_fruit"}}}

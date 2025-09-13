@@ -1,0 +1,9 @@
+{"model": {"type": "range_dispatch", "property": "custom_model_data", "index": 0, "entries": [
+	{"threshold": 1, "model": {"type": "model", "model": "synhat/old/held/hoe/scepter"}},
+	{"threshold": 2, "model": {"type": "model", "model": "synhat/old/held/hoe/runic_hoe"}},
+	{"threshold": 3, "model": {"type": "model", "model": "synhat/old/held/hoe/druidic_hoe"}},
+	{"threshold": 4, "model": {"type": "model", "model": "synhat/old/held/hoe/demon_hoe"}},
+	{"threshold": 5, "model": {"type": "model", "model": "synhat/old/held/hoe/phoenix_hoe"}},
+	{"threshold": 6, "model": {"type": "model", "model": "synhat/old/held/hoe/ornamental_hoe"}},
+	{"threshold": 7, "model": {"type": "model", "model": "synhat/old/held/hoe/obsidian_hoe"}},
+	{"threshold": 8, "model": {"type": "model", "model": "synhat/wilux/hat/mad_hoe"}}], "fallback": {"type": "minecraft:model", "model": "minecraft:item/netherite_hoe"}}}
