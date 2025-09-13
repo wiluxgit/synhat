@@ -3,19 +3,20 @@ import re
 
 def run(path = "../__master_models_table.json"):
     with open(path) as f:
-        hatList = json.load(f)["models"]
+        modelList = json.load(f)["models"]
 
         allMcItems = {}
-        for x in hatList:
+        for x in modelList:
             allMcItems[x["item"]] = 0
         allMcItems = allMcItems.keys()
 
         mcItems2Hat = {}
         for mcItem in allMcItems:
-            mcItems2Hat[mcItem] = [x for x in hatList if x["item"] == mcItem]
+            mcItems2Hat[mcItem] = [x for x in modelList if x["item"] == mcItem]
 
         chestList = []
-        for mcItem,hatList in mcItems2Hat.items():
+        for mcItem, hatList in mcItems2Hat.items():
+            hatList = sorted(hatList, key=lambda j: j["displayName"])
             itemList = [makeItem(hd) for hd in hatList]
             chestList.append(makeMegaChest(mcItem, itemList))
         NBT_masterChest = makeMegaChest("MasterChest", chestList)
