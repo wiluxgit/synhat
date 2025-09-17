@@ -21,4 +21,8 @@
 	{"predicate": {"custom_model_data": 10, "blocking": 0}, "model": "synhat/wilux/trophies/rsa/rsa_redstoner"},
 	{"predicate": {"custom_model_data": 10, "blocking": 1}, "model": "synhat/wilux/trophies/rsa/blocking_rsa_redstoner"},
 	{"predicate": {"custom_model_data": 11, "blocking": 0}, "model": "synhat/wilux/trophies/rsa/rsa_hidden_gem"},
-	{"predicate": {"custom_model_data": 11, "blocking": 1}, "model": "synhat/wilux/trophies/rsa/blocking_rsa_hidden_gem"}]}
+	{"predicate": {"custom_model_data": 11, "blocking": 1}, "model": "synhat/wilux/trophies/rsa/blocking_rsa_hidden_gem"},
+	{"predicate": {"custom_model_data": 12, "blocking": 0}, "model": "synhat/wilux/trophies/rsa/rsa_game"},
+	{"predicate": {"custom_model_data": 12, "blocking": 1}, "model": "synhat/wilux/trophies/rsa/blocking_rsa_game"},
+	{"predicate": {"custom_model_data": 13, "blocking": 0}, "model": "synhat/wilux/trophies/rsa/rsa_players_choice"},
+	{"predicate": {"custom_model_data": 13, "blocking": 1}, "model": "synhat/wilux/trophies/rsa/blocking_rsa_players_choice"}]}

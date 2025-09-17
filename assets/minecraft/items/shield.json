@@ -20,4 +20,8 @@
 	{"threshold": 10, "model": {"type": "model", "model": "synhat/wilux/trophies/rsa/rsa_redstoner"}},
 	{"threshold": 10, "model": {"type": "model", "model": "synhat/wilux/trophies/rsa/blocking_rsa_redstoner"}},
 	{"threshold": 11, "model": {"type": "model", "model": "synhat/wilux/trophies/rsa/rsa_hidden_gem"}},
-	{"threshold": 11, "model": {"type": "model", "model": "synhat/wilux/trophies/rsa/blocking_rsa_hidden_gem"}}], "fallback": {"type": "minecraft:condition", "on_false": {"type": "minecraft:special", "base": "minecraft:item/shield", "model": {"type": "minecraft:shield"}}, "on_true": {"type": "minecraft:special", "base": "minecraft:item/shield_blocking", "model": {"type": "minecraft:shield"}}, "property": "minecraft:using_item"}}}
+	{"threshold": 11, "model": {"type": "model", "model": "synhat/wilux/trophies/rsa/blocking_rsa_hidden_gem"}},
+	{"threshold": 12, "model": {"type": "model", "model": "synhat/wilux/trophies/rsa/rsa_game"}},
+	{"threshold": 12, "model": {"type": "model", "model": "synhat/wilux/trophies/rsa/blocking_rsa_game"}},
+	{"threshold": 13, "model": {"type": "model", "model": "synhat/wilux/trophies/rsa/rsa_players_choice"}},
+	{"threshold": 13, "model": {"type": "model", "model": "synhat/wilux/trophies/rsa/blocking_rsa_players_choice"}}], "fallback": {"type": "minecraft:condition", "on_false": {"type": "minecraft:special", "base": "minecraft:item/shield", "model": {"type": "minecraft:shield"}}, "on_true": {"type": "minecraft:special", "base": "minecraft:item/shield_blocking", "model": {"type": "minecraft:shield"}}, "property": "minecraft:using_item"}}}

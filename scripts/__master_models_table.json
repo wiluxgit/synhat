@@ -1225,4 +1225,8 @@
 	{"item": "minecraft:shield", "data": 10, "model": "synhat/wilux/trophies/rsa/blocking_rsa_redstoner",        "extra_predicate": {"blocking": 1}},
 	{"item": "minecraft:shield", "data": 11, "model": "synhat/wilux/trophies/rsa/rsa_hidden_gem",                "extra_predicate": {"blocking": 0}, "displayName": "Hidden Gem", "lore": "RSA 2025"},
 	{"item": "minecraft:shield", "data": 11, "model": "synhat/wilux/trophies/rsa/blocking_rsa_hidden_gem",       "extra_predicate": {"blocking": 1}},
+	{"item": "minecraft:shield", "data": 12, "model": "synhat/wilux/trophies/rsa/rsa_game",                      "extra_predicate": {"blocking": 0}, "displayName": "Best Redstone Game", "lore": "RSA 2025"},
+	{"item": "minecraft:shield", "data": 12, "model": "synhat/wilux/trophies/rsa/blocking_rsa_game",             "extra_predicate": {"blocking": 1}},
+	{"item": "minecraft:shield", "data": 13, "model": "synhat/wilux/trophies/rsa/rsa_players_choice",            "extra_predicate": {"blocking": 0}, "displayName": "Player's Choice", "lore": "RSA 2025"},
+	{"item": "minecraft:shield", "data": 13, "model": "synhat/wilux/trophies/rsa/blocking_rsa_players_choice",   "extra_predicate": {"blocking": 1}},
 	{"item": "minecraft:sugar", "data": 1, "model": "synhat/old/held/food/jam_berry", "displayName": "Berry Jam", "type": "held"}]}

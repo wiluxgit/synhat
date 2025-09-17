@@ -16,7 +16,8 @@ def run(path = "../__master_models_table.json"):
 
         chestList = []
         for mcItem, hatList in mcItems2Hat.items():
-            hatList = sorted(hatList, key=lambda j: j["displayName"])
+            if "clock" in mcItem:
+                hatList = sorted(hatList, key=lambda j: j["displayName"])
             itemList = [makeItem(hd) for hd in hatList]
             chestList.append(makeMegaChest(mcItem, itemList))
         NBT_masterChest = makeMegaChest("MasterChest", chestList)
@@ -85,7 +86,7 @@ def makeItem(hd):
     mcItem = hd["item"]
     cmData = hd["data"]
     path = hd["model"]
-    displayName = hd["displayName"]
+    displayName = hd.get("displayName", "default")
 
     color = "yellow"
     if "playerRank" in hd:
