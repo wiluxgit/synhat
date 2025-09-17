@@ -1,5 +1,5 @@
 {
-    "parent": "synhat/wilux/trophies/rsa2023/rsa_server",
+    "parent": "synhat/wilux/trophies/rsa/rsa_creative",
 	"display": {
 		"thirdperson_righthand": {
 			"rotation": [46, 70, 0],

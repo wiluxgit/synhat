@@ -1,5 +1,5 @@
 {
-    "parent": "synhat/wilux/trophies/rsa2023/rsa_hidden_gem",
+    "parent": "synhat/wilux/trophies/rsa/rsa_server",
 	"display": {
 		"thirdperson_righthand": {
 			"rotation": [46, 70, 0],
