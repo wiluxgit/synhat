@@ -1,4 +1,5 @@
 {"model": {"type": "range_dispatch", "property": "custom_model_data", "index": 0, "entries": [
+	{"threshold": -395, "model": {"type": "model", "model": "synhat/vira0906/menkoe_copper_golem_statue"}},
 	{"threshold": -394, "model": {"type": "model", "model": "synhat/wilux/painting/space/artemis2"}},
 	{"threshold": -393, "model": {"type": "model", "model": "synhat/wilux/painting/meme/omfgdogs"}},
 	{"threshold": -392, "model": {"type": "model", "model": "synhat/wilux/painting/meme/im_steve"}},

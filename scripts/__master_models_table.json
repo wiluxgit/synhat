@@ -1,4 +1,5 @@
 {"models": [
+	{"item": "minecraft:clock", "data": -395, "model": "synhat/vira0906/menkoe_copper_golem_statue", "displayName": "Menkoe Golem"},
 	{"item": "minecraft:clock", "data": -394, "model": "synhat/wilux/painting/space/artemis2", "displayName": "art002e009288"},
 	{"item": "minecraft:clock", "data": -393, "model": "synhat/wilux/painting/meme/omfgdogs", "displayName": "OMFGDOGS!"},
 	{"item": "minecraft:clock", "data": -392, "model": "synhat/wilux/painting/meme/im_steve", "displayName": "I'm Steve"},

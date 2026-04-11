@@ -1,4 +1,5 @@
 {"parent": "item/_clock_state/clock_00", "overrides": [
+	{"predicate": {"custom_model_data": -395}, "model": "synhat/vira0906/menkoe_copper_golem_statue"},
 	{"predicate": {"custom_model_data": -394}, "model": "synhat/wilux/painting/space/artemis2"},
 	{"predicate": {"custom_model_data": -393}, "model": "synhat/wilux/painting/meme/omfgdogs"},
 	{"predicate": {"custom_model_data": -392}, "model": "synhat/wilux/painting/meme/im_steve"},
