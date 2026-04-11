@@ -34,7 +34,7 @@ def sortKeysPretty(data):
     ret["item"] = data["item"]
     ret["data"] = data["data"]
     ret["model"] = data["model"]
-    ret["displayName"] = data["displayName"]
+    ret["displayName"] = data.get("displayName", "__default")
     for k,v in data.items():
         if not k in ["item","data","model","displayName"]:
             ret[k] = v
