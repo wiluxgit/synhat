@@ -1,4 +1,5 @@
 {"model": {"type": "range_dispatch", "property": "custom_model_data", "index": 0, "entries": [
+	{"threshold": -394, "model": {"type": "model", "model": "synhat/wilux/painting/space/artemis2"}},
 	{"threshold": -393, "model": {"type": "model", "model": "synhat/wilux/painting/meme/omfgdogs"}},
 	{"threshold": -392, "model": {"type": "model", "model": "synhat/wilux/painting/meme/im_steve"}},
 	{"threshold": -391, "model": {"type": "model", "model": "synhat/wilux/animal/rubber_duck_with_hat"}},
