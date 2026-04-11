@@ -1,6 +1,0 @@
-{
-    "parent": "hat/wolf",
-    "textures": {
-		"0": "hat/misc/dog"
-    }
-}
