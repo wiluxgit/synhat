@@ -13812,7 +13812,7 @@
         "5": "block/light_gray_concrete",
         "6": "block/cyan_terracotta",
         "7": "block/black_concrete",
-        "8": "item/music_disc_strad",
+        "8": "synhat/wilux/mc_item/music_disc_strad",
         "9": "block/iron_bars",
         "particle": "block/iron_bars",
         "top": "block/light_gray_wool"

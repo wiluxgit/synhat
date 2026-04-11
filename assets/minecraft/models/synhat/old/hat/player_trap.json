@@ -1,8 +1,8 @@
 {
 	"credit": "Made with Blockbench",
 	"textures": {
-		"1": "item/diamond",
-		"2": "item/gold_ingot",
+		"1": "synhat/wilux/mc_item/diamond",
+		"2": "synhat/wilux/mc_item/gold_ingot",
 		"3": "synhat/old/hat/misc/hebtex/carton",
 		"4": "block/oak_planks",
 		"5": "block/white_concrete_powder",
