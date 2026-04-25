@@ -17,7 +17,7 @@ def run(path = "../__master_models_table.json"):
         chestList = []
         for mcItem, hatList in mcItems2Hat.items():
             if "clock" in mcItem:
-                hatList = sorted(hatList, key=lambda j: j["displayName"])
+                hatList = sorted(hatList, key=lambda j: j["data"])
             itemList = [makeItem(hd) for hd in hatList]
             chestList.append(makeMegaChest(mcItem, itemList))
         NBT_masterChest = makeMegaChest("MasterChest", chestList)
@@ -68,7 +68,7 @@ def makeChest(categoryStr, itemList):
     chest = {
         "id": stringToShulkerBox(categoryStr),
         "components": {
-            "custom_name": f'{{"text":"{categoryStr}"}}',
+            "custom_name": {"text":categoryStr},
             "container": NBT_container,
         }
     }
@@ -93,17 +93,17 @@ def makeItem(hd):
         rankCol = {"T":"dark_aqua", "A":"blue", "H":"aqua", "D":"gold"}
         color = rankCol[hd["playerRank"]]
 
-    NBT_custom_name = f'{{"text":"{jsonEscape(displayName)}","color":"{color}"}}'
-    NBT_lore = [f'{{"text":"id:{cmData}","color":"dark_gray"}}']
+    NBT_custom_name = {"text":displayName,"color":color}
+    NBT_lore = [{"text":f"id:{cmData}","color":"dark_gray"}]
     if "lore" in hd:
         lore = hd["lore"]
-        NBT_lore.insert(0,f'{{"text":"{jsonEscape(lore)}","color":"gray"}}')
+        NBT_lore.insert(0,{"text": lore, "color":"gray"})
 
     item = {
         "id": mcItem,
         "count":1,
         "components": {
-            "custom_model_data": cmData,
+            "custom_model_data": { "floats": [cmData] },
             "item_name": NBT_custom_name,
             "lore": NBT_lore,
         }
